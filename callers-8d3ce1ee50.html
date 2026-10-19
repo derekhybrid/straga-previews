@@ -55,7 +55,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 8px;
 <div class="me"><span id="who"></span><button class="btn sm" id="out">Sign out</button></div></div></header>
 <main>
 <section id="t-calls">
-  <h2>Your calls</h2><p class="sub">Press <b>Get next 25</b> to reserve a batch for yourself. Nobody else will see those as available for 30 minutes, and they are never given to two people.</p>
+  <h2>Your calls</h2><p class="sub">Press <b>Get next 25</b> to reserve a batch for yourself. Those businesses stay yours for 8 hours and are never given to anyone else.</p>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px"><button class="btn p" id="alloc">Get next 25</button><button class="btn" id="refresh">Refresh</button><span class="meta" id="callsinfo" style="align-self:center"></span></div>
   <div id="mine"></div>
 </section>
@@ -65,7 +65,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 8px;
 
 …It's a one-time $899 if you want to keep it, no monthly fees.</div>
   <div class="card rules"><ul>
-    <li><b>Always press Get next 25 first.</b> That reserves those businesses for you so nobody else calls them.</li>
+    <li><b>Always press Get next 25 first.</b> That reserves those businesses for you for 8 hours so nobody else calls them.</li>
     <li><b>Spoke with someone:</b> press <b>Talked</b>, or <b>YES</b> if they want the link. For a yes, put their best cell or email in the box and who you spoke with.</li>
     <li><b>Not right now:</b> ask when to try again, write it in Notes, press <b>Not now</b>.</li>
     <li><b>No:</b> thank them, press <b>NO</b>. They are never contacted again.</li>
@@ -106,13 +106,13 @@ async function loadLog(){
   LOG=data||[];
 }
 function mineList(){
-  const cut=Date.now()-30*60000;
+  const cut=Date.now()-8*3600000;
   return [...LEADS.values()].filter(l=>l.owner==='call'&&l.status==='queued'&&l.call_by===ME&&new Date(l.call_at).getTime()>cut)
     .sort((a,b)=>(b.v||0)-(a.v||0));
 }
 function renderCalls(){
   const mine=mineList();
-  const others={};[...LEADS.values()].forEach(l=>{if(l.status==='queued'&&l.call_by&&l.call_by!==ME&&new Date(l.call_at).getTime()>Date.now()-30*60000)others[l.call_by]=(others[l.call_by]||0)+1});
+  const others={};[...LEADS.values()].forEach(l=>{if(l.status==='queued'&&l.call_by&&l.call_by!==ME&&new Date(l.call_at).getTime()>Date.now()-8*3600000)others[l.call_by]=(others[l.call_by]||0)+1});
   const left=[...LEADS.values()].filter(l=>l.owner==='call'&&l.status==='new'&&l.p).length;
   $('#callsinfo').textContent=`${left.toLocaleString()} businesses left to call`+Object.entries(others).map(([k,v])=>` · ${k} has ${v} reserved`).join('');
   $('#mine').innerHTML=mine.length?mine.map(l=>`<div class="card" data-id="${l.id}">
