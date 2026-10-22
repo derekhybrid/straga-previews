@@ -8,322 +8,262 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Larkspur Outdoor Co.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Albert+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a sticky plan-view drawing that builds itself as the stages scroll past on the right;
-   then one configurator band per area of the yard, each reusing the same drawing; a running ballpark in the header. */
+/* Layout: one fixed full-screen 3D canvas behind everything. A tall hero scrubs a 10-stage build with the camera orbiting the yard;
+   then four 100svh configurator sections re-aim the camera and swap materials live; the summary and footer are opaque over the canvas. */
 :root{
-  --paper:#f3f2ec;        /* limestone, slightly green-grey */
-  --paper-2:#e9e8df;
-  --ink:#1c2420;          /* evergreen-black */
-  --ink-2:#4b5651;
-  --ink-3:#7c867f;
-  --line:#d4d3c8;
-  --fern:#2f5d3a;         /* accent */
-  --fern-2:#244a2e;
-  --blueprint:#2b5fa8;
-  --dusk:#0f1b2d;
-  --amber:#f2b64a;
-  --display:"Young Serif", Georgia, "Times New Roman", serif;
-  --body:"Albert Sans", "Helvetica Neue", Arial, sans-serif;
-  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
-  color-scheme:light;
+  --ink:#0d1210;
+  --ink-2:#161d19;
+  --paper:#f1eee6;
+  --paper-2:#e6e2d6;
+  --fg:#f4f1ea;
+  --fg-2:rgba(244,241,234,.72);
+  --fg-3:rgba(244,241,234,.48);
+  --gold:#e4b45c;
+  --line:rgba(244,241,234,.16);
+  --display:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --body:"Manrope", "Helvetica Neue", Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
-h1{font-size:clamp(2.6rem,7vw,5.6rem)}
-h2{font-size:clamp(2rem,4.5vw,3.4rem)}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:.95;margin:0;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.45)}
+h1{font-size:clamp(2.8rem,7.2vw,6.4rem)}
+h2{font-size:clamp(2.4rem,5vw,4.4rem)}
+h1 em,h2 em{font-style:italic;color:var(--gold)}
 p{margin:0}
-a{color:inherit}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-:focus-visible{outline:2px solid var(--fern);outline-offset:3px}
-.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1240px;margin:0 auto;width:100%}
-.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.15rem;border-radius:999px;font-weight:600;font-size:.95rem;line-height:1;white-space:nowrap;transition:background .15s,color .15s,transform .15s}
-.btn:hover{transform:translateY(-1px)}
-.btn-fill{background:var(--fern);color:#fff}
-.btn-fill:hover{background:var(--fern-2)}
-.btn-line{border:1.5px solid var(--ink);background:transparent}
-.btn-line:hover{background:var(--ink);color:var(--paper)}
-.btn-ghost{color:var(--fern);padding-inline:.4rem}
-.btn-ghost:hover{color:var(--fern-2)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase}
+.gutter{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+@media (max-width:640px){.gutter{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+#bp-grid{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .5s;
+  background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:48px 48px}
+#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:
+  linear-gradient(to top,rgba(10,14,12,.8) 0%,rgba(10,14,12,0) 40%),
+  linear-gradient(to bottom,rgba(10,14,12,.6) 0%,rgba(10,14,12,0) 26%),
+  linear-gradient(to right,rgba(10,14,12,.55) 0%,rgba(10,14,12,0) 48%)}
 
 /* header */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:1rem;height:60px}
-.brand{font-family:var(--display);font-size:1.25rem;text-decoration:none;display:flex;align-items:baseline;gap:.35rem}
-.brand small{font-family:var(--body);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.topnav{display:flex;gap:1.1rem;margin-left:1rem;font-size:.9rem;color:var(--ink-2)}
-.topnav a{text-decoration:none}
-.topnav a:hover{color:var(--ink)}
+.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;gap:.6rem;height:68px}
+.brand{font-family:var(--display);font-size:1.5rem;text-decoration:none;letter-spacing:-.01em}
 .spacer{flex:1}
-.pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:#fff;border-radius:999px;padding:.45rem .8rem;font-size:.85rem;text-decoration:none}
-.pill b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
-.pill .lbl{color:var(--ink-3)}
-@media (max-width:860px){.topnav{display:none}.pill .lbl{display:none}}
-@media (max-width:480px){.top .btn{display:none}}
+.pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:.55rem .9rem;text-decoration:none;color:var(--fg-2);white-space:nowrap}
+.pill b{font-weight:500;color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.6rem 1rem;white-space:nowrap;transition:background .15s,color .15s,transform .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-fill{background:var(--paper);color:var(--ink)}
+.btn-fill:hover{background:#fff}
+.btn-line{border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn-line:hover{border-color:var(--fg-3)}
+@media (max-width:560px){.top .btn-fill{display:none}.pill .lbl{display:none}}
+
+/* side nav */
+.side{position:fixed;right:max(18px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:8;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:.8rem .6rem;display:grid;gap:.7rem;opacity:0;transition:opacity .4s;pointer-events:none}
+.side.show{opacity:1;pointer-events:auto}
+.side a{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--fg-3);font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase}
+.side a i{width:6px;height:6px;border-radius:50%;background:var(--fg-3);flex:none}
+.side a.on{color:var(--fg)}
+.side a.on i{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+@media (max-width:640px){.side{display:none}}
 
 /* hero */
-.hero{padding-block:4.5rem 2.5rem}
-.hero .wrap{display:grid;gap:1.5rem;max-width:900px}
-.hero h1 span{display:block}
-.hero h1 em{font-style:normal;color:var(--fern)}
-.hero .lede{font-size:1.2rem;color:var(--ink-2);max-width:34rem}
-.hero .acts{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
-.stage-tag{display:flex;gap:.6rem;align-items:center}
-.stage-tag .bar{width:160px;height:3px;background:var(--line);border-radius:3px;overflow:hidden}
-.stage-tag .bar i{display:block;height:100%;width:10%;background:var(--fern);transition:width .4s}
+.hero{position:relative;height:1050vh;z-index:2}
+.hero-view{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-content:end;padding-bottom:max(30px,env(safe-area-inset-bottom,0px));pointer-events:none}
+.cap{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s}
+.cap.on{opacity:1;transform:none}
+.cap .eyebrow{display:flex;align-items:center;gap:.7rem;color:var(--fg-3)}
+.cap .eyebrow i{display:block;width:46px;height:1px;background:var(--fg-3)}
+.cap .eyebrow b{color:var(--fg-2);font-weight:400}
+.cap p{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+.cap p.spec{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3)}
+.hud{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:max(30px,env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.hud>*{pointer-events:auto}
+.ring{display:flex;align-items:center;gap:.6rem;color:var(--fg-3)}
+.ring svg{width:26px;height:26px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:2}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--gold);stroke-dasharray:69.1;stroke-dashoffset:62;transition:stroke-dashoffset .2s}
+@media (max-width:640px){.cap,.hud{left:max(18px,env(safe-area-inset-left,0px));right:max(18px,env(safe-area-inset-right,0px))}.cap{max-width:100%}.hud .ring span{display:none}}
 
-/* build: sticky drawing + steps */
-.build .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:3rem;align-items:start}
-.scene-wrap{position:sticky;top:calc(60px + env(safe-area-inset-top,0px) + 1rem)}
-.scene{width:100%;max-width:100%;aspect-ratio:4/3;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
-.scene svg{display:block;width:100%;height:100%}
-.scene-cap{position:absolute;left:12px;bottom:10px;display:flex;gap:.5rem;align-items:center;font-size:.78rem;background:color-mix(in srgb,#fff 85%,transparent);border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem}
-.scene-cap i{width:8px;height:8px;border-radius:50%;background:var(--fern)}
-.steps{display:grid;gap:0;padding-block:min(28vh,220px)}
-.step{padding-block:2.2rem;border-top:1px solid var(--line);display:grid;gap:.6rem;transition:opacity .3s;opacity:.38;scroll-margin-top:120px}
-.step.is-on{opacity:1}
-.step h3{font-size:1.5rem}
-.step p{color:var(--ink-2);max-width:30rem}
-.step .spec{font-family:var(--mono);font-size:.78rem;color:var(--ink-3)}
-.step .n{font-family:var(--mono);font-size:.75rem;color:var(--fern);letter-spacing:.06em}
-@media (max-width:860px){
-  .build .wrap{grid-template-columns:1fr;gap:0}
-  .scene-wrap{top:calc(60px + env(safe-area-inset-top,0px));z-index:5;padding-block:.5rem;background:var(--paper)}
-  .scene{aspect-ratio:16/10}
-  .steps{padding-block:1rem 4rem}
-  .step{padding-block:1.4rem}
-}
-
-/* the drawing: stage reveals */
-.yard .st{opacity:0;transition:opacity .55s ease}
-.yard[data-stage] .st.on{opacity:1}
-.yard .bp{transition:opacity .55s ease}
-.yard .bp.off{opacity:0}
-
-/* configurator bands */
-.band{padding-block:5rem;border-top:1px solid var(--line)}
-.band.alt{background:var(--paper-2)}
-.band .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3rem;align-items:center}
-.band .pic{position:relative}
-.band .pic .scene{aspect-ratio:4/3}
-.band .copy{display:grid;gap:1.4rem}
-.band .copy p.lead{color:var(--ink-2);max-width:30rem}
-.opts{display:grid;gap:.6rem}
-.opt{display:grid;grid-template-columns:auto 1fr auto;gap:.9rem;align-items:center;text-align:left;padding:.85rem 1rem;border:1.5px solid var(--line);border-radius:12px;background:#fff;transition:border-color .15s,box-shadow .15s}
-.opt:hover{border-color:var(--ink-3)}
-.opt[aria-pressed="true"]{border-color:var(--fern);box-shadow:0 0 0 3px color-mix(in srgb,var(--fern) 18%,transparent)}
-.opt .sw{width:34px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.12);background:var(--paper-2);overflow:hidden}
-.opt .sw svg{display:block;width:100%;height:100%}
-.opt .t{display:grid;gap:.1rem;min-width:0}
-.opt .t b{font-weight:600}
-.opt .t small{color:var(--ink-3);font-size:.8rem}
-.opt .pr{font-family:var(--mono);font-size:.85rem;color:var(--ink-2);white-space:nowrap}
-.opt .pr.inc{color:var(--fern);font-weight:500}
-.band .foot{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;padding-top:.5rem}
-.band .sub{font-family:var(--mono);font-size:.85rem;color:var(--ink-2)}
-.band .sub b{color:var(--ink);font-weight:500}
-.segs{display:flex;gap:.4rem;flex-wrap:wrap}
-.seg{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:.45rem .9rem;font-size:.85rem;font-weight:500}
-.seg[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-@media (max-width:860px){
-  .band{padding-block:3.5rem}
-  .band .wrap{grid-template-columns:1fr;gap:1.6rem}
-  .band.flip .pic{order:-1}
-}
-@media (min-width:861px){.band.flip .pic{order:2}}
+/* configurator sections */
+.room{position:relative;z-index:2;height:100vh;height:100svh;min-height:560px;display:grid;grid-template-rows:auto 1fr auto;padding-top:calc(68px + env(safe-area-inset-top,0px) + 18px);padding-bottom:max(28px,env(safe-area-inset-bottom,0px))}
+.room .head{display:grid;gap:.5rem;max-width:40rem}
+.room .head .mono{color:var(--gold)}
+.room .lead{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+.room .ctl{display:grid;gap:.8rem;align-self:end}
+.tabs{display:flex;gap:.3rem;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:.5rem .85rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-2)}
+.tab[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chips{display:flex;gap:.45rem;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:.6rem;border:1px solid var(--line);background:rgba(13,18,16,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:12px;padding:.45rem .8rem .45rem .5rem;text-align:left;color:var(--fg);transition:background .15s,border-color .15s,transform .15s}
+.chip:hover{border-color:var(--fg-3);transform:translateY(-1px)}
+.chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chip .sw{width:28px;height:28px;border-radius:50%;flex:none;border:1px solid rgba(255,255,255,.18);background:var(--sw,#777)}
+.chip .t{display:grid;line-height:1.15}
+.chip .t b{font-weight:600;font-size:.84rem}
+.chip .t small{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;opacity:.7}
+.room .foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.room .foot .mono{color:var(--fg-3)}
+.room .foot .mono b{color:var(--fg);font-weight:500}
+.room .next{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid var(--line);background:rgba(13,18,16,.45);border-radius:999px;padding:.6rem 1rem;backdrop-filter:blur(8px)}
+.room .next:hover{border-color:var(--fg-3)}
+.pane[hidden]{display:none!important}
 
 /* summary */
-.summary{padding-block:5rem;background:var(--ink);color:var(--paper)}
-.summary .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:3rem;align-items:start}
-.summary h2{color:#fff}
-.summary .lede{color:color-mix(in srgb,var(--paper) 70%,transparent);max-width:30rem;font-size:1.1rem}
-.summary .acts{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.6rem}
-.summary .btn-fill{background:var(--amber);color:var(--ink)}
-.summary .btn-fill:hover{background:#f7c66a}
-.summary .btn-line{border-color:color-mix(in srgb,var(--paper) 50%,transparent);color:var(--paper)}
-.summary .btn-line:hover{background:var(--paper);color:var(--ink)}
-.sheet{background:color-mix(in srgb,#fff 6%,transparent);border:1px solid color-mix(in srgb,#fff 14%,transparent);border-radius:16px;padding:1.4rem;display:grid;gap:0}
-.sheet .row{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px solid color-mix(in srgb,#fff 10%,transparent);font-size:.95rem}
-.sheet .row span:first-child{color:color-mix(in srgb,var(--paper) 60%,transparent)}
-.sheet .row span:last-child{text-align:right;font-weight:500}
-.sheet .tot{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding-top:1.1rem}
-.sheet .tot .lbl{color:color-mix(in srgb,var(--paper) 60%,transparent)}
-.sheet .tot b{font-family:var(--display);font-weight:400;font-size:1.9rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.sheet .fine{font-size:.78rem;color:color-mix(in srgb,var(--paper) 50%,transparent);padding-top:.6rem}
-@media (max-width:860px){.summary{padding-block:3.5rem}.summary .wrap{grid-template-columns:1fr;gap:2rem}}
+.summary{position:relative;z-index:3;background:var(--paper);color:var(--ink);padding-block:6rem}
+.summary .in{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4rem;align-items:center}
+.summary .mono{color:#7a7366}
+.summary h2{margin-top:.6rem}
+.summary .lede{color:#55504a;max-width:28rem;margin-top:1rem}
+.summary .acts{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.6rem}
+.summary .btn-fill{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 1.2rem}
+.summary .btn-fill:hover{background:#000}
+.summary .btn-line{border:1px solid #cfc9bb;background:transparent;color:var(--ink);font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 1.2rem;backdrop-filter:none}
+.summary .btn-line:hover{border-color:var(--ink)}
+.sheet{background:#fff;border:1px solid #e3ded2;border-radius:14px;padding:1.2rem 1.4rem;display:grid}
+.sheet .row{display:flex;justify-content:space-between;gap:1rem;padding:.75rem 0;border-bottom:1px solid #eeeae0;font-size:.9rem}
+.sheet .row span:first-child{color:#8a8375;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;align-self:center}
+.sheet .row span:last-child{text-align:right;font-weight:600}
+.sheet .tot{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:var(--ink);color:var(--paper);border-radius:10px;padding:.9rem 1.1rem;margin-top:1rem}
+.sheet .tot .mono{color:var(--fg-3)}
+.sheet .tot b{font-family:var(--display);font-weight:400;font-size:1.7rem;font-variant-numeric:tabular-nums}
+.sheet .fine{font-size:.72rem;color:#8a8375;padding-top:.8rem}
+@media (max-width:860px){.summary{padding-block:4rem}.summary .in{grid-template-columns:1fr;gap:2.4rem}}
 
-/* footer */
-.foot-bar{padding-block:2rem;font-size:.85rem;color:var(--ink-3)}
-.foot-bar .wrap{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
-.foot-bar .brand{color:var(--ink)}
+.site-foot{position:relative;z-index:3;background:var(--ink);color:var(--fg-3);padding-block:2.2rem;font-size:.8rem}
+.site-foot .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
+.site-foot .brand{color:var(--fg);font-size:1.1rem}
 
 /* modal */
-.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(15,27,45,.55);padding:0;padding-top:env(safe-area-inset-top,0px)}
+.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(5,8,7,.7);padding-top:env(safe-area-inset-top,0px)}
 .modal.open{display:flex}
-.modal .card{background:var(--paper);color:var(--ink);width:min(560px,100%);max-height:calc(100% - env(safe-area-inset-top,0px));overflow:auto;border-radius:18px 18px 0 0;padding:1.4rem;padding-left:max(1.4rem,env(safe-area-inset-left,0px));padding-right:max(1.4rem,env(safe-area-inset-right,0px));padding-bottom:max(1.4rem,env(safe-area-inset-bottom,0px));display:grid;gap:1rem}
+.modal .card{position:relative;background:var(--paper);color:var(--ink);width:min(540px,100%);max-height:calc(100% - env(safe-area-inset-top,0px));overflow:auto;border-radius:18px 18px 0 0;padding:1.4rem;padding-left:max(1.4rem,env(safe-area-inset-left,0px));padding-right:max(1.4rem,env(safe-area-inset-right,0px));padding-bottom:max(1.4rem,env(safe-area-inset-bottom,0px));display:grid;gap:1rem;color-scheme:light}
 @media (min-width:600px){.modal{align-items:center;padding:1rem}.modal .card{border-radius:18px}}
-.modal h3{font-size:1.6rem}
-.modal .x{position:absolute;right:.6rem;top:.3rem;font-size:1.6rem;line-height:1;padding:.4rem;color:var(--ink-3)}
-.modal .head{position:relative;padding-right:2rem}
+.modal h3{font-size:2rem}
+.modal .x{position:absolute;right:.8rem;top:.6rem;font-size:1.6rem;line-height:1;padding:.3rem .5rem;color:#8a8375}
 .mini{display:flex;flex-wrap:wrap;gap:.4rem}
-.mini span{font-size:.78rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:.25rem .6rem}
-.mini .tot{font-family:var(--mono);font-weight:500;border-color:var(--fern);color:var(--fern)}
+.mini span{font-size:.74rem;background:#fff;border:1px solid #e3ded2;border-radius:999px;padding:.25rem .6rem}
+.mini .tot{font-family:var(--mono);font-weight:500;border-color:var(--ink);background:var(--ink);color:var(--paper)}
 .fields{display:grid;gap:.7rem;grid-template-columns:1fr 1fr}
-.fields label{display:grid;gap:.3rem;font-size:.8rem;color:var(--ink-2);min-width:0}
+.fields label{display:grid;gap:.3rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#7a7366;min-width:0}
 .fields label.full{grid-column:1/-1}
-.fields input{font:inherit;padding:.7rem .8rem;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%;min-width:0}
-.fields input:focus{outline:none;border-color:var(--fern);box-shadow:0 0 0 3px color-mix(in srgb,var(--fern) 18%,transparent)}
-.modal .fine{font-size:.78rem;color:var(--ink-3)}
-.modal .done{display:none;gap:.6rem}
+.fields input{font:inherit;font-family:var(--body);font-size:.95rem;padding:.75rem .85rem;border:1px solid #d8d2c4;border-radius:10px;background:#fff;color:var(--ink);width:100%;min-width:0}
+.fields input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,18,16,.12)}
+.modal .fine{font-size:.74rem;color:#8a8375}
+.modal .done{display:none;gap:.8rem}
 .modal.sent form{display:none}
 .modal.sent .done{display:grid}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:.7rem 1rem;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--paper);color:var(--ink);padding:.7rem 1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
+.nogl{position:fixed;inset:0;z-index:0;display:none;place-items:center;text-align:center;padding:2rem;color:var(--fg-2)}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
 
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="#top">Larkspur <small>Outdoor Co.</small></a>
-    <nav class="topnav" aria-label="Sections">
-      <a href="#build">The build</a>
-      <a href="#patio">Patio</a>
-      <a href="#fire">Fire</a>
-      <a href="#plants">Plantings</a>
-      <a href="#lighting">Lighting</a>
-    </nav>
-    <span class="spacer"></span>
-    <a class="pill" href="#summary"><span class="lbl">Est.</span> <b id="pill-total">$9K–$13K</b></a>
-    <button class="btn btn-fill" type="button" data-open-form>Start my build</button>
-  </div>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="bp-grid" aria-hidden="true"></div>
+<div id="vignette" aria-hidden="true"></div>
+<div class="nogl" id="nogl"><p>This demo needs WebGL to draw the yard. Try a current version of Chrome or Safari.</p></div>
+
+<header class="top gutter">
+  <a class="brand" href="#top">Larkspur.</a>
+  <span class="spacer"></span>
+  <a class="pill mono" href="#summary"><span class="lbl">Est.</span> <b id="pill-total">$9K–$13K</b></a>
+  <button class="btn btn-fill mono" type="button" data-open-form>Start my build</button>
 </header>
 
+<nav class="side" id="side" aria-label="Sections">
+  <a href="#lighting" data-sec="lighting"><i></i>Lights</a>
+  <a href="#plants" data-sec="plants"><i></i>Plants</a>
+  <a href="#fire" data-sec="fire"><i></i>Fire</a>
+  <a href="#patio" data-sec="patio"><i></i>Patio</a>
+  <a href="#build" data-sec="build" class="on"><i></i>Build</a>
+</nav>
+
 <main id="top">
-<section class="hero">
-  <div class="wrap">
-    <div class="stage-tag">
-      <span class="eyebrow"><span class="num" id="stage-num">01</span> / 10 · <span id="stage-name">Walk the lot</span></span>
-      <span class="bar" aria-hidden="true"><i id="stage-bar"></i></span>
-    </div>
-    <h1><span>From bare lot</span><span>to <em>backyard.</em></span></h1>
-    <p class="lede">Every Larkspur patio starts as a plan drawn for your yard, your grade and your evenings. Scroll and watch one get built, then make it yours.</p>
-    <div class="acts">
-      <button class="btn btn-line" type="button" id="watch">▶ Watch the build</button>
-      <a class="btn btn-ghost" href="#patio">Skip to the configurator →</a>
-    </div>
-  </div>
-</section>
-
-<section class="build" id="build">
-  <div class="wrap">
-    <div class="scene-wrap">
-      <div class="scene" id="scene-main"></div>
-    </div>
-    <div class="steps" id="steps">
-      <div class="step is-on" data-stage="1"><span class="n">01</span><h3>Walk the lot.</h3><p>We mark the patio footprint with stakes and string, check the pitch away from the house and find the sightlines from your kitchen window.</p><span class="spec">Fall: ¼" per foot, away from foundation</span></div>
-      <div class="step" data-stage="2"><span class="n">02</span><h3>Excavate.</h3><p>A small excavator digs the footprint out ten inches below finished grade. Topsoil gets saved for the beds.</p><span class="spec">Depth: 10" · spoils hauled or reused</span></div>
-      <div class="step" data-stage="3"><span class="n">03</span><h3>Build the base.</h3><p>Six inches of crushed stone, compacted in two-inch lifts with a plate compactor. This is the part that decides whether the patio is still flat in fifteen years.</p><span class="spec">¾" DGA · compacted in 2" lifts</span></div>
-      <div class="step" data-stage="4"><span class="n">04</span><h3>Screed the bedding.</h3><p>One inch of concrete sand, pulled level with pipes and a straightedge so every paver sits the same.</p><span class="spec">Bedding: 1" concrete sand</span></div>
-      <div class="step" data-stage="5"><span class="n">05</span><h3>Lay the pavers.</h3><p>Set from the house outward in the pattern you chose, cut clean at the edges and locked in with a concrete edge restraint.</p><span class="spec">Pattern: running bond · 90° to house</span></div>
-      <div class="step" data-stage="6"><span class="n">06</span><h3>Sweep the joints.</h3><p>Polymeric sand swept into the joints, misted and set. No weeds, no ants, no washing out.</p><span class="spec">Joint: polymeric sand, ⅛"–¼"</span></div>
-      <div class="step" data-stage="7"><span class="n">07</span><h3>Seat wall and fire pit.</h3><p>A curved seat wall on the far edge and a fire pit at the center of it, so the patio has a reason to be out there after dark.</p><span class="spec">Wall: 18" high, 12" cap · pit: 44" ID</span></div>
-      <div class="step" data-stage="8"><span class="n">08</span><h3>Beds and plantings.</h3><p>Foundation beds against the house and a privacy row along the back line, planted for Zone 7a so they come back every spring.</p><span class="spec">Zone 7a · mulch 3" hardwood</span></div>
-      <div class="step" data-stage="9"><span class="n">09</span><h3>Lawn.</h3><p>The rest gets final grade and sod, rolled and watered in. Green by the weekend.</p><span class="spec">Tall fescue sod · 2" topsoil</span></div>
-      <div class="step" data-stage="10"><span class="n">10</span><h3>Lights on.</h3><p>Low-voltage path lights along the patio edge and uplights in the trees. The yard you use at 9 pm, not just at noon.</p><span class="spec">12V LED · 2700K warm</span></div>
+<section class="hero" id="build">
+  <div class="hero-view gutter">
+    <div class="cap on" data-i="0"><span class="eyebrow mono"><b>01 / 10</b><i></i>The plan</span><h1>From bare lot<br><em>to backyard.</em></h1><p>Every Larkspur patio starts on paper, drawn for your yard, your grade and your evenings.</p></div>
+    <div class="cap" data-i="1"><span class="eyebrow mono"><b>02 / 10</b><i></i>Site</span><h1>Staked on<br><em>your lot.</em></h1><p>We mark the footprint and check the pitch before a single shovel moves.</p><p class="spec">Fall ¼" per foot, away from the house</p></div>
+    <div class="cap" data-i="2"><span class="eyebrow mono"><b>03 / 10</b><i></i>Excavation</span><h1>Ten inches<br><em>down.</em></h1><p>Topsoil saved for the beds. Everything else hauled.</p></div>
+    <div class="cap" data-i="3"><span class="eyebrow mono"><b>04 / 10</b><i></i>Base</span><h1>The part you<br><em>never see.</em></h1><p>Six inches of crushed stone, compacted in two-inch lifts. It's why the patio is still flat in fifteen years.</p><p class="spec">¾" DGA · plate-compacted</p></div>
+    <div class="cap" data-i="4"><span class="eyebrow mono"><b>05 / 10</b><i></i>Pavers</span><h1>Set by<br><em>hand.</em></h1><p>From the house outward, cut clean at the edges, locked in with a concrete edge restraint.</p></div>
+    <div class="cap" data-i="5"><span class="eyebrow mono"><b>06 / 10</b><i></i>Seat wall</span><h1>Built-in<br><em>seating.</em></h1><p>Eighteen inches high with a stone cap. The best seats in the yard.</p></div>
+    <div class="cap" data-i="6"><span class="eyebrow mono"><b>07 / 10</b><i></i>Fire</span><h1>A reason to<br><em>stay out.</em></h1><p>Wood-burning pit, 44 inches across, in the middle of it all.</p></div>
+    <div class="cap" data-i="7"><span class="eyebrow mono"><b>08 / 10</b><i></i>Plantings</span><h1>Soft<br><em>edges.</em></h1><p>Foundation beds and a privacy row, planted for Zone 7a so they come back every spring.</p></div>
+    <div class="cap" data-i="8"><span class="eyebrow mono"><b>09 / 10</b><i></i>Lawn</span><h1>Green by<br><em>the weekend.</em></h1><p>Final grade, tall fescue sod, rolled and watered in.</p></div>
+    <div class="cap" data-i="9"><span class="eyebrow mono"><b>10 / 10</b><i></i>Lights on</span><h1>Yours<br><em>after dark.</em></h1><p>Low-voltage LED, warm white, on a timer. The yard you use at 9 pm, not just at noon.</p></div>
+    <div class="hud">
+      <span class="ring mono"><svg viewBox="0 0 26 26"><circle class="bg" cx="13" cy="13" r="11"/><circle class="fg" id="ring" cx="13" cy="13" r="11"/></svg><span id="ring-lbl">Blueprint</span></span>
+      <button class="btn btn-line mono" type="button" id="watch">▶ Watch the build</button>
     </div>
   </div>
 </section>
 
-<section class="band alt" id="patio">
-  <div class="wrap">
-    <div class="pic"><div class="scene" id="scene-patio"></div></div>
-    <div class="copy">
-      <div><span class="eyebrow">Step one · Patio</span><h2>Pick your stone.</h2></div>
-      <p class="lead">The size sets the base price. The material is where the look comes from.</p>
-      <div class="segs" role="group" aria-label="Patio size" id="size-segs">
-        <button class="seg" type="button" data-size="250" aria-pressed="true">250 sq ft</button>
-        <button class="seg" type="button" data-size="400" aria-pressed="false">400 sq ft</button>
-        <button class="seg" type="button" data-size="600" aria-pressed="false">600 sq ft</button>
-      </div>
-      <div class="opts" id="paver-opts" role="group" aria-label="Paver material"></div>
-      <div class="foot">
-        <span class="sub">Patio so far <b id="patio-sub">$9K–$13K</b></span>
-        <a class="btn btn-ghost" href="#fire">Add fire →</a>
-      </div>
+<section class="room gutter" id="patio" data-sec="patio">
+  <div class="head"><span class="mono">Step one · Patio</span><h2>Make it yours.</h2><p class="lead">The size sets the base price. The stone is where the look comes from.</p></div>
+  <div></div>
+  <div class="ctl">
+    <div class="tabs" role="tablist">
+      <button class="tab" type="button" data-pane="size" aria-pressed="true">1 · Size</button>
+      <button class="tab" type="button" data-pane="paver" aria-pressed="false">2 · Stone</button>
     </div>
+    <div class="pane chips" id="pane-size"></div>
+    <div class="pane chips" id="pane-paver" hidden></div>
+    <div class="foot"><span class="mono">Patio <b id="patio-sub">$9K–$13K</b></span><a class="next" href="#fire">Price this patio →</a></div>
   </div>
 </section>
 
-<section class="band flip" id="fire">
-  <div class="wrap">
-    <div class="pic"><div class="scene" id="scene-fire"></div></div>
-    <div class="copy">
-      <div><span class="eyebrow">Step two · Fire &amp; seating</span><h2>Give it a reason to stay out.</h2></div>
-      <p class="lead">A seat wall turns the edge of the patio into the best seats. The fire is why people sit there.</p>
-      <div class="opts" id="wall-opts" role="group" aria-label="Seat wall"></div>
-      <div class="opts" id="fire-opts" role="group" aria-label="Fire feature"></div>
-      <div class="foot">
-        <span class="sub">Running ballpark <b class="live-total">$9K–$13K</b></span>
-        <a class="btn btn-ghost" href="#plants">Add plantings →</a>
-      </div>
-    </div>
+<section class="room gutter" id="fire" data-sec="fire">
+  <div class="head"><span class="mono">Step two · Fire &amp; seating</span><h2>Stay out later.</h2><p class="lead">A seat wall turns the edge of the patio into the best seats. The fire is why people sit there.</p></div>
+  <div></div>
+  <div class="ctl">
+    <div class="tabs"><button class="tab" type="button" data-pane="wall" aria-pressed="true">1 · Seat wall</button><button class="tab" type="button" data-pane="fire" aria-pressed="false">2 · Fire</button></div>
+    <div class="pane chips" id="pane-wall"></div>
+    <div class="pane chips" id="pane-fire" hidden></div>
+    <div class="foot"><span class="mono">Running ballpark <b class="live-total">$9K–$13K</b></span><a class="next" href="#plants">Add plantings →</a></div>
   </div>
 </section>
 
-<section class="band alt" id="plants">
-  <div class="wrap">
-    <div class="pic"><div class="scene" id="scene-plants"></div></div>
-    <div class="copy">
-      <div><span class="eyebrow">Step three · Plantings &amp; lawn</span><h2>Soften the edges.</h2></div>
-      <p class="lead">Pick any of these. Everything is chosen for Zone 7a and comes with a one-season replacement guarantee.</p>
-      <div class="opts" id="bed-opts" role="group" aria-label="Plantings"></div>
-      <div class="segs" role="group" aria-label="Lawn" id="lawn-segs">
-        <button class="seg" type="button" data-lawn="sod" aria-pressed="true">Sod</button>
-        <button class="seg" type="button" data-lawn="seed" aria-pressed="false">Seed &amp; straw</button>
-        <button class="seg" type="button" data-lawn="none" aria-pressed="false">Leave the lawn</button>
-      </div>
-      <div class="foot">
-        <span class="sub">Running ballpark <b class="live-total">$9K–$13K</b></span>
-        <a class="btn btn-ghost" href="#lighting">Add lighting →</a>
-      </div>
-    </div>
+<section class="room gutter" id="plants" data-sec="plants">
+  <div class="head"><span class="mono">Step three · Plantings &amp; lawn</span><h2>Soften the edges.</h2><p class="lead">Pick any of these. Everything is chosen for Zone 7a and guaranteed for a season.</p></div>
+  <div></div>
+  <div class="ctl">
+    <div class="tabs"><button class="tab" type="button" data-pane="beds" aria-pressed="true">1 · Beds</button><button class="tab" type="button" data-pane="lawn" aria-pressed="false">2 · Lawn</button></div>
+    <div class="pane chips" id="pane-beds"></div>
+    <div class="pane chips" id="pane-lawn" hidden></div>
+    <div class="foot"><span class="mono">Running ballpark <b class="live-total">$9K–$13K</b></span><a class="next" href="#lighting">Add lighting →</a></div>
   </div>
 </section>
 
-<section class="band flip" id="lighting">
-  <div class="wrap">
-    <div class="pic"><div class="scene" id="scene-light"></div></div>
-    <div class="copy">
-      <div><span class="eyebrow">Step four · Lighting</span><h2>Keep it after dark.</h2></div>
-      <p class="lead">Low-voltage LED, warm white, on a timer. You'll use the yard twice as much.</p>
-      <div class="opts" id="light-opts" role="group" aria-label="Lighting"></div>
-      <div class="foot">
-        <span class="sub">Running ballpark <b class="live-total">$9K–$13K</b></span>
-        <a class="btn btn-ghost" href="#summary">See my yard →</a>
-      </div>
-    </div>
+<section class="room gutter" id="lighting" data-sec="lighting">
+  <div class="head"><span class="mono">Step four · Lighting</span><h2>Keep it after dark.</h2><p class="lead">Low-voltage LED, warm white, on a timer. You'll use the yard twice as much.</p></div>
+  <div></div>
+  <div class="ctl">
+    <div class="pane chips" id="pane-light"></div>
+    <div class="foot"><span class="mono">Running ballpark <b class="live-total">$9K–$13K</b></span><a class="next" href="#summary">See my yard →</a></div>
   </div>
 </section>
 
-<section class="summary" id="summary">
-  <div class="wrap">
+<section class="summary gutter" id="summary" data-sec="summary">
+  <div class="in">
     <div>
-      <span class="eyebrow">Your yard</span>
+      <span class="mono">Your yard</span>
       <h2>Let's build yours.</h2>
-      <p class="lede" style="margin-top:1rem">Send us your selections and we'll walk your lot, measure the grade and turn this into a real number. One crew, start to finish, out of Williamstown.</p>
+      <p class="lede">Send us your selections and we'll walk your lot, measure the grade and turn this into a real number. One crew, start to finish, out of Williamstown.</p>
       <div class="acts">
         <button class="btn btn-fill" type="button" data-open-form>Send me my design →</button>
-        <button class="btn btn-line" type="button" id="share">Copy for my partner</button>
+        <button class="btn btn-line" type="button" id="share">Share with your partner</button>
       </div>
     </div>
     <div class="sheet" id="sheet"></div>
@@ -331,19 +271,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 </section>
 </main>
 
-<footer class="foot-bar">
-  <div class="wrap">
-    <span><a class="brand" href="#top">Larkspur <small>Outdoor Co.</small></a> · Williamstown, NJ · Licensed &amp; insured · NJ HIC #13VH00000000</span>
-    <span>Demo site by Straga Solutions · drawings are illustrative</span>
+<footer class="site-foot gutter">
+  <div class="in">
+    <span><a class="brand" href="#top">Larkspur.</a> Outdoor Co. · Williamstown, NJ · Licensed &amp; insured</span>
+    <span>Demo site by Straga Solutions · yard is a live 3D illustration</span>
   </div>
 </footer>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="card">
-    <div class="head">
-      <h3 id="modal-title">Build this on my lot</h3>
-      <button class="x" type="button" data-close-form aria-label="Close">×</button>
-    </div>
+    <h3 id="modal-title">Build this in my yard</h3>
+    <button class="x" type="button" data-close-form aria-label="Close">×</button>
     <div class="mini" id="mini"></div>
     <form id="lead" novalidate>
       <div class="fields">
@@ -353,345 +291,545 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
         <label class="full">Where's the yard? (ZIP)<input id="f-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></label>
       </div>
       <p class="fine" id="form-err" style="min-height:1.2em;color:#9b2c2c"></p>
-      <button class="btn btn-fill" type="submit" style="width:100%;justify-content:center">Request my site visit</button>
+      <button class="btn btn-fill mono" type="submit" style="width:100%;justify-content:center;background:var(--ink);color:var(--paper);padding:.9rem">Request my site visit</button>
       <p class="fine" style="margin-top:.7rem">No spam, ever. Ballpark ranges are for illustration, not a quote.</p>
     </form>
     <div class="done">
       <p><b>Got it.</b> Someone from the crew will call within one business day to set up the walk-through. Your selections are attached to the request.</p>
-      <p class="fine">This is a demo. On your site, this request lands in your inbox or CRM with the selections and ballpark attached.</p>
-      <button class="btn btn-line" type="button" data-close-form>Close</button>
+      <p class="fine">This is a demo. On a live site this lands in your inbox or CRM with the selections and ballpark attached.</p>
+      <button class="btn btn-line" type="button" data-close-form style="color:var(--ink);border-color:#cfc9bb;backdrop-filter:none;background:transparent">Close</button>
     </div>
   </div>
 </div>
 <div class="toast" id="toast">Copied</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
-  // ---------- pricing (South Jersey ballpark, demo) ----------
-  var SIZE = {250:{f:1, add:[0,0], lbl:'250 sq ft'}, 400:{f:1.6, add:[5000,8000], lbl:'400 sq ft'}, 600:{f:2.4, add:[11000,16000], lbl:'600 sq ft'}};
-  var BASE = [9000,13000]; // 250 sq ft concrete paver patio, base prep included
+  'use strict';
+  // ================= pricing =================
+  var SIZE = {250:{w:18,d:14,f:1,add:[0,0],lbl:'250 sq ft',sub:'18\' × 14\''}, 400:{w:24,d:17,f:1.6,add:[5000,8000],lbl:'400 sq ft',sub:'24\' × 17\''}, 600:{w:30,d:20,f:2.4,add:[11000,16000],lbl:'600 sq ft',sub:'30\' × 20\''}};
+  var BASE = [9000,13000];
   var PAVERS = [
-    {id:'concrete', name:'Concrete paver', sub:'Charcoal/tan blend · running bond', add:[0,0]},
-    {id:'travertine', name:'Travertine', sub:'Ivory · tumbled, Versailles pattern', add:[3000,5000]},
-    {id:'bluestone', name:'Bluestone', sub:'Thermal finish · ashlar pattern', add:[4000,7000]},
-    {id:'flagstone', name:'Irregular flagstone', sub:'PA fieldstone · mortared joints', add:[5000,8000]}
+    {id:'concrete', name:'Concrete paver', sub:'Charcoal blend', add:[0,0], sw:'#6f6b66', cols:['#6a6661','#85817b','#5b5753','#9a958d'], tile:[1,0.5]},
+    {id:'travertine', name:'Travertine', sub:'Ivory, tumbled', add:[3000,5000], sw:'#dccfb5', cols:['#e4d9c2','#d6c8ab','#ecE3cf','#cfc1a4'], tile:[2,1.33]},
+    {id:'bluestone', name:'Bluestone', sub:'Thermal finish', add:[4000,7000], sw:'#5c6b78', cols:['#5a6977','#4c5a66','#6b7a86','#56657a'], tile:[2,1]},
+    {id:'flagstone', name:'Flagstone', sub:'PA fieldstone', add:[5000,8000], sw:'#8b8172', cols:['#8d8373','#7a7062','#9c9282','#6e6558'], tile:[1.6,1.2], irregular:true}
   ];
   var WALL = [
-    {id:'none', name:'No seat wall', sub:'Open edge, lawn to patio', add:[0,0]},
-    {id:'wall', name:'Curved seat wall', sub:'18" high · 12\' long · stone cap', add:[3000,5000]}
+    {id:'none', name:'No seat wall', sub:'Open edge', add:[0,0], sw:'#4f7f3a'},
+    {id:'wall', name:'Seat wall', sub:'18" · stone cap', add:[3000,5000], sw:'#9d9283'}
   ];
   var FIRE = [
-    {id:'none', name:'No fire feature', sub:'Keep it simple', add:[0,0]},
-    {id:'table', name:'Gas fire table', sub:'Propane · 48" rectangular', add:[2500,4000]},
-    {id:'pit', name:'Built-in fire pit', sub:'Wood-burning · 44" inside', add:[3500,6000]},
-    {id:'place', name:'Outdoor fireplace', sub:'Gas · 7\' stacked stone', add:[12000,20000]}
+    {id:'none', name:'No fire', sub:'Keep it simple', add:[0,0], sw:'#2a2f2c'},
+    {id:'table', name:'Gas fire table', sub:'48" propane', add:[2500,4000], sw:'#3a3a3a'},
+    {id:'pit', name:'Built-in fire pit', sub:'44" wood-burning', add:[3500,6000], sw:'#e0702a'},
+    {id:'place', name:'Outdoor fireplace', sub:'7\' stacked stone', add:[12000,20000], sw:'#7a6f62'}
   ];
   var BEDS = [
-    {id:'found', name:'Foundation beds', sub:'Boxwood, hydrangea, hosta along the house', add:[2500,4500]},
-    {id:'screen', name:'Privacy screen', sub:'Green Giant arborvitae along the back line', add:[3000,6000]},
-    {id:'polli', name:'Pollinator garden', sub:'Coneflower, bee balm, little bluestem', add:[1800,3000]}
+    {id:'found', name:'Foundation beds', sub:'Boxwood · hydrangea', add:[2500,4500], sw:'#4f7f3a'},
+    {id:'screen', name:'Privacy screen', sub:'Green Giant arborvitae', add:[3000,6000], sw:'#245232'},
+    {id:'polli', name:'Pollinator garden', sub:'Coneflower · bee balm', add:[1800,3000], sw:'#d35a8e'}
   ];
-  var LAWN = {sod:{name:'Tall fescue sod', add:[2500,4000]}, seed:{name:'Seed & straw', add:[900,1500]}, none:{name:'Existing lawn', add:[0,0]}};
+  var LAWN = [
+    {id:'sod', name:'Tall fescue sod', sub:'Green by the weekend', add:[2500,4000], sw:'#4f8a3b'},
+    {id:'seed', name:'Seed & straw', sub:'Green by June', add:[900,1500], sw:'#9a8a4a'},
+    {id:'none', name:'Existing lawn', sub:'We blend the edges', add:[0,0], sw:'#6b7a4a'}
+  ];
   var LIGHT = [
-    {id:'none', name:'No lighting', sub:'Daylight only', add:[0,0]},
-    {id:'path', name:'Path lights', sub:'8 fixtures along the patio edge', add:[1600,2400]},
-    {id:'full', name:'Full landscape lighting', sub:'Path + uplights + wall wash · 16 fixtures', add:[4000,7000]}
+    {id:'none', name:'No lighting', sub:'Daylight only', add:[0,0], sw:'#8fb6dc'},
+    {id:'path', name:'Path lights', sub:'8 fixtures', add:[1600,2400], sw:'#e4b45c'},
+    {id:'full', name:'Full lighting', sub:'Path + uplights · 16', add:[4000,7000], sw:'#ffd27a'}
   ];
-
-  var state = {size:250, paver:'concrete', wall:'none', fire:'none', beds:[], lawn:'sod', light:'none'};
-  var STAGE_NAMES = ['','Walk the lot','Excavate','Build the base','Screed the bedding','Lay the pavers','Sweep the joints','Seat wall & fire pit','Beds & plantings','Lawn','Lights on'];
+  var state = {size:400, paver:'concrete', wall:'none', fire:'none', beds:[], lawn:'sod', light:'none'};
+  var SHOW = {wall:'wall', fire:'pit', beds:['found','screen'], light:'path'};
 
   function find(list,id){ for (var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
-  function fmtK(n){ var k = Math.round(n/500)/2; return '$' + (k%1===0 ? k : k.toFixed(1)) + 'K'; }
-  function range(r){ return fmtK(r[0]) + '–' + fmtK(r[1]); }
-  function addR(a,b){ return [a[0]+b[0], a[1]+b[1]]; }
-  function scaled(r,f){ return [Math.round(r[0]*f), Math.round(r[1]*f)]; }
-
-  function patioRange(){
-    var s = SIZE[state.size];
-    return addR(addR(BASE, s.add), scaled(find(PAVERS,state.paver).add, s.f));
-  }
+  function fmtK(n){ var k=Math.round(n/500)/2; return '$'+(k%1===0?k:k.toFixed(1))+'K'; }
+  function range(r){ return fmtK(r[0])+'–'+fmtK(r[1]); }
+  function addR(a,b){ return [a[0]+b[0],a[1]+b[1]]; }
+  function scaled(r,f){ return [Math.round(r[0]*f),Math.round(r[1]*f)]; }
+  function patioRange(){ var s=SIZE[state.size]; return addR(addR(BASE,s.add),scaled(find(PAVERS,state.paver).add,s.f)); }
   function total(){
-    var t = patioRange();
-    t = addR(t, find(WALL,state.wall).add);
-    t = addR(t, find(FIRE,state.fire).add);
-    state.beds.forEach(function(b){ t = addR(t, find(BEDS,b).add); });
-    t = addR(t, LAWN[state.lawn].add);
-    t = addR(t, find(LIGHT,state.light).add);
-    return t;
+    var t=patioRange(); t=addR(t,find(WALL,state.wall).add); t=addR(t,find(FIRE,state.fire).add);
+    state.beds.forEach(function(b){ t=addR(t,find(BEDS,b).add); });
+    t=addR(t,find(LAWN,state.lawn).add); t=addR(t,find(LIGHT,state.light).add); return t;
   }
 
-  // ---------- the drawing ----------
-  function defs(uid){
-    return '<defs>'
-    +'<pattern id="'+uid+'-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#2b5fa8" stroke-opacity=".18" stroke-width="1"/></pattern>'
-    +'<pattern id="'+uid+'-gravel" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#a9a497"/><circle cx="3" cy="4" r="1.6" fill="#8e8a7e"/><circle cx="10" cy="2" r="1.2" fill="#c2bdb0"/><circle cx="7" cy="9" r="1.8" fill="#8e8a7e"/><circle cx="12" cy="11" r="1.1" fill="#c2bdb0"/><circle cx="2" cy="12" r="1.3" fill="#c2bdb0"/></pattern>'
-    +'<pattern id="'+uid+'-sand" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#d9c9a3"/><circle cx="2" cy="2" r=".6" fill="#c9b78c"/><circle cx="6" cy="5" r=".6" fill="#c9b78c"/></pattern>'
-    +'<pattern id="'+uid+'-concrete" width="40" height="24" patternUnits="userSpaceOnUse"><rect width="40" height="24" fill="#8c8781"/><rect x="1" y="1" width="18" height="10" fill="#6f6b66"/><rect x="21" y="1" width="18" height="10" fill="#a19b93"/><rect x="-9" y="13" width="18" height="10" fill="#a19b93"/><rect x="11" y="13" width="18" height="10" fill="#6f6b66"/><rect x="31" y="13" width="18" height="10" fill="#8e8882"/></pattern>'
-    +'<pattern id="'+uid+'-travertine" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#d8ccb4"/><rect x="1" y="1" width="30" height="22" fill="#e8dfca"/><rect x="33" y="1" width="14" height="22" fill="#dccfb5"/><rect x="1" y="25" width="14" height="22" fill="#e1d6bf"/><rect x="17" y="25" width="30" height="22" fill="#eae2cf"/></pattern>'
-    +'<pattern id="'+uid+'-bluestone" width="60" height="40" patternUnits="userSpaceOnUse"><rect width="60" height="40" fill="#4c5a66"/><rect x="1" y="1" width="34" height="18" fill="#5f6f7c"/><rect x="37" y="1" width="22" height="18" fill="#6c7b87"/><rect x="1" y="21" width="22" height="18" fill="#566571"/><rect x="25" y="21" width="34" height="18" fill="#64737f"/></pattern>'
-    +'<pattern id="'+uid+'-flagstone" width="56" height="48" patternUnits="userSpaceOnUse"><rect width="56" height="48" fill="#6b6257"/><path d="M2 2h22l6 10-4 12H4z" fill="#9a8f80"/><path d="M28 2h26v14l-8 8h-10l-4-12z" fill="#8b8172"/><path d="M4 28h18l8 6-2 12H2z" fill="#8b8172"/><path d="M34 26h20v20H32l-2-10z" fill="#a0968a"/></pattern>'
-    +'<radialGradient id="'+uid+'-glow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".95"/><stop offset=".5" stop-color="#ffb648" stop-opacity=".35"/><stop offset="1" stop-color="#ffb648" stop-opacity="0"/></radialGradient>'
-    +'<radialGradient id="'+uid+'-fire"><stop offset="0" stop-color="#fff1b8"/><stop offset=".6" stop-color="#f08a24"/><stop offset="1" stop-color="#b3391a"/></radialGradient>'
-    +'</defs>';
-  }
-  function tree(x,y,r,fill){ return '<g><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'"/><circle cx="'+(x-r*.3)+'" cy="'+(y-r*.3)+'" r="'+(r*.55)+'" fill="#fff" fill-opacity=".12"/></g>'; }
-  function shrub(x,y,r,fill){ return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'"/>'; }
+  // ================= 3D scene =================
+  var T = window.THREE;
+  var canvas = document.getElementById('stage');
+  var renderer;
+  try { renderer = new T.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:'high-performance'}); }
+  catch(e){ document.getElementById('nogl').style.display='grid'; canvas.style.display='none'; }
+  var glOK = !!renderer;
+  var scene = new T.Scene();
+  var camera = new T.PerspectiveCamera(38, 1, 0.5, 600);
+  var camPos = new T.Vector3(0,70,14), camLook = new T.Vector3(0,0,4);
+  var tgtPos = camPos.clone(), tgtLook = camLook.clone();
 
-  function sceneSVG(uid){
-    var W=800,H=560;
-    var s = '<svg viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan view of a backyard patio being built">'+defs(uid);
-    s += '<rect class="bp" data-bp width="800" height="560" fill="#eef3fb"/>';
-    s += '<rect class="bp" data-bp width="800" height="560" fill="url(#'+uid+'-grid)"/>';
-    // lawn ground (stage 9) sits under everything but above blueprint
-    s += '<rect class="st" data-s="9" width="800" height="560" fill="#5f8f4e"/>';
-    s += '<rect class="st" data-s="9" width="800" height="560" fill="url(#'+uid+'-grid)" opacity=".0"/>';
-    // lot outline / fence (always)
-    s += '<rect x="30" y="30" width="740" height="500" fill="none" stroke="#2b5fa8" stroke-width="2" stroke-dasharray="6 5" class="bp" data-bp/>';
-    s += '<rect class="st" data-s="9" x="30" y="30" width="740" height="500" fill="none" stroke="#6b4c2e" stroke-width="5"/>';
-    // house (always)
-    s += '<g><rect x="30" y="30" width="740" height="90" fill="#dcdad2" stroke="#1c2420" stroke-width="2"/><rect x="372" y="104" width="56" height="18" fill="#9c7a52"/><text x="400" y="85" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="16" fill="#1c2420" letter-spacing="3">HOUSE</text></g>';
-    // dimension lines (blueprint)
-    s += '<g class="bp" data-bp font-family="IBM Plex Mono,monospace" font-size="12" fill="#2b5fa8" stroke="#2b5fa8">'
-      + '<line x1="30" y1="545" x2="770" y2="545"/><line x1="30" y1="540" x2="30" y2="550"/><line x1="770" y1="540" x2="770" y2="550"/><text x="400" y="542" text-anchor="middle" stroke="none">74\'-0"</text>'
-      + '<line x1="16" y1="120" x2="16" y2="530"/><line x1="11" y1="120" x2="21" y2="120"/><line x1="11" y1="530" x2="21" y2="530"/><text x="12" y="325" stroke="none" transform="rotate(-90 12 325)" text-anchor="middle">41\'-0"</text>'
-      + '</g>';
-    // patio footprint group (size-dependent): stakes/string (1), excavation (2), gravel (3), sand (4), pavers (5), joints/edge (6)
-    s += '<g data-patio>';
-    s += '<g class="st" data-s="1" data-until="4" data-stakes></g>';
-    s += '<rect class="st" data-s="2" data-prect fill="#5b4330"/>';
-    s += '<rect class="st" data-s="3" data-prect fill="url(#'+uid+'-gravel)"/>';
-    s += '<rect class="st" data-s="4" data-prect fill="url(#'+uid+'-sand)"/>';
-    s += '<rect class="st" data-s="5" data-prect data-pavers fill="url(#'+uid+'-concrete)"/>';
-    s += '<rect class="st" data-s="6" data-prect fill="none" stroke="#3b3a36" stroke-width="4" data-edge/>';
-    s += '</g>';
-    // seat wall + fire (7)
-    s += '<g class="st" data-s="7" data-wallg></g>';
-    s += '<g class="st" data-s="7" data-fireg></g>';
-    // beds (8)
-    s += '<g class="st" data-s="8" data-bedsg></g>';
-    // lighting (10)
-    s += '<g class="st" data-s="10" data-lightg></g>';
-    s += '</svg>';
-    return s;
+  if (glOK){
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.6));
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
+    renderer.outputEncoding = T.sRGBEncoding;
   }
 
-  function patioRect(){
-    if (state.size==250) return {x:270,y:120,w:260,h:170};
-    if (state.size==400) return {x:230,y:120,w:340,h:210};
-    return {x:190,y:120,w:420,h:260};
+  // ---- helpers: procedural textures ----
+  function noiseTex(base, specks, size, repeat, enc){
+    var c=document.createElement('canvas'); c.width=c.height=size||256; var g=c.getContext('2d');
+    g.fillStyle=base; g.fillRect(0,0,c.width,c.height);
+    for (var i=0;i<(c.width*c.height)/6;i++){ var col=specks[(Math.random()*specks.length)|0]; g.fillStyle=col; g.globalAlpha=.35+Math.random()*.4; var r=1+Math.random()*2; g.fillRect(Math.random()*c.width, Math.random()*c.height, r, r); }
+    g.globalAlpha=1;
+    var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(repeat,repeat); t.anisotropy=4; if(enc!==false) t.encoding=T.sRGBEncoding; return t;
   }
+  function glowTex(inner, outer){
+    var c=document.createElement('canvas'); c.width=c.height=128; var g=c.getContext('2d');
+    var gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,inner); gr.addColorStop(.35,outer); gr.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=gr; g.fillRect(0,0,128,128); var t=new T.CanvasTexture(c); t.encoding=T.sRGBEncoding; return t;
+  }
+  function flameTex(){
+    var c=document.createElement('canvas'); c.width=64; c.height=128; var g=c.getContext('2d');
+    var gr=g.createLinearGradient(0,128,0,0); gr.addColorStop(0,'rgba(255,240,180,1)'); gr.addColorStop(.35,'rgba(255,150,40,.95)'); gr.addColorStop(.75,'rgba(220,60,10,.5)'); gr.addColorStop(1,'rgba(200,40,0,0)');
+    g.fillStyle=gr; g.beginPath(); g.moveTo(32,0); g.bezierCurveTo(58,50,60,100,32,128); g.bezierCurveTo(4,100,6,50,32,0); g.fill();
+    var t=new T.CanvasTexture(c); t.encoding=T.sRGBEncoding; return t;
+  }
+  var dirtTex = noiseTex('#6a5137',['#574129','#7d634a','#4f3a25','#8a7458'],256,28);
+  var grassTex = noiseTex('#4d7d36',['#3e6b2c','#5c8f40','#6a9a48','#375f27'],256,36);
+  var gravelTex = noiseTex('#a39e92',['#8c877c','#c0bbaf','#77736a','#d1ccc0'],128,10);
+  var sandTex = noiseTex('#d6c49c',['#c7b48a','#e2d2ae'],64,8);
+  var woodTex = (function(){ var c=document.createElement('canvas'); c.width=256;c.height=64; var g=c.getContext('2d'); g.fillStyle='#8a6a48'; g.fillRect(0,0,256,64); for(var i=0;i<256;i+=4){ g.fillStyle=Math.random()<.5?'#7b5d3e':'#977655'; g.globalAlpha=.5; g.fillRect(i,0,2+Math.random()*2,64);} g.globalAlpha=1; var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(8,1); t.encoding=T.sRGBEncoding; return t; })();
+  var glowT = glowTex('rgba(255,225,160,1)','rgba(255,180,80,.55)');
+  var flameT = flameTex();
 
-  function renderScene(el, opts){
-    // opts: {stage:n, fullYard:boolean}
-    var svg = el.querySelector('svg'); if (!svg) return;
-    var r = patioRect();
-    var uid = el.dataset.uid;
-    svg.querySelectorAll('[data-prect]').forEach(function(n){ n.setAttribute('x',r.x); n.setAttribute('y',r.y); n.setAttribute('width',r.w); n.setAttribute('height',r.h); });
-    svg.querySelector('[data-pavers]').setAttribute('fill','url(#'+uid+'-'+state.paver+')');
-    // stakes
-    var st = svg.querySelector('[data-stakes]');
-    var corners = [[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]];
-    var html = '<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="none" stroke="#e0542b" stroke-width="2" stroke-dasharray="3 4"/>';
-    corners.forEach(function(c){ html += '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="6" fill="#e0542b"/>'; });
-    html += '<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+5)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="14" fill="#2b5fa8">'+state.size+' SQ FT</text>';
-    st.innerHTML = html;
-    // wall
-    var cx = r.x + r.w/2, by = r.y + r.h;
-    var wallg = svg.querySelector('[data-wallg]'); wallg.innerHTML = '';
-    var wallOn = opts.forceWall!==undefined ? opts.forceWall : (state.wall==='wall');
-    if (wallOn){
-      var w = '';
-      var rad = Math.min(r.w*.42, 150), ry = rad*.45;
-      var arc = 'M'+(cx-rad)+' '+(by-2)+' A '+rad+' '+ry+' 0 0 0 '+(cx+rad)+' '+(by-2);
-      w += '<path d="'+arc+' Z" fill="url(#'+uid+'-'+state.paver+')"/>';
-      w += '<path d="'+arc+'" fill="none" stroke="#8d8275" stroke-width="22" stroke-linecap="round"/>';
-      w += '<path d="'+arc+'" fill="none" stroke="#b9ae9f" stroke-width="14" stroke-linecap="round" stroke-dasharray="18 3"/>';
-      wallg.innerHTML = w;
-    }
-    // fire
-    var fg = svg.querySelector('[data-fireg]'); fg.innerHTML = '';
-    var fire = opts.forceFire || state.fire;
-    var fy = wallOn ? by + Math.min(r.w*.42,150)*.45*.3 : by - 48;
-    if (fire==='pit'){
-      fg.innerHTML = '<circle cx="'+cx+'" cy="'+fy+'" r="28" fill="#7d7266"/><circle cx="'+cx+'" cy="'+fy+'" r="20" fill="#2a2420"/><circle cx="'+cx+'" cy="'+fy+'" r="12" fill="url(#'+uid+'-fire)"/>';
-    } else if (fire==='table'){
-      fg.innerHTML = '<rect x="'+(cx-40)+'" y="'+(fy-16)+'" width="80" height="32" rx="4" fill="#3a3a3a"/><rect x="'+(cx-28)+'" y="'+(fy-7)+'" width="56" height="14" rx="3" fill="url(#'+uid+'-fire)"/>';
-    } else if (fire==='place'){
-      var py = wallOn ? fy - 10 : by - 34;
-      fg.innerHTML = '<rect x="'+(cx-48)+'" y="'+py+'" width="96" height="30" fill="#6f655a"/><rect x="'+(cx-48)+'" y="'+py+'" width="96" height="30" fill="none" stroke="#4b433b" stroke-width="2"/><rect x="'+(cx-18)+'" y="'+(py+6)+'" width="36" height="18" fill="url(#'+uid+'-fire)"/>';
-    }
-    // beds
-    var bg = svg.querySelector('[data-bedsg]'); var b = '';
-    var beds = opts.forceBeds || state.beds;
-    if (beds.indexOf('found')>=0){
-      b += '<rect x="34" y="122" width="'+(r.x-40)+'" height="34" rx="6" fill="#5a3b22"/><rect x="'+(r.x+r.w+6)+'" y="122" width="'+(766-(r.x+r.w+6))+'" height="34" rx="6" fill="#5a3b22"/>';
-      for (var i=0;i<5;i++){ b += shrub(60+i*((r.x-80)/4), 139, 12, i%2? '#3f7a3f':'#7aa35a'); b += shrub(r.x+r.w+30+i*((766-(r.x+r.w+60))/4), 139, 12, i%2? '#7aa35a':'#3f7a3f'); }
-      b += shrub(120,139,9,'#b7c9e6'); b += shrub(690,139,9,'#b7c9e6');
-    }
-    if (beds.indexOf('screen')>=0){
-      b += '<rect x="34" y="486" width="732" height="40" rx="6" fill="#5a3b22"/>';
-      for (var j=0;j<13;j++){ b += tree(62+j*56, 506, 17, '#2f5d3a'); }
-    }
-    if (beds.indexOf('polli')>=0){
-      b += '<ellipse cx="120" cy="330" rx="70" ry="60" fill="#5a3b22"/>';
-      var cols=['#d35a8e','#e9a23b','#9b6bd1','#e46b4a','#f0d35e','#b8c28a'];
-      for (var k=0;k<16;k++){ var a=k*0.39, rr=14+(k%4)*11; b += shrub(120+Math.cos(a)*rr*1.15, 330+Math.sin(a)*rr, 6+(k%3)*2, cols[k%cols.length]); }
-    }
-    bg.innerHTML = b;
-    // lighting
-    var lg = svg.querySelector('[data-lightg]'); var l = '';
-    var light = opts.forceLight || state.light;
-    if (light!=='none'){
-      l += '<rect width="800" height="560" fill="#0f1b2d" fill-opacity=".62"/>';
-      // window glow from house
-      l += '<rect x="372" y="104" width="56" height="18" fill="#ffd27a" fill-opacity=".9"/>';
-      var pts = [];
-      var n = 4;
-      for (var p=0;p<=n;p++){ pts.push([r.x + r.w*p/n, r.y+r.h+10]); }
-      pts.push([r.x-10, r.y+r.h*0.33]); pts.push([r.x-10, r.y+r.h*0.66]); pts.push([r.x+r.w+10, r.y+r.h*0.33]); pts.push([r.x+r.w+10, r.y+r.h*0.66]);
-      pts.forEach(function(pt){ l += '<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="42" fill="url(#'+uid+'-glow)"/><circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="3" fill="#fff6d8"/>'; });
-      if (light==='full'){
-        [[80,470],[260,470],[540,470],[720,470],[60,200],[740,200],[120,330]].forEach(function(pt){ l += '<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="60" fill="url(#'+uid+'-glow)" opacity=".8"/>'; });
-        l += '<rect x="'+r.x+'" y="'+(r.y+r.h-20)+'" width="'+r.w+'" height="26" fill="#ffb648" fill-opacity=".18"/>';
-      }
-      if (fire!=='none'){ l += '<circle cx="'+cx+'" cy="'+fy+'" r="70" fill="url(#'+uid+'-glow)"/>'; }
-    }
-    lg.innerHTML = l;
-    // stage reveal
-    var stage = opts.stage;
-    svg.querySelectorAll('.st').forEach(function(n){ var k = +n.getAttribute('data-s'); var u = n.getAttribute('data-until'); n.classList.toggle('on', k<=stage && (!u || stage<=+u)); });
-    svg.querySelectorAll('.bp').forEach(function(n){ n.classList.toggle('off', stage>=9); });
-  }
-
-  function mountScene(id, uid){
-    var el = document.getElementById(id); el.dataset.uid = uid; el.innerHTML = sceneSVG(uid);
-    el.firstChild.classList.add('yard'); el.firstChild.setAttribute('data-stage','1');
-    return el;
-  }
-
-  var mainScene = mountScene('scene-main','m');
-  var patioScene = mountScene('scene-patio','p');
-  var fireScene = mountScene('scene-fire','f');
-  var plantScene = mountScene('scene-plants','g');
-  var lightScene = mountScene('scene-light','l');
-  var cap = document.createElement('div'); cap.className='scene-cap'; cap.innerHTML='<i></i><span id="cap-text">Plan view · drawn to your lot</span>'; mainScene.appendChild(cap);
-
-  var stage = 1;
-  var SHOW = {forceWall:true, forceFire:'pit', forceBeds:['found','screen'], forceLight:'path'};
-  function storyOpts(n){ var o = {stage:n}; for (var k in SHOW) o[k]=SHOW[k]; return o; }
-  function paintAll(){
-    renderScene(mainScene,storyOpts(stage));
-    renderScene(patioScene,{stage:6});
-    renderScene(fireScene,{stage:9});
-    renderScene(plantScene,{stage:9});
-    renderScene(lightScene,{stage:10, forceLight: state.light==='none' ? 'none' : state.light});
-    // lighting scene with no lights chosen: show dusk w/o fixtures? keep daylight for honesty.
-    paintPrices();
-  }
-
-  // ---------- options UI ----------
-  function swatchFor(kind,id){
-    if (kind==='paver') return '<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="url(#sw-'+id+')"/></svg>';
-    if (kind==='fire') return {none:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#e9e8df"/><line x1="9" y1="9" x2="25" y2="25" stroke="#9a9a93" stroke-width="2"/></svg>', table:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#e9e8df"/><rect x="5" y="12" width="24" height="10" rx="2" fill="#3a3a3a"/><rect x="9" y="15" width="16" height="4" fill="#f08a24"/></svg>', pit:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#e9e8df"/><circle cx="17" cy="17" r="11" fill="#7d7266"/><circle cx="17" cy="17" r="7" fill="#2a2420"/><circle cx="17" cy="17" r="4" fill="#f08a24"/></svg>', place:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#e9e8df"/><rect x="6" y="6" width="22" height="22" fill="#6f655a"/><rect x="12" y="14" width="10" height="10" fill="#f08a24"/></svg>'}[id];
-    if (kind==='wall') return {none:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#5f8f4e"/></svg>', wall:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#5f8f4e"/><path d="M4 24 A 13 8 0 0 1 30 24" fill="none" stroke="#b9ae9f" stroke-width="7"/></svg>'}[id];
-    if (kind==='bed') return {found:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#5a3b22"/><circle cx="9" cy="17" r="6" fill="#3f7a3f"/><circle cx="24" cy="17" r="6" fill="#7aa35a"/></svg>', screen:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#5a3b22"/><circle cx="7" cy="17" r="6" fill="#2f5d3a"/><circle cx="17" cy="17" r="6" fill="#2f5d3a"/><circle cx="27" cy="17" r="6" fill="#2f5d3a"/></svg>', polli:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#5a3b22"/><circle cx="9" cy="11" r="4" fill="#d35a8e"/><circle cx="23" cy="9" r="4" fill="#e9a23b"/><circle cx="14" cy="23" r="4" fill="#9b6bd1"/><circle cx="26" cy="22" r="4" fill="#f0d35e"/></svg>'}[id];
-    if (kind==='light') return {none:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#cfe3f3"/><circle cx="17" cy="14" r="7" fill="#f2b64a"/></svg>', path:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#0f1b2d"/><circle cx="10" cy="22" r="6" fill="#ffb648" opacity=".7"/><circle cx="24" cy="22" r="6" fill="#ffb648" opacity=".7"/></svg>', full:'<svg viewBox="0 0 34 34"><rect width="34" height="34" fill="#0f1b2d"/><circle cx="8" cy="24" r="6" fill="#ffb648" opacity=".7"/><circle cx="17" cy="12" r="7" fill="#ffb648" opacity=".6"/><circle cx="26" cy="24" r="6" fill="#ffb648" opacity=".7"/></svg>'}[id];
-  }
-
-  function priceLbl(add, f){
-    if (!add[0] && !add[1]) return '<span class="pr inc">Included</span>';
-    return '<span class="pr">+' + range(f ? scaled(add,f) : add) + '</span>';
-  }
-
-  function buildOpts(containerId, list, kind, isMulti){
-    var c = document.getElementById(containerId); c.innerHTML='';
-    list.forEach(function(o){
-      var b = document.createElement('button'); b.type='button'; b.className='opt'; b.dataset.id=o.id;
-      b.innerHTML = '<span class="sw">'+swatchFor(kind,o.id)+'</span><span class="t"><b>'+o.name+'</b><small>'+o.sub+'</small></span>'+priceLbl(o.add, kind==='paver'?SIZE[state.size].f:0);
-      b.addEventListener('click', function(){
-        if (kind==='paver') state.paver=o.id;
-        else if (kind==='fire') state.fire=o.id;
-        else if (kind==='wall') state.wall=o.id;
-        else if (kind==='light') state.light=o.id;
-        else if (kind==='bed'){ var i=state.beds.indexOf(o.id); if(i>=0) state.beds.splice(i,1); else state.beds.push(o.id); }
-        syncOpts(); paintAll();
-      });
-      c.appendChild(b);
-    });
-  }
-  function syncOpts(){
-    document.querySelectorAll('#paver-opts .opt').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id===state.paver); b.querySelector('.pr').outerHTML = priceLbl(find(PAVERS,b.dataset.id).add, SIZE[state.size].f); });
-    document.querySelectorAll('#fire-opts .opt').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id===state.fire); });
-    document.querySelectorAll('#wall-opts .opt').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id===state.wall); });
-    document.querySelectorAll('#light-opts .opt').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id===state.light); });
-    document.querySelectorAll('#bed-opts .opt').forEach(function(b){ b.setAttribute('aria-pressed', state.beds.indexOf(b.dataset.id)>=0); });
-    document.querySelectorAll('#size-segs .seg').forEach(function(b){ b.setAttribute('aria-pressed', +b.dataset.size===state.size); });
-    document.querySelectorAll('#lawn-segs .seg').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lawn===state.lawn); });
-  }
-  buildOpts('paver-opts', PAVERS, 'paver');
-  buildOpts('wall-opts', WALL, 'wall');
-  buildOpts('fire-opts', FIRE, 'fire');
-  buildOpts('bed-opts', BEDS, 'bed', true);
-  buildOpts('light-opts', LIGHT, 'light');
-  // swatch patterns for paver options: inject a hidden svg defs block using the "p" uid patterns from the patio scene (same ids)
-  document.querySelectorAll('#size-segs .seg').forEach(function(b){ b.addEventListener('click', function(){ state.size=+b.dataset.size; syncOpts(); paintAll(); }); });
-  document.querySelectorAll('#lawn-segs .seg').forEach(function(b){ b.addEventListener('click', function(){ state.lawn=b.dataset.lawn; syncOpts(); paintAll(); }); });
-
-  // ---------- prices / summary ----------
-  function selectionRows(){
-    var rows = [];
-    rows.push(['Patio', SIZE[state.size].lbl + ' · ' + find(PAVERS,state.paver).name]);
-    rows.push(['Seat wall', state.wall==='wall' ? 'Curved, 12\'' : 'None']);
-    rows.push(['Fire', find(FIRE,state.fire).name]);
-    rows.push(['Plantings', state.beds.length ? state.beds.map(function(b){return find(BEDS,b).name;}).join(', ') : 'Not chosen']);
-    rows.push(['Lawn', LAWN[state.lawn].name]);
-    rows.push(['Lighting', find(LIGHT,state.light).name]);
-    return rows;
-  }
-  function paintPrices(){
-    var t = range(total());
-    document.getElementById('pill-total').textContent = t;
-    document.querySelectorAll('.live-total').forEach(function(n){ n.textContent = t; });
-    document.getElementById('patio-sub').textContent = range(patioRange());
-    var sheet = document.getElementById('sheet'); var h='';
-    selectionRows().forEach(function(r){ h += '<div class="row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'; });
-    h += '<div class="tot"><span class="lbl">Ballpark</span><b>'+t.replace('–',' – ')+'</b></div>';
-    h += '<p class="fine">Illustrative demo ranges, not a quote. Final pricing depends on access, grade and what we find under the sod.</p>';
-    sheet.innerHTML = h;
-    var mini = document.getElementById('mini'); var m='';
-    selectionRows().forEach(function(r){ if (r[1]!=='None' && r[1]!=='Not chosen') m += '<span>'+r[1]+'</span>'; });
-    m += '<span class="tot">'+t+'</span>';
-    mini.innerHTML = m;
-  }
-
-  // ---------- stages: scroll + autoplay ----------
-  var stepEls = Array.prototype.slice.call(document.querySelectorAll('.step'));
-  var autoplay = null;
-  function setStage(n){
-    stage = n;
-    stepEls.forEach(function(s){ s.classList.toggle('is-on', +s.dataset.stage===n); });
-    document.getElementById('stage-num').textContent = (n<10?'0':'')+n;
-    document.getElementById('stage-name').textContent = STAGE_NAMES[n];
-    document.getElementById('stage-bar').style.width = (n*10)+'%';
-    var ct = document.getElementById('cap-text'); if (ct) ct.textContent = (n<10?'0':'')+n+' · '+STAGE_NAMES[n];
-    renderScene(mainScene,storyOpts(n));
-  }
-  var io = new IntersectionObserver(function(entries){
-    if (autoplay) return;
-    entries.forEach(function(e){ if (e.isIntersecting) setStage(+e.target.dataset.stage); });
-  }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
-  stepEls.forEach(function(s){ io.observe(s); });
-
-  document.getElementById('watch').addEventListener('click', function(){
-    if (autoplay) return;
-    var i = 1; setStage(1);
-    document.getElementById('build').scrollIntoView({behavior:'smooth',block:'start'});
-    autoplay = setInterval(function(){ i++; setStage(i); if (i>=10){ clearInterval(autoplay); autoplay=null; } }, 900);
+  // ---- lights & sky ----
+  var sun = new T.DirectionalLight(0xfff1dc, 1.3); sun.position.set(40,60,30); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-60; sun.shadow.camera.right=60; sun.shadow.camera.top=60; sun.shadow.camera.bottom=-60; sun.shadow.camera.near=10; sun.shadow.camera.far=200; sun.shadow.bias=-0.0008; sun.shadow.normalBias=0.03;
+  scene.add(sun); scene.add(sun.target);
+  var hemi = new T.HemisphereLight(0xbcd7ff, 0x6b5a3f, 0.42); scene.add(hemi);
+  var amb = new T.AmbientLight(0xffffff, 0.08); scene.add(amb);
+  var skyMat = new T.ShaderMaterial({
+    uniforms:{topColor:{value:new T.Color(0x6aa3dc)}, bottomColor:{value:new T.Color(0xe9eef2)}, offset:{value:20}, exponent:{value:0.55}},
+    vertexShader:'varying vec3 vW; void main(){ vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+    fragmentShader:'uniform vec3 topColor; uniform vec3 bottomColor; uniform float offset; uniform float exponent; varying vec3 vW; void main(){ float h=normalize(vW+vec3(0.0,offset,0.0)).y; gl_FragColor=vec4(mix(bottomColor,topColor,max(pow(max(h,0.0),exponent),0.0)),1.0); }',
+    side:T.BackSide, depthWrite:false
   });
+  var sky = new T.Mesh(new T.SphereGeometry(400,24,12), skyMat); scene.add(sky);
+  scene.fog = new T.Fog(0xdfe6ec, 120, 420);
+  var sunSprite = new T.Sprite(new T.SpriteMaterial({map:glowTex('rgba(255,200,120,1)','rgba(255,120,50,.5)'), color:0xffffff, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0}));
+  sunSprite.scale.set(140,140,1); sunSprite.position.set(-120,26,-230); scene.add(sunSprite);
 
-  // ---------- modal / share ----------
-  var modal = document.getElementById('modal');
+  // ---- ground ----
+  var H = -10; // house back wall z
+  var UP = new T.Vector3(0,1,0);
+  var YW=68, YD=42; // yard width/depth (fence)
+  var grassMat = new T.MeshStandardMaterial({map:grassTex, roughness:1});
+  var ground = new T.Mesh(new T.PlaneGeometry(400,400), grassMat); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+  var dirt = new T.Mesh(new T.PlaneGeometry(YW-0.5,YD+1), new T.MeshStandardMaterial({map:dirtTex, roughness:1})); dirt.rotation.x=-Math.PI/2; dirt.position.set(0,0.02,H+YD/2-0.5); dirt.receiveShadow=true; scene.add(dirt);
+  var yardMat = grassMat.clone();
+  var yardGrass = new T.Mesh(new T.PlaneGeometry(YW-0.5,YD-0.5), yardMat); yardGrass.rotation.x=-Math.PI/2; yardGrass.position.set(0,0.04,H+YD/2); yardGrass.receiveShadow=true; scene.add(yardGrass);
+  function setSod(s){ s=Math.max(0.001,s); yardGrass.scale.set(1,s,1); yardGrass.position.z=H+0.25+(YD-0.5)*s/2; }
+
+  // ---- house ----
+  var house = new T.Group(); scene.add(house);
+  var sidingTex = (function(){ var c=document.createElement('canvas'); c.width=64; c.height=64; var g=c.getContext('2d'); g.fillStyle='#dcd7cb'; g.fillRect(0,0,64,64); for (var y=0;y<64;y+=8){ g.fillStyle='#c9c3b5'; g.fillRect(0,y,64,1.5); g.fillStyle='#e6e2d8'; g.fillRect(0,y+2,64,1); } var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(10,5); t.encoding=T.sRGBEncoding; return t; })();
+  var sidingMat = new T.MeshStandardMaterial({map:sidingTex, roughness:.9});
+  var trimMat = new T.MeshStandardMaterial({color:0xf3f1ea, roughness:.8});
+  var shutterMat = new T.MeshStandardMaterial({color:0x1f2a2a, roughness:.85});
+  var roofMat = new T.MeshStandardMaterial({color:0x33363b, roughness:.95});
+  var glassMat = new T.MeshStandardMaterial({color:0x243544, roughness:.5, metalness:.1, emissive:0xffc97a, emissiveIntensity:0});
+  var hw=58, hd=26, hh=21;
+  var body = new T.Mesh(new T.BoxGeometry(hw,hh,hd), sidingMat); body.position.set(0,hh/2,H-hd/2); body.castShadow=true; body.receiveShadow=true; house.add(body);
+  var band = new T.Mesh(new T.BoxGeometry(hw+0.3,0.7,hd+0.3), trimMat); band.position.set(0,10.2,H-hd/2); house.add(band);
+  var base = new T.Mesh(new T.BoxGeometry(hw+0.3,1.6,hd+0.3), new T.MeshStandardMaterial({color:0x8e8a82,roughness:1})); base.position.set(0,0.8,H-hd/2); house.add(base);
+  // gable roof along x, with eaves
+  var roofShape = new T.Shape(); roofShape.moveTo(-hd/2-2.2,-0.2); roofShape.lineTo(hd/2+2.2,-0.2); roofShape.lineTo(0,9.5); roofShape.lineTo(-hd/2-2.2,-0.2);
+  var roofGeo = new T.ExtrudeGeometry(roofShape,{depth:hw+4,bevelEnabled:false}); roofGeo.rotateY(Math.PI/2); roofGeo.translate(-(hw+4)/2,hh,H-hd/2);
+  var roof = new T.Mesh(roofGeo, roofMat); roof.castShadow=true; house.add(roof);
+  var fascia = new T.Mesh(new T.BoxGeometry(hw+4,0.9,0.5), trimMat); fascia.position.set(0,hh-0.1,H+2.0); house.add(fascia);
+  var chim = new T.Mesh(new T.BoxGeometry(3.2,11,3.2), new T.MeshStandardMaterial({color:0x8a5a3c,roughness:.9})); chim.position.set(19,hh+4,H-6); chim.castShadow=true; house.add(chim);
+  // dormers
+  [-16,0,16].forEach(function(x){ var dm=new T.Mesh(new T.BoxGeometry(6,5,5), sidingMat); dm.position.set(x,hh+2.4,H-2.2); dm.castShadow=true; house.add(dm);
+    var dr=new T.Mesh(new T.BoxGeometry(6.8,0.5,5.6), roofMat); dr.position.set(x,hh+5.1,H-2.2); house.add(dr);
+    var dw=new T.Mesh(new T.BoxGeometry(2.6,2.8,0.3), glassMat); dw.position.set(x,hh+2.3,H+0.4); house.add(dw); });
+  // windows + door on the back facade
+  var winGeo = new T.BoxGeometry(3.4,4.6,0.3), winFrame = new T.BoxGeometry(4.2,5.4,0.2), mullV = new T.BoxGeometry(0.16,4.6,0.1), mullH = new T.BoxGeometry(3.4,0.16,0.1), shutGeo = new T.BoxGeometry(1.2,5.4,0.25);
+  function window_(x,y,shut){ var f=new T.Mesh(winFrame,trimMat); f.position.set(x,y,H+0.1); house.add(f); var w=new T.Mesh(winGeo,glassMat); w.position.set(x,y,H+0.25); house.add(w);
+    var mv=new T.Mesh(mullV,trimMat); mv.position.set(x,y,H+0.42); house.add(mv); var mh=new T.Mesh(mullH,trimMat); mh.position.set(x,y+0.3,H+0.42); house.add(mh);
+    if (shut){ var s1=new T.Mesh(shutGeo,shutterMat); s1.position.set(x-2.8,y,H+0.15); house.add(s1); var s2=new T.Mesh(shutGeo,shutterMat); s2.position.set(x+2.8,y,H+0.15); house.add(s2); } }
+  [-23,-15,15,23].forEach(function(x){ window_(x,5,true); window_(x,15,true); });
+  [-5,5].forEach(function(x){ window_(x,15,false); });
+  var doorF = new T.Mesh(new T.BoxGeometry(11,8.6,0.25), trimMat); doorF.position.set(0,4.3,H+0.1); house.add(doorF);
+  var door = new T.Mesh(new T.BoxGeometry(10,7.8,0.3), glassMat); door.position.set(0,4.0,H+0.25); house.add(door);
+  [-3.3,0,3.3].forEach(function(x){ var m=new T.Mesh(new T.BoxGeometry(0.2,7.8,0.1),trimMat); m.position.set(x,4.0,H+0.42); house.add(m); });
+  var lantern = new T.Mesh(new T.BoxGeometry(0.6,1.0,0.5), shutterMat); lantern.position.set(6.2,8,H+0.3); house.add(lantern);
+  var doorLight = new T.PointLight(0xffc27a, 0, 30, 2); doorLight.position.set(0,7.5,H+2); scene.add(doorLight);
+  var step = new T.Mesh(new T.BoxGeometry(12,0.6,2.2), new T.MeshStandardMaterial({color:0xa9a39a,roughness:.9})); step.position.set(0,0.3,H+1.1); step.castShadow=true; step.receiveShadow=true; house.add(step);
+
+  // ---- fence ----
+  var fence = new T.Group(); scene.add(fence);
+  var fenceMat = new T.MeshStandardMaterial({map:woodTex, roughness:.9});
+  function fencePanel(len, x, z, rotY){ var m=new T.Mesh(new T.BoxGeometry(len,6,0.25), fenceMat); m.position.set(x,3,z); m.rotation.y=rotY; m.castShadow=true; m.receiveShadow=true; fence.add(m); var cap=new T.Mesh(new T.BoxGeometry(len,0.35,0.6), fenceMat); cap.position.set(x,6.1,z); cap.rotation.y=rotY; fence.add(cap); }
+  fencePanel(YW,0,H+YD,0); fencePanel(YD,-YW/2,H+YD/2,Math.PI/2); fencePanel(YD,YW/2,H+YD/2,Math.PI/2);
+  var postGeo = new T.BoxGeometry(0.6,6.6,0.6);
+  for (var px=-YW/2; px<=YW/2+0.01; px+=8.5){ var p=new T.Mesh(postGeo,fenceMat); p.position.set(px,3.3,H+YD); fence.add(p); }
+  for (var pz=H; pz<=H+YD; pz+=8){ var p1=new T.Mesh(postGeo,fenceMat); p1.position.set(-YW/2,3.3,pz); fence.add(p1); var p2=new T.Mesh(postGeo,fenceMat); p2.position.set(YW/2,3.3,pz); fence.add(p2); }
+
+  // ---- trees beyond the fence ----
+  var trees = new T.Group(); scene.add(trees);
+  var trunkMat = new T.MeshStandardMaterial({color:0x5a4030, roughness:1});
+  var canopyMats = [0x3f6f33,0x4a7d3a,0x35612c,0x568a41].map(function(c){ return new T.MeshStandardMaterial({color:c, roughness:1}); });
+  var canopyGeo = new T.IcosahedronGeometry(1,1);
+  function tree(x,z,s){ var g=new T.Group(); var tr=new T.Mesh(new T.CylinderGeometry(0.5*s,0.8*s,8*s,7),trunkMat); tr.position.y=4*s; tr.castShadow=true; g.add(tr);
+    for (var i=0;i<3;i++){ var c=new T.Mesh(canopyGeo, canopyMats[(Math.random()*4)|0]); var r=(5+Math.random()*2)*s; c.scale.set(r,r*.9,r); c.position.set((Math.random()-.5)*4*s, (8+i*3.2+Math.random())*s, (Math.random()-.5)*4*s); c.castShadow=true; g.add(c); }
+    g.position.set(x,0,z); g.rotation.y=Math.random()*6.28; trees.add(g); }
+  var seed=7; function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
+  for (var i=0;i<16;i++){ tree(-60+rnd()*120, H+YD+6+rnd()*34, 0.9+rnd()*0.9); }
+  for (var j=0;j<6;j++){ tree(-YW/2-8-rnd()*18, H+4+rnd()*36, 0.9+rnd()*0.7); tree(YW/2+8+rnd()*18, H+4+rnd()*36, 0.9+rnd()*0.7); }
+  for (var k=0;k<8;k++){ tree(-80+rnd()*160, H-40-rnd()*30, 1.1+rnd()*0.8); }
+
+  // ---- patio (rebuilt on size/material change) ----
+  var patio = new T.Group(); scene.add(patio);
+  var P = {w:18,d:14,z0:H,z1:H+14};
+  var pitMat = new T.MeshStandardMaterial({color:0x4a3522, roughness:1});
+  var gravelMat = new T.MeshStandardMaterial({map:gravelTex, roughness:1});
+  var sandMat = new T.MeshStandardMaterial({map:sandTex, roughness:1});
+  var edgeMat = new T.MeshStandardMaterial({color:0x3a3733, roughness:.9});
+  var paverMat = new T.MeshStandardMaterial({color:0xffffff, roughness:.92});
+  var stakes = new T.Group(), pit, gravel, sand, pavers, edge, paverCount=0, paverOrder=[];
+  var stakeMat = new T.MeshStandardMaterial({color:0xe8582a, roughness:.8});
+  var stringMat = new T.LineBasicMaterial({color:0xff6a3d});
+  var tmpM = new T.Matrix4(), tmpQ = new T.Quaternion(), tmpS = new T.Vector3(), tmpP = new T.Vector3(), tmpC = new T.Color();
+  function buildPatio(){
+    while (patio.children.length) patio.remove(patio.children[0]);
+    var s=SIZE[state.size]; P={w:s.w,d:s.d,z0:H,z1:H+s.d};
+    var cx=0, cz=H+s.d/2;
+    // stakes & string
+    stakes = new T.Group(); var corners=[[-s.w/2,H+0.3],[s.w/2,H+0.3],[s.w/2,P.z1],[-s.w/2,P.z1]];
+    corners.forEach(function(c){ var st=new T.Mesh(new T.CylinderGeometry(0.08,0.08,2.4,6), stakeMat); st.position.set(c[0],1.0,c[1]); stakes.add(st); });
+    var pts=corners.concat([corners[0]]).map(function(c){ return new T.Vector3(c[0],1.6,c[1]); });
+    stakes.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), stringMat)); patio.add(stakes);
+    pit = new T.Mesh(new T.BoxGeometry(s.w+1.5,0.1,s.d+1.5), pitMat); pit.position.set(cx,0.05,cz); pit.receiveShadow=true; patio.add(pit);
+    gravel = new T.Mesh(new T.BoxGeometry(s.w+0.6,0.5,s.d+0.6), gravelMat); gravel.position.set(cx,0.12,cz); gravel.receiveShadow=true; patio.add(gravel);
+    sand = new T.Mesh(new T.BoxGeometry(s.w+0.2,0.12,s.d+0.2), sandMat); sand.position.set(cx,0.38,cz); patio.add(sand);
+    edge = new T.Group();
+    [[cx, H+0.15, s.w+0.8, 0.3],[cx, P.z1-0.15, s.w+0.8, 0.3],[-s.w/2-0.25, cz, 0.3, s.d],[s.w/2+0.25, cz, 0.3, s.d]].forEach(function(e){ var m=new T.Mesh(new T.BoxGeometry(e[2],0.5,e[3]), edgeMat); m.position.set(e[0],0.5,e[1]); m.castShadow=true; m.receiveShadow=true; edge.add(m); });
+    patio.add(edge);
+    // pavers
+    var mat = find(PAVERS,state.paver); var tw=mat.tile[0], td=mat.tile[1];
+    var cols=Math.ceil(s.w/tw), rows=Math.ceil(s.d/td); paverCount=cols*rows+rows; paverOrder=[];
+    var geo = mat.irregular ? new T.CylinderGeometry(0.62,0.6,0.28,7) : new T.BoxGeometry(tw-0.06,0.28,td-0.06);
+    pavers = new T.InstancedMesh(geo, paverMat, paverCount); pavers.castShadow=true; pavers.receiveShadow=true;
+    var n=0;
+    for (var r=0;r<rows;r++){ var off=(r%2)?tw/2:0; for (var c=0;c<=cols;c++){ var x=-s.w/2+c*tw+tw/2-off, z=H+0.1+r*td+td/2;
+      var x0=Math.max(-s.w/2+0.05,x-tw/2), x1=Math.min(s.w/2-0.05,x+tw/2), z0=Math.max(H+0.1,z-td/2), z1=Math.min(P.z1-0.1,z+td/2);
+      var sx=(x1-x0)/tw, sz=(z1-z0)/td, ry=0; x=(x0+x1)/2; z=(z0+z1)/2; if (sx<0.22||sz<0.22){ sx=0; sz=0; }
+      if (mat.irregular && sx>0){ sx*=(tw*0.78+Math.random()*0.5); sz*=(td*0.78+Math.random()*0.5); ry=Math.random()*3.14; }
+      paverOrder.push({x:x,z:z,sx:sx,sz:sz,ry:ry}); tmpC.set(mat.cols[(Math.random()*mat.cols.length)|0]); pavers.setColorAt(n, tmpC); n++; if (n>=paverCount) break; } if (n>=paverCount) break; }
+    for (;n<paverCount;n++){ paverOrder.push({x:0,z:cz,sx:0,sz:0,ry:0}); pavers.setColorAt(n, tmpC); }
+    pavers.instanceColor = new T.InstancedBufferAttribute(pavers.instanceColor.array, 3); pavers.instanceColor.needsUpdate=true; patio.add(pavers);
+    layPavers(1);
+    buildWall(); buildFire(); buildLights(); buildBeds();
+  }
+  function layPavers(t){
+    var shown=Math.floor(t*paverCount);
+    for (var i=0;i<paverCount;i++){ var o=paverOrder[i]; var vis=i<shown; var pop = vis && i>shown-14 ? 0.6+0.4*((shown-i)/14) : 1;
+      tmpP.set(o.x, vis?0.58:0.58+ (1-pop)*1.5, o.z); tmpQ.setFromAxisAngle(UP, o.ry); tmpS.set(vis?o.sx:0, vis?1:0, vis?o.sz:0); tmpM.compose(tmpP,tmpQ,tmpS); pavers.setMatrixAt(i,tmpM); }
+    pavers.instanceMatrix.needsUpdate=true;
+  }
+
+  // ---- seat wall ----
+  var wallG = new T.Group(); scene.add(wallG);
+  var blockMat = new T.MeshStandardMaterial({color:0x9a8f80, roughness:.95});
+  var capMat = new T.MeshStandardMaterial({color:0xb9ae9f, roughness:.9});
+  var wallBlocks=null, wallCourses=3, wallPer=0;
+  function buildWall(){
+    while (wallG.children.length) wallG.remove(wallG.children[0]); wallBlocks=null;
+    var w=P.w, z=P.z1-0.9, segs=[];
+    var mid=w*0.62, ret=Math.min(6, P.d*0.35);
+    for (var x=-mid/2+0.6; x<=mid/2-0.6; x+=1.25) segs.push({x:x,z:z,ry:0});
+    for (var i=0;i<Math.floor(ret/1.25);i++){ var zz=z-0.6-i*1.25; segs.push({x:-mid/2-0.1, z:zz, ry:Math.PI/2}); segs.push({x:mid/2+0.1, z:zz, ry:Math.PI/2}); }
+    wallPer=segs.length;
+    wallBlocks = new T.InstancedMesh(new T.BoxGeometry(1.2,0.5,1.0), blockMat, wallPer*wallCourses); wallBlocks.castShadow=true; wallBlocks.receiveShadow=true;
+    wallBlocks.userData.segs=segs;
+    var cap = new T.InstancedMesh(new T.BoxGeometry(1.25,0.22,1.3), capMat, wallPer); cap.castShadow=true; cap.userData.segs=segs; cap.userData.isCap=true;
+    wallG.add(wallBlocks); wallG.add(cap); setWall(1);
+  }
+  function setWall(t){
+    if (!wallBlocks) return;
+    var segs=wallBlocks.userData.segs; var tot=wallPer*wallCourses; var shown=Math.floor(t*tot);
+    for (var i=0;i<tot;i++){ var c=Math.floor(i/wallPer), k=i%wallPer, s=segs[k]; var vis=i<shown;
+      tmpP.set(s.x+((c%2)?0.3:0)*Math.cos(s.ry), 0.72+0.25+c*0.5, s.z+((c%2)?0.3:0)*Math.sin(s.ry)); tmpQ.setFromAxisAngle(UP, s.ry); tmpS.set(vis?1:0,vis?1:0,vis?1:0); tmpM.compose(tmpP,tmpQ,tmpS); wallBlocks.setMatrixAt(i,tmpM); }
+    wallBlocks.instanceMatrix.needsUpdate=true;
+    var cap=wallG.children[1]; var capVis = t>=0.999;
+    for (var j=0;j<wallPer;j++){ var s2=segs[j]; tmpP.set(s2.x,0.72+wallCourses*0.5+0.11,s2.z); tmpQ.setFromAxisAngle(UP, s2.ry); tmpS.set(capVis?1:0,capVis?1:0,capVis?1:0); tmpM.compose(tmpP,tmpQ,tmpS); cap.setMatrixAt(j,tmpM); }
+    cap.instanceMatrix.needsUpdate=true;
+  }
+
+  // ---- fire ----
+  var fireG = new T.Group(); scene.add(fireG);
+  var fireLight = new T.PointLight(0xff8a2a, 0, 24, 2); scene.add(fireLight);
+  var flames=[], fireKind='none';
+  function flame(x,y,z,s){ var m=new T.Mesh(new T.PlaneGeometry(1.6*s,3.2*s), new T.MeshBasicMaterial({map:flameT, transparent:true, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide})); m.position.set(x,y,z); m.userData.base=y; m.userData.s=s; flames.push(m); fireG.add(m); }
+  function buildFire(kind){
+    kind = kind||fireKind; fireKind=kind; while (fireG.children.length) fireG.remove(fireG.children[0]); flames=[];
+    var cz = P.z1-6, cx=0;
+    if (kind==='pit'){
+      var ring = new T.InstancedMesh(new T.BoxGeometry(1.1,0.55,0.8), blockMat, 28); ring.castShadow=true;
+      for (var i=0;i<28;i++){ var c=Math.floor(i/14), a=(i%14)/14*Math.PI*2+(c?0.22:0); tmpP.set(cx+Math.cos(a)*1.9, 0.72+0.28+c*0.55, cz+Math.sin(a)*1.9); tmpQ.setFromAxisAngle(UP, -a); tmpS.set(1,1,1); tmpM.compose(tmpP,tmpQ,tmpS); ring.setMatrixAt(i,tmpM); }
+      fireG.add(ring);
+      var inner = new T.Mesh(new T.CylinderGeometry(1.5,1.5,1.0,20), new T.MeshStandardMaterial({color:0x1a1512,roughness:1})); inner.position.set(cx,1.2,cz); fireG.add(inner);
+      var logs = new T.Mesh(new T.CylinderGeometry(0.25,0.25,2.2,6), trunkMat); logs.rotation.z=Math.PI/2; logs.position.set(cx,1.75,cz); fireG.add(logs); var logs2=logs.clone(); logs2.rotation.y=1.1; fireG.add(logs2);
+      flame(cx,2.9,cz,1); flame(cx+0.4,2.6,cz-0.3,0.7); flame(cx-0.35,2.5,cz+0.3,0.6);
+      fireLight.position.set(cx,3.2,cz);
+    } else if (kind==='table'){
+      var tb = new T.Mesh(new T.BoxGeometry(4.2,1.3,2.0), new T.MeshStandardMaterial({color:0x2f2f2f,roughness:.6,metalness:.3})); tb.position.set(cx,0.72+0.65,cz); tb.castShadow=true; fireG.add(tb);
+      var tray = new T.Mesh(new T.BoxGeometry(2.6,0.12,0.9), new T.MeshStandardMaterial({color:0x111111,roughness:.9})); tray.position.set(cx,0.72+1.32,cz); fireG.add(tray);
+      for (var f=-1;f<=1;f++) flame(cx+f*0.8,2.5,cz,0.55);
+      fireLight.position.set(cx,2.6,cz);
+    } else if (kind==='place'){
+      var fz = P.z1-1.6;
+      var fp = new T.Mesh(new T.BoxGeometry(8,7.5,2.6), new T.MeshStandardMaterial({color:0x7a6f62,roughness:.95})); fp.position.set(cx,0.72+3.75,fz); fp.castShadow=true; fireG.add(fp);
+      var fch = new T.Mesh(new T.BoxGeometry(3,3,2), new T.MeshStandardMaterial({color:0x6d6358,roughness:.95})); fch.position.set(cx,0.72+9,fz); fch.castShadow=true; fireG.add(fch);
+      var box = new T.Mesh(new T.BoxGeometry(3.6,3.2,2.0), new T.MeshStandardMaterial({color:0x120f0c,roughness:1})); box.position.set(cx,0.72+2.3,fz+0.5); fireG.add(box);
+      var hearth = new T.Mesh(new T.BoxGeometry(9,0.4,3), capMat); hearth.position.set(cx,0.92,fz+0.4); fireG.add(hearth);
+      flame(cx,2.6,fz+1.2,0.8); flame(cx+0.5,2.4,fz+1.2,0.55); flame(cx-0.5,2.4,fz+1.2,0.55);
+      fireLight.position.set(cx,3.5,fz+2.5);
+    }
+  }
+
+  // ---- beds & plantings ----
+  var bedsG = new T.Group(); scene.add(bedsG);
+  var mulchMat = new T.MeshStandardMaterial({color:0x4a3220, roughness:1});
+  var shrubMats = [0x3f7a3f,0x7aa35a,0x2f5d3a].map(function(c){ return new T.MeshStandardMaterial({color:c,roughness:1}); });
+  var hydMat = new T.MeshStandardMaterial({color:0xb7c9e6, roughness:1});
+  var arbMat = new T.MeshStandardMaterial({color:0x245232, roughness:1});
+  var bedItems=[]; // meshes that pop in
+  function bedMesh(geo,mat,x,y,z,s,group){ var m=new T.Mesh(geo,mat); m.position.set(x,y,z); m.userData.s=s||1; m.scale.setScalar(s||1); m.castShadow=true; m.receiveShadow=true; group.add(m); bedItems.push(m); return m; }
+  var shrubGeo = new T.IcosahedronGeometry(1,1), arbGeo = new T.ConeGeometry(1.6,9,8), flowerGeo = new T.SphereGeometry(0.45,8,6);
+  var flowerMats = [0xd35a8e,0xe9a23b,0x9b6bd1,0xe46b4a,0xf0d35e].map(function(c){ return new T.MeshStandardMaterial({color:c,roughness:1}); });
+  function buildBeds(list){
+    list = list||state.beds; while (bedsG.children.length) bedsG.remove(bedsG.children[0]); bedItems=[];
+    if (list.indexOf('found')>=0){
+      var w=P.w/2+1.5;
+      [[-1,-YW/2+1, -w],[1,w,YW/2-1]].forEach(function(side){ var x0=side[1], x1=side[2]; var len=x1-x0; var strip=new T.Mesh(new T.BoxGeometry(len,0.35,4.2), mulchMat); strip.position.set((x0+x1)/2,0.17,H+2.1); strip.receiveShadow=true; bedsG.add(strip);
+        var n=Math.floor(len/4.2); for (var i=0;i<n;i++){ var x=x0+2.1+i*(len-4.2)/Math.max(1,n-1); if (i%3===1) bedMesh(shrubGeo,hydMat,x,1.4,H+2.0,1.5,bedsG); else bedMesh(shrubGeo,shrubMats[i%2],x,1.3,H+2.1,1.4,bedsG); } });
+    }
+    if (list.indexOf('screen')>=0){
+      var strip2=new T.Mesh(new T.BoxGeometry(YW-2,0.35,4.5), mulchMat); strip2.position.set(0,0.17,H+YD-2.6); strip2.receiveShadow=true; bedsG.add(strip2);
+      for (var x=-YW/2+3; x<=YW/2-3; x+=4.4){ bedMesh(arbGeo,arbMat,x,4.5,H+YD-2.6,1,bedsG); }
+    }
+    if (list.indexOf('polli')>=0){
+      var ov=new T.Mesh(new T.CylinderGeometry(7,7,0.35,28), mulchMat); ov.scale.set(1.3,1,1); ov.position.set(-P.w/2-13,0.17,H+16); ov.receiveShadow=true; bedsG.add(ov);
+      for (var k=0;k<22;k++){ var a=k*0.57, rr=1.5+(k%5)*1.2; bedMesh(flowerGeo,flowerMats[k%5],-P.w/2-13+Math.cos(a)*rr*1.3,0.9+(k%3)*0.25,H+16+Math.sin(a)*rr,1+(k%3)*0.3,bedsG); }
+    }
+    setBeds(1);
+  }
+  function setBeds(t){ var n=bedItems.length; for (var i=0;i<n;i++){ var it=bedItems[i]; var local=Math.max(0,Math.min(1,(t*1.3 - i/n*0.3))); var e=local<1? (1-Math.pow(1-local,3))*(1+0.25*Math.sin(local*Math.PI)) : 1; it.scale.setScalar(it.userData.s*e); } }
+
+  // ---- lighting fixtures ----
+  var lightG = new T.Group(); scene.add(lightG);
+  var pointPool=[]; for (var q=0;q<10;q++){ var pl=new T.PointLight(0xffc27a,0,18,2); scene.add(pl); pointPool.push(pl); }
+  var fixtures=[]; var lightKind='none';
+  var postMat = new T.MeshStandardMaterial({color:0x1b1b1b, roughness:.6, metalness:.4});
+  function fixture(x,z,up){ var g=new T.Group(); if (!up){ var post=new T.Mesh(new T.CylinderGeometry(0.06,0.06,1.6,6), postMat); post.position.y=0.8; g.add(post); var hat=new T.Mesh(new T.ConeGeometry(0.45,0.3,10), postMat); hat.position.y=1.7; g.add(hat); }
+    var sp=new T.Sprite(new T.SpriteMaterial({map:glowT, color:0xffd9a0, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0})); sp.scale.set(up?8:3.4,up?8:3.4,1); sp.position.y=up?3.5:1.5; g.add(sp);
+    var pool=new T.Sprite(new T.SpriteMaterial({map:glowT, color:0xffc070, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0})); pool.scale.set(up?12:6,up?5:2.2,1); pool.position.y=up?1.5:0.3; g.add(pool);
+    g.position.set(x,0,z); g.userData.sp=sp; g.userData.pool=pool; lightG.add(g); fixtures.push(g); return g; }
+  function buildLights(kind){
+    kind=kind||lightKind; lightKind=kind; while (lightG.children.length) lightG.remove(lightG.children[0]); fixtures=[];
+    if (kind==='none') return setLights(1);
+    var n=4; for (var i=0;i<=n;i++){ fixture(-P.w/2+P.w*i/n, P.z1+1.2, false); }
+    fixture(-P.w/2-1.2, H+P.d*0.35, false); fixture(P.w/2+1.2, H+P.d*0.35, false); fixture(-P.w/2-1.2, H+P.d*0.75, false); fixture(P.w/2+1.2, H+P.d*0.75, false);
+    if (kind==='full'){ [[-YW/2+10,H+YD-3],[-10,H+YD-3],[10,H+YD-3],[YW/2-10,H+YD-3],[-YW/2+3,H+8],[YW/2-3,H+8],[-P.w/2-13,H+16]].forEach(function(p){ fixture(p[0],p[1],true); }); }
+    setLights(1);
+  }
+  var lightsOn=0;
+  function setLights(t){ lightsOn=t; var pi=0; for (var i=0;i<fixtures.length;i++){ var f=fixtures[i]; var local=Math.max(0,Math.min(1,t*1.4-i/fixtures.length*0.4)); f.userData.sp.material.opacity=0.9*local; f.userData.pool.material.opacity=0.55*local; if (pi<pointPool.length){ var pl=pointPool[pi++]; pl.position.set(f.position.x, f.userData.sp.position.y+0.5, f.position.z); pl.intensity=(f.userData.sp.scale.x>6?0.45:0.22)*local; } }
+    for (;pi<pointPool.length;pi++) pointPool[pi].intensity=0; }
+
+  // ---- time of day ----
+  var dayTop=new T.Color(0x5e9bd8), dayBot=new T.Color(0xe9eef2), duskTop=new T.Color(0x0c1a33), duskBot=new T.Color(0xd9743a), nightTop=new T.Color(0x070d1c), nightBot=new T.Color(0x2b3357);
+  var fogDay=new T.Color(0xdfe6ec), fogDusk=new T.Color(0x3a3550), fogNight=new T.Color(0x151a2c);
+  var sunDay=new T.Color(0xfff1dc), sunDusk=new T.Color(0xff9a4a);
+  var tod=0;
+  function setTod(t){
+    tod=t;
+    var a=Math.min(1,t/0.6), b=Math.max(0,(t-0.6)/0.4);
+    skyMat.uniforms.topColor.value.copy(dayTop).lerp(duskTop,a).lerp(nightTop,b);
+    skyMat.uniforms.bottomColor.value.copy(dayBot).lerp(duskBot,a).lerp(nightBot,b);
+    scene.fog.color.copy(fogDay).lerp(fogDusk,a).lerp(fogNight,b);
+    sun.intensity = 1.3*(1-a)+0.45*a*(1-b)+0.06*b; sun.color.copy(sunDay).lerp(sunDusk,a);
+    sun.position.set(40-30*a, 60-48*a, 30+10*a);
+    hemi.intensity = 0.42-0.26*a; hemi.color.setHex(0xbcd7ff).lerp(new T.Color(0x2a3a6e),a);
+    amb.intensity = 0.08-0.04*t;
+    glassMat.emissiveIntensity = 0.65*Math.max(0,(t-0.35)/0.65);
+    doorLight.intensity = 0.45*Math.max(0,(t-0.4)/0.6);
+    sunSprite.material.opacity = a*(1-b)*0.9;
+    renderer && (renderer.toneMappingExposure = 0.95-0.22*t);
+  }
+
+  // ---- blueprint mode ----
+  var bpMat = new T.MeshBasicMaterial({color:0xd7e6ff, wireframe:true, transparent:true, opacity:.42});
+  var bpBg = new T.Color(0x1a4a94);
+  var bpGrid = document.getElementById('bp-grid');
+  function setBlueprint(on){ scene.overrideMaterial = on?bpMat:null; sky.visible=!on; sunSprite.visible=!on; lightG.visible=!on; scene.background = on?bpBg:null; bpGrid.style.opacity=on?1:0; if (on){ scene.fog.near=400; scene.fog.far=800; } else { scene.fog.near=120; scene.fog.far=420; } }
+
+  // ---- camera paths ----
+  var heroKeys = [
+    {p:0.00, pos:[0,100,22],  look:[0,0,4]},
+    {p:0.10, pos:[30,15,36],  look:[0,1,-2]},
+    {p:0.30, pos:[-30,8.5,30],look:[0,1,-2]},
+    {p:0.50, pos:[-14,5,26],  look:[0,2,-4]},
+    {p:0.66, pos:[22,6,22],   look:[0,2,-3]},
+    {p:0.82, pos:[30,13,28],  look:[0,2,-2]},
+    {p:1.00, pos:[14,6.5,26], look:[0,2.5,-4]}
+  ];
+  var posCurve = new T.CatmullRomCurve3(heroKeys.map(function(k){ return new T.Vector3().fromArray(k.pos); }), false, 'centripetal');
+  var lookCurve = new T.CatmullRomCurve3(heroKeys.map(function(k){ return new T.Vector3().fromArray(k.look); }), false, 'centripetal');
+  function heroCam(p){ var n=heroKeys.length-1, u=0; for (var i=0;i<n;i++){ if (p>=heroKeys[i].p && p<=heroKeys[i+1].p){ u=(i+(p-heroKeys[i].p)/(heroKeys[i+1].p-heroKeys[i].p))/n; break; } } if (p>=1) u=1; posCurve.getPoint(u,tgtPos); lookCurve.getPoint(u,tgtLook); }
+  var views = {
+    patio:   {pos:function(){return [P.w*0.9+6, 11, P.z1+12];}, look:function(){return [0,0.5,H+P.d*0.45];}, tod:0.0},
+    fire:    {pos:function(){return [-9, 4.6, P.z1+15];}, look:function(){return [0,1.8,P.z1-5];}, tod:0.78},
+    plants:  {pos:function(){return [-30, 9, H+30];}, look:function(){return [-4,2,H+2];}, tod:0.12},
+    lighting:{pos:function(){return [20, 8, P.z1+18];}, look:function(){return [0,2.5,H+4];}, tod:1.0},
+    summary: {pos:function(){return [20, 8, P.z1+18];}, look:function(){return [0,2.5,H+4];}, tod:1.0}
+  };
+
+  // ---- scroll / section logic ----
+  var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
+  var STAGES=[[0,0.085],[0.085,0.16],[0.16,0.235],[0.235,0.31],[0.31,0.45],[0.45,0.55],[0.55,0.63],[0.63,0.74],[0.74,0.84],[0.84,1.0]];
+  var LBL=['Blueprint','Staked','Excavated','Base','Pavers','Seat wall','Fire','Plantings','Lawn','Lights on'];
+  function sub(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+  function ease(x){ return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; }
+  var mode='hero', activeSec='build', heroP=0, curStage=-1, lastApplied='';
+  function applyHero(p){
+    heroP=p; heroCam(p);
+    var bp = p<STAGES[0][1];
+    setBlueprint(bp);
+    var showWall = SHOW.wall==='wall', showFire=SHOW.fire;
+    if (fireKind!==showFire) buildFire(showFire);
+    if (lightKind!==SHOW.light) buildLights(SHOW.light);
+    stakes.visible = bp || p<STAGES[3][1];
+    pit.visible = bp || p>=STAGES[2][0]; var ps=bp?1:Math.max(0.001,ease(sub(p,STAGES[2][0],STAGES[2][1]))); pit.scale.set(ps,1,ps);
+    gravel.visible = bp || p>=STAGES[3][0]; gravel.scale.y = bp?1:ease(sub(p,STAGES[3][0],STAGES[3][1])); gravel.position.y=0.12*gravel.scale.y;
+    sand.visible = bp || p>=STAGES[3][1]-0.02;
+    edge.visible = bp || p>=STAGES[4][0];
+    pavers.visible = bp || p>=STAGES[4][0]; layPavers(bp?1:ease(sub(p,STAGES[4][0],STAGES[4][1])));
+    wallG.visible = showWall && (bp || p>=STAGES[5][0]); setWall(bp?1:ease(sub(p,STAGES[5][0],STAGES[5][1])));
+    fireG.visible = bp || p>=STAGES[6][0]+0.02; var fs=bp?1:ease(sub(p,STAGES[6][0],STAGES[6][1])); fireG.scale.set(1,Math.max(0.001,fs),1); fireOn = bp?0:sub(p,STAGES[6][0]+0.5*(STAGES[6][1]-STAGES[6][0]),STAGES[6][1]);
+    var bedsWanted = SHOW.beds.join(); if (lastApplied!==bedsWanted){ buildBeds(SHOW.beds); lastApplied=bedsWanted; }
+    bedsG.visible = bp || p>=STAGES[7][0]; setBeds(bp?1:ease(sub(p,STAGES[7][0],STAGES[7][1])));
+    var sodT = bp?1:ease(sub(p,STAGES[8][0],STAGES[8][1])); dirt.visible=true; yardGrass.visible = bp || sodT>0; setSod(bp?1:sodT); yardMat.color.setHex(0xffffff);
+    lightG.visible = !bp && p>=STAGES[9][0]; var lt = bp?0:sub(p,STAGES[9][0]+0.3*(STAGES[9][1]-STAGES[9][0]),STAGES[9][1]); setLights(lt);
+    setTod(bp?0:sub(p,STAGES[9][0],STAGES[9][1]-0.04)*1.0);
+    // captions
+    var st=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st=i;
+    if (st!==curStage){ curStage=st; caps.forEach(function(c){ c.classList.toggle('on', +c.dataset.i===st); }); ringLbl.textContent=LBL[st]; }
+    ring.style.strokeDashoffset = 69.1*(1-p);
+  }
+  var fireOn=0;
+  function applySection(sec){
+    var v=views[sec]; if (!v) return;
+    setBlueprint(false);
+    tgtPos.fromArray(v.pos()); tgtLook.fromArray(v.look());
+    if (camera.aspect<0.8){ tgtPos.sub(tgtLook).multiplyScalar(1.5).add(tgtLook); tgtPos.y+=4; }
+    stakes.visible=false; pit.visible=true; pit.scale.set(1,1,1); lightG.visible=true; gravel.visible=true; gravel.scale.y=1; gravel.position.y=0.12; sand.visible=true; edge.visible=true; pavers.visible=true; layPavers(1);
+    wallG.visible = state.wall==='wall'; setWall(1);
+    if (fireKind!==state.fire) buildFire(state.fire); fireG.visible=true; fireG.scale.set(1,1,1); fireOn = state.fire==='none'?0:1;
+    var bedsWanted='u:'+state.beds.join(); if (lastApplied!==bedsWanted){ buildBeds(state.beds); lastApplied=bedsWanted; } bedsG.visible=true; setBeds(1);
+    dirt.visible=false; yardGrass.visible=true; setSod(1); yardMat.color.setHex(state.lawn==='seed'?0xc2b97e:(state.lawn==='none'?0xd9dcb8:0xffffff));
+    if (lightKind!==state.light) buildLights(state.light);
+    var t = v.tod; if (sec==='lighting' && state.light==='none') t=0.85;
+    setTod(t); setLights(state.light==='none'?0:Math.max(0,(t-0.5)/0.5));
+  }
+  function onScroll(){
+    var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
+    var travel=r.height-vh; var p=Math.max(0,Math.min(1,-r.top/travel));
+    if (r.bottom>vh*0.5){ if (mode!=='hero'){ mode='hero'; lastApplied=''; } applyHero(p); setActive('build'); }
+    else {
+      var secs=['patio','fire','plants','lighting','summary']; var best='patio';
+      for (var i=0;i<secs.length;i++){ var el=document.getElementById(secs[i]); if (el.getBoundingClientRect().top<=vh*0.5) best=secs[i]; }
+      if (mode!=='sec' || best!==activeSec){ mode='sec'; lastApplied=''; }
+      applySection(best); setActive(best);
+    }
+    document.getElementById('side').classList.toggle('show', window.scrollY>vh*0.6 && mode!=='sec' || mode==='sec');
+  }
+  function setActive(sec){ if (sec===activeSec) return; activeSec=sec; document.querySelectorAll('#side a').forEach(function(a){ a.classList.toggle('on', a.dataset.sec===(sec==='summary'?'lighting':sec)); }); }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  // ---- resize & render loop ----
+  function resize(){ var w=window.innerWidth, h=window.innerHeight; camera.aspect=w/h; renderer && renderer.setSize(w,h,false); camera.fov = w<640? 54 : 38; camera.updateProjectionMatrix(); }
+  window.addEventListener('resize', function(){ resize(); onScroll(); });
+  var clock = new T.Clock();
+  function frame(){
+    requestAnimationFrame(frame); if (!glOK) return;
+    var dt=Math.min(0.12, clock.getDelta()), t=clock.elapsedTime;
+    var k = 1-Math.exp(-dt*(mode==='hero' ? 9 : 4.5));
+    camPos.lerp(tgtPos, k); camLook.lerp(tgtLook, k);
+    camera.position.copy(camPos); camera.lookAt(camLook);
+    // fire flicker
+    var fl = fireOn*(0.7+Math.sin(t*17)*0.18+Math.sin(t*7.3)*0.14);
+    fireLight.intensity = fl;
+    for (var i=0;i<flames.length;i++){ var f=flames[i]; var s=f.userData.s; f.scale.set(1+Math.sin(t*12+i)*0.12, (0.85+Math.sin(t*9+i*2)*0.18)*fireOn, 1); f.position.y=f.userData.base+Math.sin(t*6+i)*0.12; f.material.opacity=fireOn; f.lookAt(camera.position.x, f.position.y, camera.position.z); }
+    sun.target.position.set(0,0,H+10); sun.target.updateMatrixWorld();
+    renderer.render(scene, camera);
+  }
+
+  // ---- options UI ----
+  function chip(o, pressed, extra){ var b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=o.id; b.setAttribute('aria-pressed', pressed); b.style.setProperty('--sw', o.sw); b.innerHTML='<span class="sw"></span><span class="t"><b>'+o.name+'</b><small>'+(extra||'')+'</small></span>'; return b; }
+  function priceTxt(add,f){ if(!add[0]&&!add[1]) return 'Included'; return '+'+range(f?scaled(add,f):add); }
+  function buildPanes(){
+    var ps=document.getElementById('pane-size'); ps.innerHTML='';
+    Object.keys(SIZE).forEach(function(k){ var s=SIZE[k]; var o={id:k,name:s.lbl,sw:'#2a2f2c'}; var b=chip(o, +k===state.size, s.sub+' · '+(k==='250'?'Base':'+'+range(s.add))); b.addEventListener('click',function(){ state.size=+k; rebuild(); }); ps.appendChild(b); });
+    var pp=document.getElementById('pane-paver'); pp.innerHTML='';
+    PAVERS.forEach(function(o){ var b=chip(o,o.id===state.paver, priceTxt(o.add,SIZE[state.size].f)); b.addEventListener('click',function(){ state.paver=o.id; rebuild(); }); pp.appendChild(b); });
+    var pw=document.getElementById('pane-wall'); pw.innerHTML='';
+    WALL.forEach(function(o){ var b=chip(o,o.id===state.wall, priceTxt(o.add)); b.addEventListener('click',function(){ state.wall=o.id; refresh(); }); pw.appendChild(b); });
+    var pf=document.getElementById('pane-fire'); pf.innerHTML='';
+    FIRE.forEach(function(o){ var b=chip(o,o.id===state.fire, priceTxt(o.add)); b.addEventListener('click',function(){ state.fire=o.id; refresh(); }); pf.appendChild(b); });
+    var pb=document.getElementById('pane-beds'); pb.innerHTML='';
+    BEDS.forEach(function(o){ var b=chip(o,state.beds.indexOf(o.id)>=0, priceTxt(o.add)); b.addEventListener('click',function(){ var i=state.beds.indexOf(o.id); if(i>=0) state.beds.splice(i,1); else state.beds.push(o.id); refresh(); }); pb.appendChild(b); });
+    var pl=document.getElementById('pane-lawn'); pl.innerHTML='';
+    LAWN.forEach(function(o){ var b=chip(o,o.id===state.lawn, priceTxt(o.add)); b.addEventListener('click',function(){ state.lawn=o.id; refresh(); }); pl.appendChild(b); });
+    var pli=document.getElementById('pane-light'); pli.innerHTML='';
+    LIGHT.forEach(function(o){ var b=chip(o,o.id===state.light, priceTxt(o.add)); b.addEventListener('click',function(){ state.light=o.id; refresh(); }); pli.appendChild(b); });
+  }
+  document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ var sec=t.closest('.room'); sec.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-pressed', x===t); }); sec.querySelectorAll('.pane').forEach(function(p){ p.hidden = p.id!=='pane-'+t.dataset.pane; }); }); });
+  function rebuild(){ buildPatio(); lastApplied=''; refresh(); }
+  function refresh(){ buildPanes(); paintPrices(); lastApplied=''; onScroll(); }
+
+  // ---- prices / summary ----
+  function rows(){ return [
+    ['Patio', SIZE[state.size].lbl+' · '+find(PAVERS,state.paver).name],
+    ['Seat wall', state.wall==='wall'?'18" stone-capped':'None'],
+    ['Fire', find(FIRE,state.fire).name],
+    ['Plantings', state.beds.length? state.beds.map(function(b){return find(BEDS,b).name;}).join(', ') : 'Not chosen'],
+    ['Lawn', find(LAWN,state.lawn).name],
+    ['Lighting', find(LIGHT,state.light).name] ]; }
+  function paintPrices(){
+    var t=range(total()); document.getElementById('pill-total').textContent=t;
+    document.querySelectorAll('.live-total').forEach(function(n){ n.textContent=t; });
+    document.getElementById('patio-sub').textContent=range(patioRange());
+    var h=''; rows().forEach(function(r){ h+='<div class="row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'; });
+    h+='<div class="tot"><span class="mono">Ballpark</span><b>'+t.replace('–',' – ')+'</b></div><p class="fine">Illustrative demo ranges, not a quote. Final pricing depends on access, grade and what we find under the sod.</p>';
+    document.getElementById('sheet').innerHTML=h;
+    var m=''; rows().forEach(function(r){ if (r[1]!=='None'&&r[1]!=='Not chosen') m+='<span>'+r[1]+'</span>'; }); m+='<span class="tot">'+t+'</span>'; document.getElementById('mini').innerHTML=m;
+  }
+
+  // ---- watch the build (auto-scroll) ----
+  var auto=null;
+  function stopAuto(){ if (auto){ cancelAnimationFrame(auto); auto=null; } }
+  ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev, stopAuto, {passive:true}); });
+  document.getElementById('watch').addEventListener('click', function(){
+    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=16000;
+    function step(now){ var x=Math.min(1,(now-start)/dur); var e= x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e); if (x<1) auto=requestAnimationFrame(step); else auto=null; }
+    auto=requestAnimationFrame(step);
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){ a.addEventListener('click', function(e){ var id=a.getAttribute('href').slice(1); var el=document.getElementById(id); if(!el) return; e.preventDefault(); stopAuto(); el.scrollIntoView({behavior:'smooth',block:'start'}); }); });
+
+  // ---- modal / share ----
+  var modal=document.getElementById('modal');
   function openForm(){ modal.classList.add('open'); modal.classList.remove('sent'); document.getElementById('f-name').focus(); }
   function closeForm(){ modal.classList.remove('open'); }
   document.querySelectorAll('[data-open-form]').forEach(function(b){ b.addEventListener('click', openForm); });
@@ -699,8 +837,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   modal.addEventListener('click', function(e){ if (e.target===modal) closeForm(); });
   document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeForm(); });
   document.getElementById('lead').addEventListener('submit', function(e){
-    e.preventDefault();
-    var err = document.getElementById('form-err'); err.textContent='';
+    e.preventDefault(); var err=document.getElementById('form-err'); err.textContent='';
     var name=document.getElementById('f-name').value.trim(), phone=document.getElementById('f-phone').value.trim(), email=document.getElementById('f-email').value.trim(), zip=document.getElementById('f-zip').value.trim();
     if (!name){ err.textContent='Add your name so we know who to call.'; return; }
     if (!/^[\d\s().+-]{7,}$/.test(phone)){ err.textContent='That phone number doesn\'t look right.'; return; }
@@ -708,22 +845,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     if (!/^\d{5}$/.test(zip)){ err.textContent='ZIP should be five digits.'; return; }
     modal.classList.add('sent');
   });
-  function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1600); }
+  function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },1600); }
   document.getElementById('share').addEventListener('click', function(){
-    var lines = ['Our Larkspur backyard'];
-    selectionRows().forEach(function(r){ lines.push(r[0]+': '+r[1]); });
-    lines.push('Ballpark: '+range(total()).replace('–',' – '));
-    lines.push(location.href.split('#')[0]);
-    var text = lines.join('\n');
-    try { navigator.clipboard.writeText(text).then(function(){ toast('Copied. Paste it in a text.'); }, function(){ fallback(); }); } catch(e){ fallback(); }
+    var lines=['Our Larkspur backyard']; rows().forEach(function(r){ lines.push(r[0]+': '+r[1]); }); lines.push('Ballpark: '+range(total()).replace('–',' – ')); lines.push(location.href.split('#')[0]);
+    var text=lines.join('\n');
     function fallback(){ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('Copied. Paste it in a text.'); }catch(e){ toast('Select and copy the summary above.'); } document.body.removeChild(ta); }
+    try { navigator.clipboard.writeText(text).then(function(){ toast('Copied. Paste it in a text.'); }, fallback); } catch(e){ fallback(); }
   });
 
-  // paver swatches need the pattern defs reachable in the document: add a hidden svg carrying the patio scene's defs under ids "p-*"
-  var hidden = document.createElement('div'); hidden.style.cssText='position:absolute;width:0;height:0;overflow:hidden'; hidden.innerHTML = '<svg width="0" height="0" aria-hidden="true">'+defs('sw')+'</svg>';
-  document.body.appendChild(hidden);
-
-  syncOpts(); paintAll(); setStage(1);
+  window.__larkspur = function(){ return {sun:sun.intensity, tod:tod, hemi:hemi.intensity, mode:mode, p:heroP, exp:renderer&&renderer.toneMappingExposure, fire:fireOn, lights:lightsOn}; };
+  // ---- boot ----
+  buildPatio(); buildPanes(); paintPrices(); resize(); setTod(0); onScroll(); frame();
 })();
 </script>
 
