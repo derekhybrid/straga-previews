@@ -75,9 +75,10 @@ a{color:inherit}
 @media (max-width:640px){.side{display:none}}
 
 /* hero */
-.hero{position:relative;height:1050vh;z-index:2}
+.hero{position:relative;height:1300vh;z-index:2}
 .hero-view{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-content:end;padding-bottom:max(30px,env(safe-area-inset-bottom,0px));pointer-events:none}
-.cap{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s}
+.cap{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.cap.out{opacity:0;transform:translateY(-10px);transition-duration:.35s}
 .cap.on{opacity:1;transform:none}
 .cap .eyebrow{display:flex;align-items:center;gap:.7rem;color:var(--fg-3)}
 .cap .eyebrow i{display:block;width:46px;height:1px;background:var(--fg-3)}
@@ -94,7 +95,15 @@ a{color:inherit}
 @media (max-width:640px){.cap,.hud{left:max(18px,env(safe-area-inset-left,0px));right:max(18px,env(safe-area-inset-right,0px))}.cap{max-width:100%}.hud .ring span{display:none}}
 
 /* configurator sections */
-.room{position:relative;z-index:2;height:100vh;height:100svh;min-height:560px;display:grid;grid-template-rows:auto 1fr auto;padding-top:calc(68px + env(safe-area-inset-top,0px) + 18px);padding-bottom:max(28px,env(safe-area-inset-bottom,0px))}
+.room{position:relative;z-index:2;height:100vh;height:100svh;min-height:560px;display:grid;grid-template-rows:auto 1fr auto;padding-top:calc(68px + env(safe-area-inset-top,0px) + 18px);padding-bottom:max(28px,env(safe-area-inset-bottom,0px));overflow:hidden;background:var(--ink)}
+.room>.bg{position:absolute;inset:0;z-index:-1}
+.room>.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none;opacity:0;transition:opacity .9s ease;transform:scale(1.06);will-change:transform,opacity}
+.room>.bg img.on{opacity:1}
+.room.in>.bg img.on{animation:kb 14s ease-out forwards}
+@keyframes kb{from{transform:scale(1.06)}to{transform:scale(1.0)}}
+.room>.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,14,12,.82) 0%,rgba(10,14,12,.15) 45%,rgba(10,14,12,0) 70%),linear-gradient(to bottom,rgba(10,14,12,.55) 0%,rgba(10,14,12,0) 28%),linear-gradient(to right,rgba(10,14,12,.5) 0%,rgba(10,14,12,0) 50%)}
+#stage,#vignette{transition:opacity .8s ease}
+body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
 .room .head{display:grid;gap:.5rem;max-width:40rem}
 .room .head .mono{color:var(--gold)}
 .room .lead{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
@@ -211,6 +220,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="patio" data-sec="patio">
+  <div class="bg"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="Finished paver patio off the back of the house in late-morning light" class="on" data-img="patio-day"></div>
   <div class="head"><span class="mono">Step one · Patio</span><h2>Make it yours.</h2><p class="lead">The size sets the base price. The stone is where the look comes from.</p></div>
   <div></div>
   <div class="ctl">
@@ -225,6 +235,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="fire" data-sec="fire">
+  <div class="bg"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="" data-img="patio-day" class="on"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="Stone seat wall and fire pit at golden hour" data-img="fire-dusk"></div>
   <div class="head"><span class="mono">Step two · Fire &amp; seating</span><h2>Stay out later.</h2><p class="lead">A seat wall turns the edge of the patio into the best seats. The fire is why people sit there.</p></div>
   <div></div>
   <div class="ctl">
@@ -236,6 +247,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="plants" data-sec="plants">
+  <div class="bg"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="" data-img="fire-dusk"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="" data-img="patio-day"><img src="renders/plants-day.jpg" srcset="renders/plants-day-m.jpg 1280w, renders/plants-day.jpg 2560w" sizes="100vw" alt="Foundation beds and arborvitae privacy screen in afternoon light" data-img="plants-day" class="on"></div>
   <div class="head"><span class="mono">Step three · Plantings &amp; lawn</span><h2>Soften the edges.</h2><p class="lead">Pick any of these. Everything is chosen for Zone 7a and guaranteed for a season.</p></div>
   <div></div>
   <div class="ctl">
@@ -247,6 +259,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="lighting" data-sec="lighting">
+  <div class="bg"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="" data-img="fire-dusk"><img src="renders/lights-night.jpg" srcset="renders/lights-night-m.jpg 1280w, renders/lights-night.jpg 2560w" sizes="100vw" alt="Path lights, uplit trees and the fire at blue hour" data-img="lights-night"></div>
   <div class="head"><span class="mono">Step four · Lighting</span><h2>Keep it after dark.</h2><p class="lead">Low-voltage LED, warm white, on a timer. You'll use the yard twice as much.</p></div>
   <div></div>
   <div class="ctl">
@@ -274,7 +287,7 @@ a{color:inherit}
 <footer class="site-foot gutter">
   <div class="in">
     <span><a class="brand" href="#top">Larkspur.</a> Outdoor Co. · Williamstown, NJ · Licensed &amp; insured</span>
-    <span>Demo site by Straga Solutions · yard is a live 3D illustration</span>
+    <span>Demo site by Straga Solutions · photos are AI-visualized</span>
   </div>
 </footer>
 
@@ -700,11 +713,12 @@ a{color:inherit}
   var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
   var STAGES=[[0,0.085],[0.085,0.16],[0.16,0.235],[0.235,0.31],[0.31,0.45],[0.45,0.55],[0.55,0.63],[0.63,0.74],[0.74,0.84],[0.84,1.0]];
   var LBL=['Blueprint','Staked','Excavated','Base','Pavers','Seat wall','Fire','Plantings','Lawn','Lights on'];
-  function sub(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+  function sub(p,a,b){ return Math.max(0,Math.min(1,(p-a)/((b-a)*0.62))); }
+  function dwell(p){ for (var i=0;i<STAGES.length;i++){ var a=STAGES[i][0], b=STAGES[i][1]; if (p>=a && p<b){ var u=(p-a)/(b-a); var m=Math.min(1,u/0.62); return a+(b-a)*(0.9*m*m*(3-2*m) + 0.1*u); } } return p; }
   function ease(x){ return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; }
   var mode='hero', activeSec='build', heroP=0, curStage=-1, lastApplied='';
   function applyHero(p){
-    heroP=p; heroCam(p);
+    heroP=p; heroCam(0.3*p+0.7*dwell(p));
     var bp = p<STAGES[0][1];
     setBlueprint(bp);
     var showWall = SHOW.wall==='wall', showFire=SHOW.fire;
@@ -725,10 +739,20 @@ a{color:inherit}
     setTod(bp?0:sub(p,STAGES[9][0],STAGES[9][1]-0.04)*1.0);
     // captions
     var st=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st=i;
-    if (st!==curStage){ curStage=st; caps.forEach(function(c){ c.classList.toggle('on', +c.dataset.i===st); }); ringLbl.textContent=LBL[st]; }
+    if (st!==curStage){ var prev=curStage; curStage=st; caps.forEach(function(c){ var i=+c.dataset.i; c.classList.toggle('on', i===st); c.classList.toggle('out', i===prev && prev<st); }); ringLbl.textContent=LBL[st]; }
     ring.style.strokeDashoffset = 69.1*(1-p);
   }
   var fireOn=0;
+  function photoFor(sec){
+    if (sec==='patio') return 'patio-day';
+    if (sec==='fire') return (state.fire==='none' && state.wall==='none') ? 'patio-day' : 'fire-dusk';
+    if (sec==='plants') return state.beds.length ? 'plants-day' : ((state.fire!=='none'||state.wall==='wall') ? 'fire-dusk' : 'patio-day');
+    if (sec==='lighting') return state.light==='none' ? 'fire-dusk' : 'lights-night';
+    return null;
+  }
+  function paintPhotos(){
+    ['patio','fire','plants','lighting'].forEach(function(sec){ var want=photoFor(sec); var el=document.getElementById(sec); el.querySelectorAll('.bg img').forEach(function(im){ im.classList.toggle('on', im.dataset.img===want); }); });
+  }
   function applySection(sec){
     var v=views[sec]; if (!v) return;
     setBlueprint(false);
@@ -746,6 +770,8 @@ a{color:inherit}
   function onScroll(){
     var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
     var travel=r.height-vh; var p=Math.max(0,Math.min(1,-r.top/travel));
+    document.body.classList.toggle('in-rooms', r.bottom<=vh*0.5);
+    ['patio','fire','plants','lighting'].forEach(function(id){ var el=document.getElementById(id), rr=el.getBoundingClientRect(); el.classList.toggle('in', rr.top<vh*0.8 && rr.bottom>vh*0.2); });
     if (r.bottom>vh*0.5){ if (mode!=='hero'){ mode='hero'; lastApplied=''; } applyHero(p); setActive('build'); }
     else {
       var secs=['patio','fire','plants','lighting','summary']; var best='patio';
@@ -763,9 +789,9 @@ a{color:inherit}
   window.addEventListener('resize', function(){ resize(); onScroll(); });
   var clock = new T.Clock();
   function frame(){
-    requestAnimationFrame(frame); if (!glOK) return;
+    requestAnimationFrame(frame); if (!glOK) return; if (mode==='sec' && document.body.classList.contains('in-rooms') && clock.elapsedTime>2){ clock.getDelta(); return; }
     var dt=Math.min(0.12, clock.getDelta()), t=clock.elapsedTime;
-    var k = 1-Math.exp(-dt*(mode==='hero' ? 9 : 4.5));
+    var k = 1-Math.exp(-dt*(mode==='hero' ? 5.5 : 3.2));
     camPos.lerp(tgtPos, k); camLook.lerp(tgtLook, k);
     camera.position.copy(camPos); camera.lookAt(camLook);
     // fire flicker
@@ -797,7 +823,7 @@ a{color:inherit}
   }
   document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ var sec=t.closest('.room'); sec.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-pressed', x===t); }); sec.querySelectorAll('.pane').forEach(function(p){ p.hidden = p.id!=='pane-'+t.dataset.pane; }); }); });
   function rebuild(){ buildPatio(); lastApplied=''; refresh(); }
-  function refresh(){ buildPanes(); paintPrices(); lastApplied=''; onScroll(); }
+  function refresh(){ buildPanes(); paintPrices(); paintPhotos(); lastApplied=''; onScroll(); }
 
   // ---- prices / summary ----
   function rows(){ return [
@@ -822,7 +848,7 @@ a{color:inherit}
   function stopAuto(){ if (auto){ cancelAnimationFrame(auto); auto=null; } }
   ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev, stopAuto, {passive:true}); });
   document.getElementById('watch').addEventListener('click', function(){
-    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=16000;
+    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=22000;
     function step(now){ var x=Math.min(1,(now-start)/dur); var e= x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e); if (x<1) auto=requestAnimationFrame(step); else auto=null; }
     auto=requestAnimationFrame(step);
   });
@@ -855,7 +881,7 @@ a{color:inherit}
 
   window.__larkspur = function(){ return {sun:sun.intensity, tod:tod, hemi:hemi.intensity, mode:mode, p:heroP, exp:renderer&&renderer.toneMappingExposure, fire:fireOn, lights:lightsOn}; };
   // ---- boot ----
-  buildPatio(); buildPanes(); paintPrices(); resize(); setTod(0); onScroll(); frame();
+  buildPatio(); buildPanes(); paintPrices(); paintPhotos(); resize(); setTod(0); onScroll(); frame();
 })();
 </script>
 
