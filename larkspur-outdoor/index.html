@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Larkspur Outdoor Co.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: one fixed full-screen 3D canvas behind everything. A tall hero scrubs a 10-stage build with the camera orbiting the yard;
    then four 100svh configurator sections re-aim the camera and swap materials live; the summary and footer are opaque over the canvas. */
@@ -20,11 +20,11 @@
   --fg:#f4f1ea;
   --fg-2:rgba(244,241,234,.72);
   --fg-3:rgba(244,241,234,.48);
-  --gold:#e4b45c;
+  --gold:#f2a855;
   --line:rgba(244,241,234,.16);
   --display:"Instrument Serif", Georgia, "Times New Roman", serif;
-  --body:"Manrope", "Helvetica Neue", Arial, sans-serif;
-  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --body:"Figtree", "Helvetica Neue", Arial, sans-serif;
+  --mono:"DM Mono", ui-monospace, Menlo, monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -32,7 +32,7 @@ html{scroll-behavior:auto}
 body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
 h1,h2,h3{font-family:var(--display);font-weight:400;line-height:.95;margin:0;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.45)}
-h1{font-size:clamp(2.8rem,7.2vw,6.4rem)}
+h1{font-size:clamp(3rem,7.6vw,7rem);letter-spacing:-.02em}
 h2{font-size:clamp(2.4rem,5vw,4.4rem)}
 h1 em,h2 em{font-style:italic;color:var(--gold)}
 p{margin:0}
@@ -43,24 +43,17 @@ a{color:inherit}
 .gutter{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
 @media (max-width:640px){.gutter{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}}
 
-#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
-#bp-grid{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .5s;
-  background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:48px 48px}
-#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:
-  linear-gradient(to top,rgba(10,14,12,.8) 0%,rgba(10,14,12,0) 40%),
-  linear-gradient(to bottom,rgba(10,14,12,.6) 0%,rgba(10,14,12,0) 26%),
-  linear-gradient(to right,rgba(10,14,12,.55) 0%,rgba(10,14,12,0) 48%)}
 
 /* header */
 .top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;gap:.6rem;height:68px}
 .brand{font-family:var(--display);font-size:1.5rem;text-decoration:none;letter-spacing:-.01em}
 .spacer{flex:1}
-.pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:.55rem .9rem;text-decoration:none;color:var(--fg-2);white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:10px;padding:.55rem .9rem;text-decoration:none;color:var(--fg-2);white-space:nowrap}
 .pill b{font-weight:500;color:var(--fg)}
-.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.6rem 1rem;white-space:nowrap;transition:background .15s,color .15s,transform .15s,border-color .15s}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:10px;padding:.6rem 1rem;white-space:nowrap;transition:background .15s,color .15s,transform .15s,border-color .15s}
 .btn:hover{transform:translateY(-1px)}
-.btn-fill{background:var(--paper);color:var(--ink)}
-.btn-fill:hover{background:#fff}
+.btn-fill{background:var(--gold);color:var(--ink)}
+.btn-fill:hover{background:#ffc078}
 .btn-line{border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .btn-line:hover{border-color:var(--fg-3)}
 @media (max-width:560px){.top .btn-fill{display:none}.pill .lbl{display:none}}
@@ -75,17 +68,24 @@ a{color:inherit}
 @media (max-width:640px){.side{display:none}}
 
 /* hero */
-.hero{position:relative;height:1300vh;z-index:2}
-.hero-view{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-content:end;padding-bottom:max(30px,env(safe-area-inset-bottom,0px));pointer-events:none}
-.cap{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.hero{position:relative;height:1150vh;z-index:2}
+.hero-view{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-content:end;padding-bottom:max(30px,env(safe-area-inset-bottom,0px));pointer-events:none;overflow:hidden}
+.hero-photos{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-photos img,#seq{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none;will-change:transform,opacity}
+.hero-photos img{opacity:1}
+#seq{opacity:0}
+.hero-photos::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,14,12,.82) 0%,rgba(10,14,12,.12) 42%,rgba(10,14,12,0) 70%),linear-gradient(to bottom,rgba(10,14,12,.5) 0%,rgba(10,14,12,0) 26%),linear-gradient(to right,rgba(10,14,12,.45) 0%,rgba(10,14,12,0) 50%);opacity:var(--scrim,0)}
+.cap{z-index:2;position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
 .cap.out{opacity:0;transform:translateY(-10px);transition-duration:.35s}
 .cap.on{opacity:1;transform:none}
 .cap .eyebrow{display:flex;align-items:center;gap:.7rem;color:var(--fg-3)}
-.cap .eyebrow i{display:block;width:46px;height:1px;background:var(--fg-3)}
+.cap .eyebrow i{display:block;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
 .cap .eyebrow b{color:var(--fg-2);font-weight:400}
 .cap p{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
 .cap p.spec{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3)}
-.hud{position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:max(30px,env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.rail{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(244,241,234,.12);z-index:2}
+.rail i{display:block;height:100%;width:0;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.hud{z-index:2;position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:max(30px,env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
 .hud>*{pointer-events:auto}
 .ring{display:flex;align-items:center;gap:.6rem;color:var(--fg-3)}
 .ring svg{width:26px;height:26px;transform:rotate(-90deg)}
@@ -102,8 +102,7 @@ a{color:inherit}
 .room.in>.bg img.on{animation:kb 14s ease-out forwards}
 @keyframes kb{from{transform:scale(1.06)}to{transform:scale(1.0)}}
 .room>.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,14,12,.82) 0%,rgba(10,14,12,.15) 45%,rgba(10,14,12,0) 70%),linear-gradient(to bottom,rgba(10,14,12,.55) 0%,rgba(10,14,12,0) 28%),linear-gradient(to right,rgba(10,14,12,.5) 0%,rgba(10,14,12,0) 50%)}
-#stage,#vignette{transition:opacity .8s ease}
-body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
+
 .room .head{display:grid;gap:.5rem;max-width:40rem}
 .room .head .mono{color:var(--gold)}
 .room .lead{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
@@ -172,17 +171,12 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
 .modal.sent .done{display:grid}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--paper);color:var(--ink);padding:.7rem 1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.nogl{position:fixed;inset:0;z-index:0;display:none;place-items:center;text-align:center;padding:2rem;color:var(--fg-2)}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
 
-<canvas id="stage" aria-hidden="true"></canvas>
-<div id="bp-grid" aria-hidden="true"></div>
-<div id="vignette" aria-hidden="true"></div>
-<div class="nogl" id="nogl"><p>This demo needs WebGL to draw the yard. Try a current version of Chrome or Safari.</p></div>
 
 <header class="top gutter">
   <a class="brand" href="#top">Larkspur.</a>
@@ -202,16 +196,19 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
 <main id="top">
 <section class="hero" id="build">
   <div class="hero-view gutter">
-    <div class="cap on" data-i="0"><span class="eyebrow mono"><b>01 / 10</b><i></i>The plan</span><h1>From bare lot<br><em>to backyard.</em></h1><p>Every Larkspur patio starts on paper, drawn for your yard, your grade and your evenings.</p></div>
-    <div class="cap" data-i="1"><span class="eyebrow mono"><b>02 / 10</b><i></i>Site</span><h1>Staked on<br><em>your lot.</em></h1><p>We mark the footprint and check the pitch before a single shovel moves.</p><p class="spec">Fall ¼" per foot, away from the house</p></div>
-    <div class="cap" data-i="2"><span class="eyebrow mono"><b>03 / 10</b><i></i>Excavation</span><h1>Ten inches<br><em>down.</em></h1><p>Topsoil saved for the beds. Everything else hauled.</p></div>
-    <div class="cap" data-i="3"><span class="eyebrow mono"><b>04 / 10</b><i></i>Base</span><h1>The part you<br><em>never see.</em></h1><p>Six inches of crushed stone, compacted in two-inch lifts. It's why the patio is still flat in fifteen years.</p><p class="spec">¾" DGA · plate-compacted</p></div>
-    <div class="cap" data-i="4"><span class="eyebrow mono"><b>05 / 10</b><i></i>Pavers</span><h1>Set by<br><em>hand.</em></h1><p>From the house outward, cut clean at the edges, locked in with a concrete edge restraint.</p></div>
-    <div class="cap" data-i="5"><span class="eyebrow mono"><b>06 / 10</b><i></i>Seat wall</span><h1>Built-in<br><em>seating.</em></h1><p>Eighteen inches high with a stone cap. The best seats in the yard.</p></div>
-    <div class="cap" data-i="6"><span class="eyebrow mono"><b>07 / 10</b><i></i>Fire</span><h1>A reason to<br><em>stay out.</em></h1><p>Wood-burning pit, 44 inches across, in the middle of it all.</p></div>
-    <div class="cap" data-i="7"><span class="eyebrow mono"><b>08 / 10</b><i></i>Plantings</span><h1>Soft<br><em>edges.</em></h1><p>Foundation beds and a privacy row, planted for Zone 7a so they come back every spring.</p></div>
-    <div class="cap" data-i="8"><span class="eyebrow mono"><b>09 / 10</b><i></i>Lawn</span><h1>Green by<br><em>the weekend.</em></h1><p>Final grade, tall fescue sod, rolled and watered in.</p></div>
-    <div class="cap" data-i="9"><span class="eyebrow mono"><b>10 / 10</b><i></i>Lights on</span><h1>Yours<br><em>after dark.</em></h1><p>Low-voltage LED, warm white, on a timer. The yard you use at 9 pm, not just at noon.</p></div>
+    <div class="hero-photos" aria-hidden="true">
+      <img src="renders/blueprint-desk.jpg" srcset="renders/blueprint-desk-m.jpg 1280w, renders/blueprint-desk.jpg 2560w" sizes="100vw" alt="" id="bp-img">
+      <canvas id="seq"></canvas>
+    </div>
+    <div class="cap on" data-i="0"><span class="eyebrow mono"><b>01 / 08</b><i></i>The plan</span><h1>From bare lot<br><em>to backyard.</em></h1><p>Every Larkspur patio starts on paper, drawn for your yard, your grade and your evenings.</p></div>
+    <div class="cap" data-i="1"><span class="eyebrow mono"><b>02 / 08</b><i></i>Site</span><h1>Staked on<br><em>your lot.</em></h1><p>We mark the footprint and check the pitch before a single shovel moves.</p><p class="spec">Fall ¼" per foot, away from the house</p></div>
+    <div class="cap" data-i="2"><span class="eyebrow mono"><b>03 / 08</b><i></i>Excavation &amp; base</span><h1>The part you<br><em>never see.</em></h1><p>Ten inches down, then six inches of crushed stone compacted in two-inch lifts. It's why the patio is still flat in fifteen years.</p><p class="spec">¾" DGA · plate-compacted</p></div>
+    <div class="cap" data-i="3"><span class="eyebrow mono"><b>04 / 08</b><i></i>Pavers</span><h1>Set by<br><em>hand.</em></h1><p>From the house outward, cut clean at the edges, locked in with a concrete edge restraint.</p><p class="spec">Running bond · polymeric joints</p></div>
+    <div class="cap" data-i="4"><span class="eyebrow mono"><b>05 / 08</b><i></i>Seat wall &amp; fire</span><h1>A reason to<br><em>stay out.</em></h1><p>An 18-inch stone seat wall and a 44-inch wood-burning pit. The best seats in the yard.</p></div>
+    <div class="cap" data-i="5"><span class="eyebrow mono"><b>06 / 08</b><i></i>Plantings</span><h1>Soft<br><em>edges.</em></h1><p>Foundation beds and a privacy row, planted for Zone 7a so they come back every spring.</p></div>
+    <div class="cap" data-i="6"><span class="eyebrow mono"><b>07 / 08</b><i></i>Lawn</span><h1>Green by<br><em>the weekend.</em></h1><p>Final grade, tall fescue sod, rolled and watered in.</p></div>
+    <div class="cap" data-i="7"><span class="eyebrow mono"><b>08 / 08</b><i></i>Lights on</span><h1>Yours<br><em>after dark.</em></h1><p>Low-voltage LED, warm white, on a timer. The yard you use at 9 pm, not just at noon.</p></div>
+    <div class="rail" aria-hidden="true"><i id="rail"></i></div>
     <div class="hud">
       <span class="ring mono"><svg viewBox="0 0 26 26"><circle class="bg" cx="13" cy="13" r="11"/><circle class="fg" id="ring" cx="13" cy="13" r="11"/></svg><span id="ring-lbl">Blueprint</span></span>
       <button class="btn btn-line mono" type="button" id="watch">▶ Watch the build</button>
@@ -316,7 +313,6 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
 </div>
 <div class="toast" id="toast">Copied</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
   'use strict';
@@ -369,380 +365,43 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
     t=addR(t,find(LAWN,state.lawn).add); t=addR(t,find(LIGHT,state.light).add); return t;
   }
 
-  // ================= 3D scene =================
-  var T = window.THREE;
-  var canvas = document.getElementById('stage');
-  var renderer;
-  try { renderer = new T.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:'high-performance'}); }
-  catch(e){ document.getElementById('nogl').style.display='grid'; canvas.style.display='none'; }
-  var glOK = !!renderer;
-  var scene = new T.Scene();
-  var camera = new T.PerspectiveCamera(38, 1, 0.5, 600);
-  var camPos = new T.Vector3(0,70,14), camLook = new T.Vector3(0,0,4);
-  var tgtPos = camPos.clone(), tgtLook = camLook.clone();
-
-  if (glOK){
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.6));
-    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-    renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
-    renderer.outputEncoding = T.sRGBEncoding;
-  }
-
-  // ---- helpers: procedural textures ----
-  function noiseTex(base, specks, size, repeat, enc){
-    var c=document.createElement('canvas'); c.width=c.height=size||256; var g=c.getContext('2d');
-    g.fillStyle=base; g.fillRect(0,0,c.width,c.height);
-    for (var i=0;i<(c.width*c.height)/6;i++){ var col=specks[(Math.random()*specks.length)|0]; g.fillStyle=col; g.globalAlpha=.35+Math.random()*.4; var r=1+Math.random()*2; g.fillRect(Math.random()*c.width, Math.random()*c.height, r, r); }
-    g.globalAlpha=1;
-    var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(repeat,repeat); t.anisotropy=4; if(enc!==false) t.encoding=T.sRGBEncoding; return t;
-  }
-  function glowTex(inner, outer){
-    var c=document.createElement('canvas'); c.width=c.height=128; var g=c.getContext('2d');
-    var gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,inner); gr.addColorStop(.35,outer); gr.addColorStop(1,'rgba(0,0,0,0)');
-    g.fillStyle=gr; g.fillRect(0,0,128,128); var t=new T.CanvasTexture(c); t.encoding=T.sRGBEncoding; return t;
-  }
-  function flameTex(){
-    var c=document.createElement('canvas'); c.width=64; c.height=128; var g=c.getContext('2d');
-    var gr=g.createLinearGradient(0,128,0,0); gr.addColorStop(0,'rgba(255,240,180,1)'); gr.addColorStop(.35,'rgba(255,150,40,.95)'); gr.addColorStop(.75,'rgba(220,60,10,.5)'); gr.addColorStop(1,'rgba(200,40,0,0)');
-    g.fillStyle=gr; g.beginPath(); g.moveTo(32,0); g.bezierCurveTo(58,50,60,100,32,128); g.bezierCurveTo(4,100,6,50,32,0); g.fill();
-    var t=new T.CanvasTexture(c); t.encoding=T.sRGBEncoding; return t;
-  }
-  var dirtTex = noiseTex('#6a5137',['#574129','#7d634a','#4f3a25','#8a7458'],256,28);
-  var grassTex = noiseTex('#4d7d36',['#3e6b2c','#5c8f40','#6a9a48','#375f27'],256,36);
-  var gravelTex = noiseTex('#a39e92',['#8c877c','#c0bbaf','#77736a','#d1ccc0'],128,10);
-  var sandTex = noiseTex('#d6c49c',['#c7b48a','#e2d2ae'],64,8);
-  var woodTex = (function(){ var c=document.createElement('canvas'); c.width=256;c.height=64; var g=c.getContext('2d'); g.fillStyle='#8a6a48'; g.fillRect(0,0,256,64); for(var i=0;i<256;i+=4){ g.fillStyle=Math.random()<.5?'#7b5d3e':'#977655'; g.globalAlpha=.5; g.fillRect(i,0,2+Math.random()*2,64);} g.globalAlpha=1; var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(8,1); t.encoding=T.sRGBEncoding; return t; })();
-  var glowT = glowTex('rgba(255,225,160,1)','rgba(255,180,80,.55)');
-  var flameT = flameTex();
-
-  // ---- lights & sky ----
-  var sun = new T.DirectionalLight(0xfff1dc, 1.3); sun.position.set(40,60,30); sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-60; sun.shadow.camera.right=60; sun.shadow.camera.top=60; sun.shadow.camera.bottom=-60; sun.shadow.camera.near=10; sun.shadow.camera.far=200; sun.shadow.bias=-0.0008; sun.shadow.normalBias=0.03;
-  scene.add(sun); scene.add(sun.target);
-  var hemi = new T.HemisphereLight(0xbcd7ff, 0x6b5a3f, 0.42); scene.add(hemi);
-  var amb = new T.AmbientLight(0xffffff, 0.08); scene.add(amb);
-  var skyMat = new T.ShaderMaterial({
-    uniforms:{topColor:{value:new T.Color(0x6aa3dc)}, bottomColor:{value:new T.Color(0xe9eef2)}, offset:{value:20}, exponent:{value:0.55}},
-    vertexShader:'varying vec3 vW; void main(){ vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-    fragmentShader:'uniform vec3 topColor; uniform vec3 bottomColor; uniform float offset; uniform float exponent; varying vec3 vW; void main(){ float h=normalize(vW+vec3(0.0,offset,0.0)).y; gl_FragColor=vec4(mix(bottomColor,topColor,max(pow(max(h,0.0),exponent),0.0)),1.0); }',
-    side:T.BackSide, depthWrite:false
-  });
-  var sky = new T.Mesh(new T.SphereGeometry(400,24,12), skyMat); scene.add(sky);
-  scene.fog = new T.Fog(0xdfe6ec, 120, 420);
-  var sunSprite = new T.Sprite(new T.SpriteMaterial({map:glowTex('rgba(255,200,120,1)','rgba(255,120,50,.5)'), color:0xffffff, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0}));
-  sunSprite.scale.set(140,140,1); sunSprite.position.set(-120,26,-230); scene.add(sunSprite);
-
-  // ---- ground ----
-  var H = -10; // house back wall z
-  var UP = new T.Vector3(0,1,0);
-  var YW=68, YD=42; // yard width/depth (fence)
-  var grassMat = new T.MeshStandardMaterial({map:grassTex, roughness:1});
-  var ground = new T.Mesh(new T.PlaneGeometry(400,400), grassMat); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
-  var dirt = new T.Mesh(new T.PlaneGeometry(YW-0.5,YD+1), new T.MeshStandardMaterial({map:dirtTex, roughness:1})); dirt.rotation.x=-Math.PI/2; dirt.position.set(0,0.02,H+YD/2-0.5); dirt.receiveShadow=true; scene.add(dirt);
-  var yardMat = grassMat.clone();
-  var yardGrass = new T.Mesh(new T.PlaneGeometry(YW-0.5,YD-0.5), yardMat); yardGrass.rotation.x=-Math.PI/2; yardGrass.position.set(0,0.04,H+YD/2); yardGrass.receiveShadow=true; scene.add(yardGrass);
-  function setSod(s){ s=Math.max(0.001,s); yardGrass.scale.set(1,s,1); yardGrass.position.z=H+0.25+(YD-0.5)*s/2; }
-
-  // ---- house ----
-  var house = new T.Group(); scene.add(house);
-  var sidingTex = (function(){ var c=document.createElement('canvas'); c.width=64; c.height=64; var g=c.getContext('2d'); g.fillStyle='#dcd7cb'; g.fillRect(0,0,64,64); for (var y=0;y<64;y+=8){ g.fillStyle='#c9c3b5'; g.fillRect(0,y,64,1.5); g.fillStyle='#e6e2d8'; g.fillRect(0,y+2,64,1); } var t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping; t.repeat.set(10,5); t.encoding=T.sRGBEncoding; return t; })();
-  var sidingMat = new T.MeshStandardMaterial({map:sidingTex, roughness:.9});
-  var trimMat = new T.MeshStandardMaterial({color:0xf3f1ea, roughness:.8});
-  var shutterMat = new T.MeshStandardMaterial({color:0x1f2a2a, roughness:.85});
-  var roofMat = new T.MeshStandardMaterial({color:0x33363b, roughness:.95});
-  var glassMat = new T.MeshStandardMaterial({color:0x243544, roughness:.5, metalness:.1, emissive:0xffc97a, emissiveIntensity:0});
-  var hw=58, hd=26, hh=21;
-  var body = new T.Mesh(new T.BoxGeometry(hw,hh,hd), sidingMat); body.position.set(0,hh/2,H-hd/2); body.castShadow=true; body.receiveShadow=true; house.add(body);
-  var band = new T.Mesh(new T.BoxGeometry(hw+0.3,0.7,hd+0.3), trimMat); band.position.set(0,10.2,H-hd/2); house.add(band);
-  var base = new T.Mesh(new T.BoxGeometry(hw+0.3,1.6,hd+0.3), new T.MeshStandardMaterial({color:0x8e8a82,roughness:1})); base.position.set(0,0.8,H-hd/2); house.add(base);
-  // gable roof along x, with eaves
-  var roofShape = new T.Shape(); roofShape.moveTo(-hd/2-2.2,-0.2); roofShape.lineTo(hd/2+2.2,-0.2); roofShape.lineTo(0,9.5); roofShape.lineTo(-hd/2-2.2,-0.2);
-  var roofGeo = new T.ExtrudeGeometry(roofShape,{depth:hw+4,bevelEnabled:false}); roofGeo.rotateY(Math.PI/2); roofGeo.translate(-(hw+4)/2,hh,H-hd/2);
-  var roof = new T.Mesh(roofGeo, roofMat); roof.castShadow=true; house.add(roof);
-  var fascia = new T.Mesh(new T.BoxGeometry(hw+4,0.9,0.5), trimMat); fascia.position.set(0,hh-0.1,H+2.0); house.add(fascia);
-  var chim = new T.Mesh(new T.BoxGeometry(3.2,11,3.2), new T.MeshStandardMaterial({color:0x8a5a3c,roughness:.9})); chim.position.set(19,hh+4,H-6); chim.castShadow=true; house.add(chim);
-  // dormers
-  [-16,0,16].forEach(function(x){ var dm=new T.Mesh(new T.BoxGeometry(6,5,5), sidingMat); dm.position.set(x,hh+2.4,H-2.2); dm.castShadow=true; house.add(dm);
-    var dr=new T.Mesh(new T.BoxGeometry(6.8,0.5,5.6), roofMat); dr.position.set(x,hh+5.1,H-2.2); house.add(dr);
-    var dw=new T.Mesh(new T.BoxGeometry(2.6,2.8,0.3), glassMat); dw.position.set(x,hh+2.3,H+0.4); house.add(dw); });
-  // windows + door on the back facade
-  var winGeo = new T.BoxGeometry(3.4,4.6,0.3), winFrame = new T.BoxGeometry(4.2,5.4,0.2), mullV = new T.BoxGeometry(0.16,4.6,0.1), mullH = new T.BoxGeometry(3.4,0.16,0.1), shutGeo = new T.BoxGeometry(1.2,5.4,0.25);
-  function window_(x,y,shut){ var f=new T.Mesh(winFrame,trimMat); f.position.set(x,y,H+0.1); house.add(f); var w=new T.Mesh(winGeo,glassMat); w.position.set(x,y,H+0.25); house.add(w);
-    var mv=new T.Mesh(mullV,trimMat); mv.position.set(x,y,H+0.42); house.add(mv); var mh=new T.Mesh(mullH,trimMat); mh.position.set(x,y+0.3,H+0.42); house.add(mh);
-    if (shut){ var s1=new T.Mesh(shutGeo,shutterMat); s1.position.set(x-2.8,y,H+0.15); house.add(s1); var s2=new T.Mesh(shutGeo,shutterMat); s2.position.set(x+2.8,y,H+0.15); house.add(s2); } }
-  [-23,-15,15,23].forEach(function(x){ window_(x,5,true); window_(x,15,true); });
-  [-5,5].forEach(function(x){ window_(x,15,false); });
-  var doorF = new T.Mesh(new T.BoxGeometry(11,8.6,0.25), trimMat); doorF.position.set(0,4.3,H+0.1); house.add(doorF);
-  var door = new T.Mesh(new T.BoxGeometry(10,7.8,0.3), glassMat); door.position.set(0,4.0,H+0.25); house.add(door);
-  [-3.3,0,3.3].forEach(function(x){ var m=new T.Mesh(new T.BoxGeometry(0.2,7.8,0.1),trimMat); m.position.set(x,4.0,H+0.42); house.add(m); });
-  var lantern = new T.Mesh(new T.BoxGeometry(0.6,1.0,0.5), shutterMat); lantern.position.set(6.2,8,H+0.3); house.add(lantern);
-  var doorLight = new T.PointLight(0xffc27a, 0, 30, 2); doorLight.position.set(0,7.5,H+2); scene.add(doorLight);
-  var step = new T.Mesh(new T.BoxGeometry(12,0.6,2.2), new T.MeshStandardMaterial({color:0xa9a39a,roughness:.9})); step.position.set(0,0.3,H+1.1); step.castShadow=true; step.receiveShadow=true; house.add(step);
-
-  // ---- fence ----
-  var fence = new T.Group(); scene.add(fence);
-  var fenceMat = new T.MeshStandardMaterial({map:woodTex, roughness:.9});
-  function fencePanel(len, x, z, rotY){ var m=new T.Mesh(new T.BoxGeometry(len,6,0.25), fenceMat); m.position.set(x,3,z); m.rotation.y=rotY; m.castShadow=true; m.receiveShadow=true; fence.add(m); var cap=new T.Mesh(new T.BoxGeometry(len,0.35,0.6), fenceMat); cap.position.set(x,6.1,z); cap.rotation.y=rotY; fence.add(cap); }
-  fencePanel(YW,0,H+YD,0); fencePanel(YD,-YW/2,H+YD/2,Math.PI/2); fencePanel(YD,YW/2,H+YD/2,Math.PI/2);
-  var postGeo = new T.BoxGeometry(0.6,6.6,0.6);
-  for (var px=-YW/2; px<=YW/2+0.01; px+=8.5){ var p=new T.Mesh(postGeo,fenceMat); p.position.set(px,3.3,H+YD); fence.add(p); }
-  for (var pz=H; pz<=H+YD; pz+=8){ var p1=new T.Mesh(postGeo,fenceMat); p1.position.set(-YW/2,3.3,pz); fence.add(p1); var p2=new T.Mesh(postGeo,fenceMat); p2.position.set(YW/2,3.3,pz); fence.add(p2); }
-
-  // ---- trees beyond the fence ----
-  var trees = new T.Group(); scene.add(trees);
-  var trunkMat = new T.MeshStandardMaterial({color:0x5a4030, roughness:1});
-  var canopyMats = [0x3f6f33,0x4a7d3a,0x35612c,0x568a41].map(function(c){ return new T.MeshStandardMaterial({color:c, roughness:1}); });
-  var canopyGeo = new T.IcosahedronGeometry(1,1);
-  function tree(x,z,s){ var g=new T.Group(); var tr=new T.Mesh(new T.CylinderGeometry(0.5*s,0.8*s,8*s,7),trunkMat); tr.position.y=4*s; tr.castShadow=true; g.add(tr);
-    for (var i=0;i<3;i++){ var c=new T.Mesh(canopyGeo, canopyMats[(Math.random()*4)|0]); var r=(5+Math.random()*2)*s; c.scale.set(r,r*.9,r); c.position.set((Math.random()-.5)*4*s, (8+i*3.2+Math.random())*s, (Math.random()-.5)*4*s); c.castShadow=true; g.add(c); }
-    g.position.set(x,0,z); g.rotation.y=Math.random()*6.28; trees.add(g); }
-  var seed=7; function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
-  for (var i=0;i<16;i++){ tree(-60+rnd()*120, H+YD+6+rnd()*34, 0.9+rnd()*0.9); }
-  for (var j=0;j<6;j++){ tree(-YW/2-8-rnd()*18, H+4+rnd()*36, 0.9+rnd()*0.7); tree(YW/2+8+rnd()*18, H+4+rnd()*36, 0.9+rnd()*0.7); }
-  for (var k=0;k<8;k++){ tree(-80+rnd()*160, H-40-rnd()*30, 1.1+rnd()*0.8); }
-
-  // ---- patio (rebuilt on size/material change) ----
-  var patio = new T.Group(); scene.add(patio);
-  var P = {w:18,d:14,z0:H,z1:H+14};
-  var pitMat = new T.MeshStandardMaterial({color:0x4a3522, roughness:1});
-  var gravelMat = new T.MeshStandardMaterial({map:gravelTex, roughness:1});
-  var sandMat = new T.MeshStandardMaterial({map:sandTex, roughness:1});
-  var edgeMat = new T.MeshStandardMaterial({color:0x3a3733, roughness:.9});
-  var paverMat = new T.MeshStandardMaterial({color:0xffffff, roughness:.92});
-  var stakes = new T.Group(), pit, gravel, sand, pavers, edge, paverCount=0, paverOrder=[];
-  var stakeMat = new T.MeshStandardMaterial({color:0xe8582a, roughness:.8});
-  var stringMat = new T.LineBasicMaterial({color:0xff6a3d});
-  var tmpM = new T.Matrix4(), tmpQ = new T.Quaternion(), tmpS = new T.Vector3(), tmpP = new T.Vector3(), tmpC = new T.Color();
-  function buildPatio(){
-    while (patio.children.length) patio.remove(patio.children[0]);
-    var s=SIZE[state.size]; P={w:s.w,d:s.d,z0:H,z1:H+s.d};
-    var cx=0, cz=H+s.d/2;
-    // stakes & string
-    stakes = new T.Group(); var corners=[[-s.w/2,H+0.3],[s.w/2,H+0.3],[s.w/2,P.z1],[-s.w/2,P.z1]];
-    corners.forEach(function(c){ var st=new T.Mesh(new T.CylinderGeometry(0.08,0.08,2.4,6), stakeMat); st.position.set(c[0],1.0,c[1]); stakes.add(st); });
-    var pts=corners.concat([corners[0]]).map(function(c){ return new T.Vector3(c[0],1.6,c[1]); });
-    stakes.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), stringMat)); patio.add(stakes);
-    pit = new T.Mesh(new T.BoxGeometry(s.w+1.5,0.1,s.d+1.5), pitMat); pit.position.set(cx,0.05,cz); pit.receiveShadow=true; patio.add(pit);
-    gravel = new T.Mesh(new T.BoxGeometry(s.w+0.6,0.5,s.d+0.6), gravelMat); gravel.position.set(cx,0.12,cz); gravel.receiveShadow=true; patio.add(gravel);
-    sand = new T.Mesh(new T.BoxGeometry(s.w+0.2,0.12,s.d+0.2), sandMat); sand.position.set(cx,0.38,cz); patio.add(sand);
-    edge = new T.Group();
-    [[cx, H+0.15, s.w+0.8, 0.3],[cx, P.z1-0.15, s.w+0.8, 0.3],[-s.w/2-0.25, cz, 0.3, s.d],[s.w/2+0.25, cz, 0.3, s.d]].forEach(function(e){ var m=new T.Mesh(new T.BoxGeometry(e[2],0.5,e[3]), edgeMat); m.position.set(e[0],0.5,e[1]); m.castShadow=true; m.receiveShadow=true; edge.add(m); });
-    patio.add(edge);
-    // pavers
-    var mat = find(PAVERS,state.paver); var tw=mat.tile[0], td=mat.tile[1];
-    var cols=Math.ceil(s.w/tw), rows=Math.ceil(s.d/td); paverCount=cols*rows+rows; paverOrder=[];
-    var geo = mat.irregular ? new T.CylinderGeometry(0.62,0.6,0.28,7) : new T.BoxGeometry(tw-0.06,0.28,td-0.06);
-    pavers = new T.InstancedMesh(geo, paverMat, paverCount); pavers.castShadow=true; pavers.receiveShadow=true;
-    var n=0;
-    for (var r=0;r<rows;r++){ var off=(r%2)?tw/2:0; for (var c=0;c<=cols;c++){ var x=-s.w/2+c*tw+tw/2-off, z=H+0.1+r*td+td/2;
-      var x0=Math.max(-s.w/2+0.05,x-tw/2), x1=Math.min(s.w/2-0.05,x+tw/2), z0=Math.max(H+0.1,z-td/2), z1=Math.min(P.z1-0.1,z+td/2);
-      var sx=(x1-x0)/tw, sz=(z1-z0)/td, ry=0; x=(x0+x1)/2; z=(z0+z1)/2; if (sx<0.22||sz<0.22){ sx=0; sz=0; }
-      if (mat.irregular && sx>0){ sx*=(tw*0.78+Math.random()*0.5); sz*=(td*0.78+Math.random()*0.5); ry=Math.random()*3.14; }
-      paverOrder.push({x:x,z:z,sx:sx,sz:sz,ry:ry}); tmpC.set(mat.cols[(Math.random()*mat.cols.length)|0]); pavers.setColorAt(n, tmpC); n++; if (n>=paverCount) break; } if (n>=paverCount) break; }
-    for (;n<paverCount;n++){ paverOrder.push({x:0,z:cz,sx:0,sz:0,ry:0}); pavers.setColorAt(n, tmpC); }
-    pavers.instanceColor = new T.InstancedBufferAttribute(pavers.instanceColor.array, 3); pavers.instanceColor.needsUpdate=true; patio.add(pavers);
-    layPavers(1);
-    buildWall(); buildFire(); buildLights(); buildBeds();
-  }
-  function layPavers(t){
-    var shown=Math.floor(t*paverCount);
-    for (var i=0;i<paverCount;i++){ var o=paverOrder[i]; var vis=i<shown; var pop = vis && i>shown-14 ? 0.6+0.4*((shown-i)/14) : 1;
-      tmpP.set(o.x, vis?0.58:0.58+ (1-pop)*1.5, o.z); tmpQ.setFromAxisAngle(UP, o.ry); tmpS.set(vis?o.sx:0, vis?1:0, vis?o.sz:0); tmpM.compose(tmpP,tmpQ,tmpS); pavers.setMatrixAt(i,tmpM); }
-    pavers.instanceMatrix.needsUpdate=true;
-  }
-
-  // ---- seat wall ----
-  var wallG = new T.Group(); scene.add(wallG);
-  var blockMat = new T.MeshStandardMaterial({color:0x9a8f80, roughness:.95});
-  var capMat = new T.MeshStandardMaterial({color:0xb9ae9f, roughness:.9});
-  var wallBlocks=null, wallCourses=3, wallPer=0;
-  function buildWall(){
-    while (wallG.children.length) wallG.remove(wallG.children[0]); wallBlocks=null;
-    var w=P.w, z=P.z1-0.9, segs=[];
-    var mid=w*0.62, ret=Math.min(6, P.d*0.35);
-    for (var x=-mid/2+0.6; x<=mid/2-0.6; x+=1.25) segs.push({x:x,z:z,ry:0});
-    for (var i=0;i<Math.floor(ret/1.25);i++){ var zz=z-0.6-i*1.25; segs.push({x:-mid/2-0.1, z:zz, ry:Math.PI/2}); segs.push({x:mid/2+0.1, z:zz, ry:Math.PI/2}); }
-    wallPer=segs.length;
-    wallBlocks = new T.InstancedMesh(new T.BoxGeometry(1.2,0.5,1.0), blockMat, wallPer*wallCourses); wallBlocks.castShadow=true; wallBlocks.receiveShadow=true;
-    wallBlocks.userData.segs=segs;
-    var cap = new T.InstancedMesh(new T.BoxGeometry(1.25,0.22,1.3), capMat, wallPer); cap.castShadow=true; cap.userData.segs=segs; cap.userData.isCap=true;
-    wallG.add(wallBlocks); wallG.add(cap); setWall(1);
-  }
-  function setWall(t){
-    if (!wallBlocks) return;
-    var segs=wallBlocks.userData.segs; var tot=wallPer*wallCourses; var shown=Math.floor(t*tot);
-    for (var i=0;i<tot;i++){ var c=Math.floor(i/wallPer), k=i%wallPer, s=segs[k]; var vis=i<shown;
-      tmpP.set(s.x+((c%2)?0.3:0)*Math.cos(s.ry), 0.72+0.25+c*0.5, s.z+((c%2)?0.3:0)*Math.sin(s.ry)); tmpQ.setFromAxisAngle(UP, s.ry); tmpS.set(vis?1:0,vis?1:0,vis?1:0); tmpM.compose(tmpP,tmpQ,tmpS); wallBlocks.setMatrixAt(i,tmpM); }
-    wallBlocks.instanceMatrix.needsUpdate=true;
-    var cap=wallG.children[1]; var capVis = t>=0.999;
-    for (var j=0;j<wallPer;j++){ var s2=segs[j]; tmpP.set(s2.x,0.72+wallCourses*0.5+0.11,s2.z); tmpQ.setFromAxisAngle(UP, s2.ry); tmpS.set(capVis?1:0,capVis?1:0,capVis?1:0); tmpM.compose(tmpP,tmpQ,tmpS); cap.setMatrixAt(j,tmpM); }
-    cap.instanceMatrix.needsUpdate=true;
-  }
-
-  // ---- fire ----
-  var fireG = new T.Group(); scene.add(fireG);
-  var fireLight = new T.PointLight(0xff8a2a, 0, 24, 2); scene.add(fireLight);
-  var flames=[], fireKind='none';
-  function flame(x,y,z,s){ var m=new T.Mesh(new T.PlaneGeometry(1.6*s,3.2*s), new T.MeshBasicMaterial({map:flameT, transparent:true, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide})); m.position.set(x,y,z); m.userData.base=y; m.userData.s=s; flames.push(m); fireG.add(m); }
-  function buildFire(kind){
-    kind = kind||fireKind; fireKind=kind; while (fireG.children.length) fireG.remove(fireG.children[0]); flames=[];
-    var cz = P.z1-6, cx=0;
-    if (kind==='pit'){
-      var ring = new T.InstancedMesh(new T.BoxGeometry(1.1,0.55,0.8), blockMat, 28); ring.castShadow=true;
-      for (var i=0;i<28;i++){ var c=Math.floor(i/14), a=(i%14)/14*Math.PI*2+(c?0.22:0); tmpP.set(cx+Math.cos(a)*1.9, 0.72+0.28+c*0.55, cz+Math.sin(a)*1.9); tmpQ.setFromAxisAngle(UP, -a); tmpS.set(1,1,1); tmpM.compose(tmpP,tmpQ,tmpS); ring.setMatrixAt(i,tmpM); }
-      fireG.add(ring);
-      var inner = new T.Mesh(new T.CylinderGeometry(1.5,1.5,1.0,20), new T.MeshStandardMaterial({color:0x1a1512,roughness:1})); inner.position.set(cx,1.2,cz); fireG.add(inner);
-      var logs = new T.Mesh(new T.CylinderGeometry(0.25,0.25,2.2,6), trunkMat); logs.rotation.z=Math.PI/2; logs.position.set(cx,1.75,cz); fireG.add(logs); var logs2=logs.clone(); logs2.rotation.y=1.1; fireG.add(logs2);
-      flame(cx,2.9,cz,1); flame(cx+0.4,2.6,cz-0.3,0.7); flame(cx-0.35,2.5,cz+0.3,0.6);
-      fireLight.position.set(cx,3.2,cz);
-    } else if (kind==='table'){
-      var tb = new T.Mesh(new T.BoxGeometry(4.2,1.3,2.0), new T.MeshStandardMaterial({color:0x2f2f2f,roughness:.6,metalness:.3})); tb.position.set(cx,0.72+0.65,cz); tb.castShadow=true; fireG.add(tb);
-      var tray = new T.Mesh(new T.BoxGeometry(2.6,0.12,0.9), new T.MeshStandardMaterial({color:0x111111,roughness:.9})); tray.position.set(cx,0.72+1.32,cz); fireG.add(tray);
-      for (var f=-1;f<=1;f++) flame(cx+f*0.8,2.5,cz,0.55);
-      fireLight.position.set(cx,2.6,cz);
-    } else if (kind==='place'){
-      var fz = P.z1-1.6;
-      var fp = new T.Mesh(new T.BoxGeometry(8,7.5,2.6), new T.MeshStandardMaterial({color:0x7a6f62,roughness:.95})); fp.position.set(cx,0.72+3.75,fz); fp.castShadow=true; fireG.add(fp);
-      var fch = new T.Mesh(new T.BoxGeometry(3,3,2), new T.MeshStandardMaterial({color:0x6d6358,roughness:.95})); fch.position.set(cx,0.72+9,fz); fch.castShadow=true; fireG.add(fch);
-      var box = new T.Mesh(new T.BoxGeometry(3.6,3.2,2.0), new T.MeshStandardMaterial({color:0x120f0c,roughness:1})); box.position.set(cx,0.72+2.3,fz+0.5); fireG.add(box);
-      var hearth = new T.Mesh(new T.BoxGeometry(9,0.4,3), capMat); hearth.position.set(cx,0.92,fz+0.4); fireG.add(hearth);
-      flame(cx,2.6,fz+1.2,0.8); flame(cx+0.5,2.4,fz+1.2,0.55); flame(cx-0.5,2.4,fz+1.2,0.55);
-      fireLight.position.set(cx,3.5,fz+2.5);
-    }
-  }
-
-  // ---- beds & plantings ----
-  var bedsG = new T.Group(); scene.add(bedsG);
-  var mulchMat = new T.MeshStandardMaterial({color:0x4a3220, roughness:1});
-  var shrubMats = [0x3f7a3f,0x7aa35a,0x2f5d3a].map(function(c){ return new T.MeshStandardMaterial({color:c,roughness:1}); });
-  var hydMat = new T.MeshStandardMaterial({color:0xb7c9e6, roughness:1});
-  var arbMat = new T.MeshStandardMaterial({color:0x245232, roughness:1});
-  var bedItems=[]; // meshes that pop in
-  function bedMesh(geo,mat,x,y,z,s,group){ var m=new T.Mesh(geo,mat); m.position.set(x,y,z); m.userData.s=s||1; m.scale.setScalar(s||1); m.castShadow=true; m.receiveShadow=true; group.add(m); bedItems.push(m); return m; }
-  var shrubGeo = new T.IcosahedronGeometry(1,1), arbGeo = new T.ConeGeometry(1.6,9,8), flowerGeo = new T.SphereGeometry(0.45,8,6);
-  var flowerMats = [0xd35a8e,0xe9a23b,0x9b6bd1,0xe46b4a,0xf0d35e].map(function(c){ return new T.MeshStandardMaterial({color:c,roughness:1}); });
-  function buildBeds(list){
-    list = list||state.beds; while (bedsG.children.length) bedsG.remove(bedsG.children[0]); bedItems=[];
-    if (list.indexOf('found')>=0){
-      var w=P.w/2+1.5;
-      [[-1,-YW/2+1, -w],[1,w,YW/2-1]].forEach(function(side){ var x0=side[1], x1=side[2]; var len=x1-x0; var strip=new T.Mesh(new T.BoxGeometry(len,0.35,4.2), mulchMat); strip.position.set((x0+x1)/2,0.17,H+2.1); strip.receiveShadow=true; bedsG.add(strip);
-        var n=Math.floor(len/4.2); for (var i=0;i<n;i++){ var x=x0+2.1+i*(len-4.2)/Math.max(1,n-1); if (i%3===1) bedMesh(shrubGeo,hydMat,x,1.4,H+2.0,1.5,bedsG); else bedMesh(shrubGeo,shrubMats[i%2],x,1.3,H+2.1,1.4,bedsG); } });
-    }
-    if (list.indexOf('screen')>=0){
-      var strip2=new T.Mesh(new T.BoxGeometry(YW-2,0.35,4.5), mulchMat); strip2.position.set(0,0.17,H+YD-2.6); strip2.receiveShadow=true; bedsG.add(strip2);
-      for (var x=-YW/2+3; x<=YW/2-3; x+=4.4){ bedMesh(arbGeo,arbMat,x,4.5,H+YD-2.6,1,bedsG); }
-    }
-    if (list.indexOf('polli')>=0){
-      var ov=new T.Mesh(new T.CylinderGeometry(7,7,0.35,28), mulchMat); ov.scale.set(1.3,1,1); ov.position.set(-P.w/2-13,0.17,H+16); ov.receiveShadow=true; bedsG.add(ov);
-      for (var k=0;k<22;k++){ var a=k*0.57, rr=1.5+(k%5)*1.2; bedMesh(flowerGeo,flowerMats[k%5],-P.w/2-13+Math.cos(a)*rr*1.3,0.9+(k%3)*0.25,H+16+Math.sin(a)*rr,1+(k%3)*0.3,bedsG); }
-    }
-    setBeds(1);
-  }
-  function setBeds(t){ var n=bedItems.length; for (var i=0;i<n;i++){ var it=bedItems[i]; var local=Math.max(0,Math.min(1,(t*1.3 - i/n*0.3))); var e=local<1? (1-Math.pow(1-local,3))*(1+0.25*Math.sin(local*Math.PI)) : 1; it.scale.setScalar(it.userData.s*e); } }
-
-  // ---- lighting fixtures ----
-  var lightG = new T.Group(); scene.add(lightG);
-  var pointPool=[]; for (var q=0;q<10;q++){ var pl=new T.PointLight(0xffc27a,0,18,2); scene.add(pl); pointPool.push(pl); }
-  var fixtures=[]; var lightKind='none';
-  var postMat = new T.MeshStandardMaterial({color:0x1b1b1b, roughness:.6, metalness:.4});
-  function fixture(x,z,up){ var g=new T.Group(); if (!up){ var post=new T.Mesh(new T.CylinderGeometry(0.06,0.06,1.6,6), postMat); post.position.y=0.8; g.add(post); var hat=new T.Mesh(new T.ConeGeometry(0.45,0.3,10), postMat); hat.position.y=1.7; g.add(hat); }
-    var sp=new T.Sprite(new T.SpriteMaterial({map:glowT, color:0xffd9a0, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0})); sp.scale.set(up?8:3.4,up?8:3.4,1); sp.position.y=up?3.5:1.5; g.add(sp);
-    var pool=new T.Sprite(new T.SpriteMaterial({map:glowT, color:0xffc070, blending:T.AdditiveBlending, depthWrite:false, transparent:true, opacity:0})); pool.scale.set(up?12:6,up?5:2.2,1); pool.position.y=up?1.5:0.3; g.add(pool);
-    g.position.set(x,0,z); g.userData.sp=sp; g.userData.pool=pool; lightG.add(g); fixtures.push(g); return g; }
-  function buildLights(kind){
-    kind=kind||lightKind; lightKind=kind; while (lightG.children.length) lightG.remove(lightG.children[0]); fixtures=[];
-    if (kind==='none') return setLights(1);
-    var n=4; for (var i=0;i<=n;i++){ fixture(-P.w/2+P.w*i/n, P.z1+1.2, false); }
-    fixture(-P.w/2-1.2, H+P.d*0.35, false); fixture(P.w/2+1.2, H+P.d*0.35, false); fixture(-P.w/2-1.2, H+P.d*0.75, false); fixture(P.w/2+1.2, H+P.d*0.75, false);
-    if (kind==='full'){ [[-YW/2+10,H+YD-3],[-10,H+YD-3],[10,H+YD-3],[YW/2-10,H+YD-3],[-YW/2+3,H+8],[YW/2-3,H+8],[-P.w/2-13,H+16]].forEach(function(p){ fixture(p[0],p[1],true); }); }
-    setLights(1);
-  }
-  var lightsOn=0;
-  function setLights(t){ lightsOn=t; var pi=0; for (var i=0;i<fixtures.length;i++){ var f=fixtures[i]; var local=Math.max(0,Math.min(1,t*1.4-i/fixtures.length*0.4)); f.userData.sp.material.opacity=0.9*local; f.userData.pool.material.opacity=0.55*local; if (pi<pointPool.length){ var pl=pointPool[pi++]; pl.position.set(f.position.x, f.userData.sp.position.y+0.5, f.position.z); pl.intensity=(f.userData.sp.scale.x>6?0.45:0.22)*local; } }
-    for (;pi<pointPool.length;pi++) pointPool[pi].intensity=0; }
-
-  // ---- time of day ----
-  var dayTop=new T.Color(0x5e9bd8), dayBot=new T.Color(0xe9eef2), duskTop=new T.Color(0x0c1a33), duskBot=new T.Color(0xd9743a), nightTop=new T.Color(0x070d1c), nightBot=new T.Color(0x2b3357);
-  var fogDay=new T.Color(0xdfe6ec), fogDusk=new T.Color(0x3a3550), fogNight=new T.Color(0x151a2c);
-  var sunDay=new T.Color(0xfff1dc), sunDusk=new T.Color(0xff9a4a);
-  var tod=0;
-  function setTod(t){
-    tod=t;
-    var a=Math.min(1,t/0.6), b=Math.max(0,(t-0.6)/0.4);
-    skyMat.uniforms.topColor.value.copy(dayTop).lerp(duskTop,a).lerp(nightTop,b);
-    skyMat.uniforms.bottomColor.value.copy(dayBot).lerp(duskBot,a).lerp(nightBot,b);
-    scene.fog.color.copy(fogDay).lerp(fogDusk,a).lerp(fogNight,b);
-    sun.intensity = 1.3*(1-a)+0.45*a*(1-b)+0.06*b; sun.color.copy(sunDay).lerp(sunDusk,a);
-    sun.position.set(40-30*a, 60-48*a, 30+10*a);
-    hemi.intensity = 0.42-0.26*a; hemi.color.setHex(0xbcd7ff).lerp(new T.Color(0x2a3a6e),a);
-    amb.intensity = 0.08-0.04*t;
-    glassMat.emissiveIntensity = 0.65*Math.max(0,(t-0.35)/0.65);
-    doorLight.intensity = 0.45*Math.max(0,(t-0.4)/0.6);
-    sunSprite.material.opacity = a*(1-b)*0.9;
-    renderer && (renderer.toneMappingExposure = 0.95-0.22*t);
-  }
-
-  // ---- blueprint mode ----
-  var bpMat = new T.MeshBasicMaterial({color:0xd7e6ff, wireframe:true, transparent:true, opacity:.42});
-  var bpBg = new T.Color(0x1a4a94);
-  var bpGrid = document.getElementById('bp-grid');
-  function setBlueprint(on){ scene.overrideMaterial = on?bpMat:null; sky.visible=!on; sunSprite.visible=!on; lightG.visible=!on; scene.background = on?bpBg:null; bpGrid.style.opacity=on?1:0; if (on){ scene.fog.near=400; scene.fog.far=800; } else { scene.fog.near=120; scene.fog.far=420; } }
-
-  // ---- camera paths ----
-  var heroKeys = [
-    {p:0.00, pos:[0,100,22],  look:[0,0,4]},
-    {p:0.10, pos:[30,15,36],  look:[0,1,-2]},
-    {p:0.30, pos:[-30,8.5,30],look:[0,1,-2]},
-    {p:0.50, pos:[-14,5,26],  look:[0,2,-4]},
-    {p:0.66, pos:[22,6,22],   look:[0,2,-3]},
-    {p:0.82, pos:[30,13,28],  look:[0,2,-2]},
-    {p:1.00, pos:[14,6.5,26], look:[0,2.5,-4]}
-  ];
-  var posCurve = new T.CatmullRomCurve3(heroKeys.map(function(k){ return new T.Vector3().fromArray(k.pos); }), false, 'centripetal');
-  var lookCurve = new T.CatmullRomCurve3(heroKeys.map(function(k){ return new T.Vector3().fromArray(k.look); }), false, 'centripetal');
-  function heroCam(p){ var n=heroKeys.length-1, u=0; for (var i=0;i<n;i++){ if (p>=heroKeys[i].p && p<=heroKeys[i+1].p){ u=(i+(p-heroKeys[i].p)/(heroKeys[i+1].p-heroKeys[i].p))/n; break; } } if (p>=1) u=1; posCurve.getPoint(u,tgtPos); lookCurve.getPoint(u,tgtLook); }
-  var views = {
-    patio:   {pos:function(){return [P.w*0.9+6, 11, P.z1+12];}, look:function(){return [0,0.5,H+P.d*0.45];}, tod:0.0},
-    fire:    {pos:function(){return [-9, 4.6, P.z1+15];}, look:function(){return [0,1.8,P.z1-5];}, tod:0.78},
-    plants:  {pos:function(){return [-30, 9, H+30];}, look:function(){return [-4,2,H+2];}, tod:0.12},
-    lighting:{pos:function(){return [20, 8, P.z1+18];}, look:function(){return [0,2.5,H+4];}, tod:1.0},
-    summary: {pos:function(){return [20, 8, P.z1+18];}, look:function(){return [0,2.5,H+4];}, tod:1.0}
-  };
-
-  // ---- scroll / section logic ----
+  // ================= hero: blueprint, then a scroll-scrubbed build film =================
   var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
-  var STAGES=[[0,0.085],[0.085,0.16],[0.16,0.235],[0.235,0.31],[0.31,0.45],[0.45,0.55],[0.55,0.63],[0.63,0.74],[0.74,0.84],[0.84,1.0]];
-  var LBL=['Blueprint','Staked','Excavated','Base','Pavers','Seat wall','Fire','Plantings','Lawn','Lights on'];
-  function sub(p,a,b){ return Math.max(0,Math.min(1,(p-a)/((b-a)*0.62))); }
-  function dwell(p){ for (var i=0;i<STAGES.length;i++){ var a=STAGES[i][0], b=STAGES[i][1]; if (p>=a && p<b){ var u=(p-a)/(b-a); var m=Math.min(1,u/0.62); return a+(b-a)*(0.9*m*m*(3-2*m) + 0.1*u); } } return p; }
-  function ease(x){ return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; }
-  var mode='hero', activeSec='build', heroP=0, curStage=-1, lastApplied='';
-  function applyHero(p){
-    heroP=p; heroCam(0.3*p+0.7*dwell(p));
-    var bp = p<STAGES[0][1];
-    setBlueprint(bp);
-    var showWall = SHOW.wall==='wall', showFire=SHOW.fire;
-    if (fireKind!==showFire) buildFire(showFire);
-    if (lightKind!==SHOW.light) buildLights(SHOW.light);
-    stakes.visible = bp || p<STAGES[3][1];
-    pit.visible = bp || p>=STAGES[2][0]; var ps=bp?1:Math.max(0.001,ease(sub(p,STAGES[2][0],STAGES[2][1]))); pit.scale.set(ps,1,ps);
-    gravel.visible = bp || p>=STAGES[3][0]; gravel.scale.y = bp?1:ease(sub(p,STAGES[3][0],STAGES[3][1])); gravel.position.y=0.12*gravel.scale.y;
-    sand.visible = bp || p>=STAGES[3][1]-0.02;
-    edge.visible = bp || p>=STAGES[4][0];
-    pavers.visible = bp || p>=STAGES[4][0]; layPavers(bp?1:ease(sub(p,STAGES[4][0],STAGES[4][1])));
-    wallG.visible = showWall && (bp || p>=STAGES[5][0]); setWall(bp?1:ease(sub(p,STAGES[5][0],STAGES[5][1])));
-    fireG.visible = bp || p>=STAGES[6][0]+0.02; var fs=bp?1:ease(sub(p,STAGES[6][0],STAGES[6][1])); fireG.scale.set(1,Math.max(0.001,fs),1); fireOn = bp?0:sub(p,STAGES[6][0]+0.5*(STAGES[6][1]-STAGES[6][0]),STAGES[6][1]);
-    var bedsWanted = SHOW.beds.join(); if (lastApplied!==bedsWanted){ buildBeds(SHOW.beds); lastApplied=bedsWanted; }
-    bedsG.visible = bp || p>=STAGES[7][0]; setBeds(bp?1:ease(sub(p,STAGES[7][0],STAGES[7][1])));
-    var sodT = bp?1:ease(sub(p,STAGES[8][0],STAGES[8][1])); dirt.visible=true; yardGrass.visible = bp || sodT>0; setSod(bp?1:sodT); yardMat.color.setHex(0xffffff);
-    lightG.visible = !bp && p>=STAGES[9][0]; var lt = bp?0:sub(p,STAGES[9][0]+0.3*(STAGES[9][1]-STAGES[9][0]),STAGES[9][1]); setLights(lt);
-    setTod(bp?0:sub(p,STAGES[9][0],STAGES[9][1]-0.04)*1.0);
-    // captions
-    var st=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st=i;
-    if (st!==curStage){ var prev=curStage; curStage=st; caps.forEach(function(c){ var i=+c.dataset.i; c.classList.toggle('on', i===st); c.classList.toggle('out', i===prev && prev<st); }); ringLbl.textContent=LBL[st]; }
-    ring.style.strokeDashoffset = 69.1*(1-p);
+  var FRAMES=289, FPS=16, DUR=18.04, V0=0.10, V1=0.15, V2=0.95; // blueprint until V0, dissolve V0..V1, film V1..V2, hold after
+  function tp(t){ return V1+(t/DUR)*(V2-V1); }
+  var STAGES=[[0,0.12],[0.12,tp(3.0)],[tp(3.0),tp(7.0)],[tp(7.0),tp(9.5)],[tp(9.5),tp(11.6)],[tp(11.6),tp(13.0)],[tp(13.0),tp(15.0)],[tp(15.0),1.0]];
+  var LBL=['Blueprint','Staked','Excavation & base','Pavers','Seat wall & fire','Plantings','Lawn','Lights on'];
+  function lin(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+  function dwell(p){ for (var i=0;i<STAGES.length;i++){ var a=STAGES[i][0], b=STAGES[i][1]; if (p>=a && p<b){ var u=(p-a)/(b-a); var m=Math.min(1,u/0.85); return a+(b-a)*(0.88*m*m*(3-2*m) + 0.12*u); } } return p; }
+  var mode='hero', activeSec='build', heroP=0, curStage=-1;
+  var bpImg=document.getElementById('bp-img'), seq=document.getElementById('seq'), ctx=seq.getContext('2d'), heroPhotos=document.querySelector('.hero-photos');
+  var imgs=new Array(FRAMES), loaded=0, targetF=0, curF=0, drawnF=-1, needDraw=true;
+  function src(i){ return 'frames/'+('000'+(i+1)).slice(-4)+'.jpg'; }
+  function load(i){ if (imgs[i]) return; var im=new Image(); im.decoding='async'; im.onload=function(){ loaded++; needDraw=true; }; im.src=src(i); imgs[i]=im; }
+  // progressive: coarse first so scrubbing works almost immediately, then fill in
+  [16,8,4,2,1].forEach(function(step,si){ setTimeout(function(){ for (var i=0;i<FRAMES;i+=step) load(i); }, si*900); });
+  function nearest(i){ i=Math.round(i); if (imgs[i]&&imgs[i].complete&&imgs[i].naturalWidth) return imgs[i]; for (var d=1;d<FRAMES;d++){ var a=imgs[i-d], b=imgs[i+d]; if (a&&a.complete&&a.naturalWidth) return a; if (b&&b.complete&&b.naturalWidth) return b; } return null; }
+  function sizeCanvas(){ var dpr=Math.min(window.devicePixelRatio||1,1.5); var w=Math.round(seq.clientWidth*dpr), h=Math.round(seq.clientHeight*dpr); if (seq.width!==w||seq.height!==h){ seq.width=w; seq.height=h; drawnF=-1; needDraw=true; } }
+  function draw(f){ var im=nearest(f); if (!im) return; sizeCanvas(); var W=seq.width,H=seq.height, iw=im.naturalWidth, ih=im.naturalHeight; var sc=Math.max(W/iw,H/ih); var dw=iw*sc, dh=ih*sc; ctx.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); drawnF=f; }
+  var lastT=performance.now();
+  function loop(now){
+    requestAnimationFrame(loop); var dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+    if (mode!=='hero') return;
+    var k=1-Math.exp(-dt*14); curF+= (targetF-curF)*k; if (Math.abs(targetF-curF)<0.02) curF=targetF;
+    var f=Math.round(curF); if (f!==drawnF || needDraw){ needDraw=false; draw(f); }
   }
-  var fireOn=0;
+  requestAnimationFrame(loop);
+  window.addEventListener('resize', function(){ sizeCanvas(); needDraw=true; });
+  function applyHero(p){
+    heroP=p;
+    var bl=lin(p,0,V1); bpImg.style.transform='scale('+(1.0+0.14*bl).toFixed(4)+') translateY('+(bl*-1.5).toFixed(2)+'%)';
+    var fade=lin(p,V0,V1); seq.style.opacity=fade; bpImg.style.opacity=1;
+    var q=dwell(p); targetF=Math.max(0,Math.min(FRAMES-1, (lin(q,V1,V2))*(FRAMES-1)));
+    heroPhotos.style.setProperty('--scrim', 0.5+0.5*fade);
+    var st2=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st2=i;
+    if (st2!==curStage){ var prev=curStage; curStage=st2; caps.forEach(function(c){ var ci=+c.dataset.i; c.classList.toggle('on', ci===st2); c.classList.toggle('out', ci===prev && prev<st2); }); ringLbl.textContent=LBL[st2]; }
+    ring.style.strokeDashoffset = 69.1*(1-p); document.getElementById('rail').style.width=(p*100).toFixed(2)+'%';
+  }
   function photoFor(sec){
     if (sec==='patio') return 'patio-day';
     if (sec==='fire') return (state.fire==='none' && state.wall==='none') ? 'patio-day' : 'fire-dusk';
@@ -753,55 +412,24 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
   function paintPhotos(){
     ['patio','fire','plants','lighting'].forEach(function(sec){ var want=photoFor(sec); var el=document.getElementById(sec); el.querySelectorAll('.bg img').forEach(function(im){ im.classList.toggle('on', im.dataset.img===want); }); });
   }
-  function applySection(sec){
-    var v=views[sec]; if (!v) return;
-    setBlueprint(false);
-    tgtPos.fromArray(v.pos()); tgtLook.fromArray(v.look());
-    if (camera.aspect<0.8){ tgtPos.sub(tgtLook).multiplyScalar(1.5).add(tgtLook); tgtPos.y+=4; }
-    stakes.visible=false; pit.visible=true; pit.scale.set(1,1,1); lightG.visible=true; gravel.visible=true; gravel.scale.y=1; gravel.position.y=0.12; sand.visible=true; edge.visible=true; pavers.visible=true; layPavers(1);
-    wallG.visible = state.wall==='wall'; setWall(1);
-    if (fireKind!==state.fire) buildFire(state.fire); fireG.visible=true; fireG.scale.set(1,1,1); fireOn = state.fire==='none'?0:1;
-    var bedsWanted='u:'+state.beds.join(); if (lastApplied!==bedsWanted){ buildBeds(state.beds); lastApplied=bedsWanted; } bedsG.visible=true; setBeds(1);
-    dirt.visible=false; yardGrass.visible=true; setSod(1); yardMat.color.setHex(state.lawn==='seed'?0xc2b97e:(state.lawn==='none'?0xd9dcb8:0xffffff));
-    if (lightKind!==state.light) buildLights(state.light);
-    var t = v.tod; if (sec==='lighting' && state.light==='none') t=0.85;
-    setTod(t); setLights(state.light==='none'?0:Math.max(0,(t-0.5)/0.5));
-  }
+  function applySection(sec){ /* photos handled by paintPhotos */ }
   function onScroll(){
     var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
     var travel=r.height-vh; var p=Math.max(0,Math.min(1,-r.top/travel));
     document.body.classList.toggle('in-rooms', r.bottom<=vh*0.5);
     ['patio','fire','plants','lighting'].forEach(function(id){ var el=document.getElementById(id), rr=el.getBoundingClientRect(); el.classList.toggle('in', rr.top<vh*0.8 && rr.bottom>vh*0.2); });
-    if (r.bottom>vh*0.5){ if (mode!=='hero'){ mode='hero'; lastApplied=''; } applyHero(p); setActive('build'); }
+    if (r.bottom>vh*0.5){ mode='hero'; applyHero(p); setActive('build'); }
     else {
       var secs=['patio','fire','plants','lighting','summary']; var best='patio';
       for (var i=0;i<secs.length;i++){ var el=document.getElementById(secs[i]); if (el.getBoundingClientRect().top<=vh*0.5) best=secs[i]; }
-      if (mode!=='sec' || best!==activeSec){ mode='sec'; lastApplied=''; }
-      applySection(best); setActive(best);
+      mode='sec'; setActive(best);
     }
     document.getElementById('side').classList.toggle('show', window.scrollY>vh*0.6 && mode!=='sec' || mode==='sec');
   }
   function setActive(sec){ if (sec===activeSec) return; activeSec=sec; document.querySelectorAll('#side a').forEach(function(a){ a.classList.toggle('on', a.dataset.sec===(sec==='summary'?'lighting':sec)); }); }
   window.addEventListener('scroll', onScroll, {passive:true});
 
-  // ---- resize & render loop ----
-  function resize(){ var w=window.innerWidth, h=window.innerHeight; camera.aspect=w/h; renderer && renderer.setSize(w,h,false); camera.fov = w<640? 54 : 38; camera.updateProjectionMatrix(); }
-  window.addEventListener('resize', function(){ resize(); onScroll(); });
-  var clock = new T.Clock();
-  function frame(){
-    requestAnimationFrame(frame); if (!glOK) return; if (mode==='sec' && document.body.classList.contains('in-rooms') && clock.elapsedTime>2){ clock.getDelta(); return; }
-    var dt=Math.min(0.12, clock.getDelta()), t=clock.elapsedTime;
-    var k = 1-Math.exp(-dt*(mode==='hero' ? 5.5 : 3.2));
-    camPos.lerp(tgtPos, k); camLook.lerp(tgtLook, k);
-    camera.position.copy(camPos); camera.lookAt(camLook);
-    // fire flicker
-    var fl = fireOn*(0.7+Math.sin(t*17)*0.18+Math.sin(t*7.3)*0.14);
-    fireLight.intensity = fl;
-    for (var i=0;i<flames.length;i++){ var f=flames[i]; var s=f.userData.s; f.scale.set(1+Math.sin(t*12+i)*0.12, (0.85+Math.sin(t*9+i*2)*0.18)*fireOn, 1); f.position.y=f.userData.base+Math.sin(t*6+i)*0.12; f.material.opacity=fireOn; f.lookAt(camera.position.x, f.position.y, camera.position.z); }
-    sun.target.position.set(0,0,H+10); sun.target.updateMatrixWorld();
-    renderer.render(scene, camera);
-  }
-
+  function resize(){}
   // ---- options UI ----
   function chip(o, pressed, extra){ var b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=o.id; b.setAttribute('aria-pressed', pressed); b.style.setProperty('--sw', o.sw); b.innerHTML='<span class="sw"></span><span class="t"><b>'+o.name+'</b><small>'+(extra||'')+'</small></span>'; return b; }
   function priceTxt(add,f){ if(!add[0]&&!add[1]) return 'Included'; return '+'+range(f?scaled(add,f):add); }
@@ -822,8 +450,8 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
     LIGHT.forEach(function(o){ var b=chip(o,o.id===state.light, priceTxt(o.add)); b.addEventListener('click',function(){ state.light=o.id; refresh(); }); pli.appendChild(b); });
   }
   document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ var sec=t.closest('.room'); sec.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-pressed', x===t); }); sec.querySelectorAll('.pane').forEach(function(p){ p.hidden = p.id!=='pane-'+t.dataset.pane; }); }); });
-  function rebuild(){ buildPatio(); lastApplied=''; refresh(); }
-  function refresh(){ buildPanes(); paintPrices(); paintPhotos(); lastApplied=''; onScroll(); }
+  function rebuild(){ refresh(); }
+  function refresh(){ buildPanes(); paintPrices(); paintPhotos(); onScroll(); }
 
   // ---- prices / summary ----
   function rows(){ return [
@@ -848,7 +476,7 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
   function stopAuto(){ if (auto){ cancelAnimationFrame(auto); auto=null; } }
   ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev, stopAuto, {passive:true}); });
   document.getElementById('watch').addEventListener('click', function(){
-    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=22000;
+    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=24000;
     function step(now){ var x=Math.min(1,(now-start)/dur); var e= x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e); if (x<1) auto=requestAnimationFrame(step); else auto=null; }
     auto=requestAnimationFrame(step);
   });
@@ -879,9 +507,8 @@ body.in-rooms #stage,body.in-rooms #vignette{opacity:0}
     try { navigator.clipboard.writeText(text).then(function(){ toast('Copied. Paste it in a text.'); }, fallback); } catch(e){ fallback(); }
   });
 
-  window.__larkspur = function(){ return {sun:sun.intensity, tod:tod, hemi:hemi.intensity, mode:mode, p:heroP, exp:renderer&&renderer.toneMappingExposure, fire:fireOn, lights:lightsOn}; };
   // ---- boot ----
-  buildPatio(); buildPanes(); paintPrices(); paintPhotos(); resize(); setTod(0); onScroll(); frame();
+  buildPanes(); paintPrices(); paintPhotos(); onScroll();
 })();
 </script>
 
