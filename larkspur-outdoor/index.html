@@ -293,7 +293,7 @@ a{color:inherit}
 
   // ================= hero: blueprint, then a scroll-scrubbed build film =================
   var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
-  var FRAMES=289, FPS=16, DUR=18.04, D0=0.03, D1=0.13, V0=0.11, V1=0.165, V2=0.955; // desk hold until D0, sheet un-warps to fill the frame D0..D1, film dissolves in V0..V1, film V1..V2, hold after
+  var FRAMES=289, FPS=16, DUR=18.04, D0=0.03, D1=0.15, V0=0.05, V1=0.15, V2=0.955; // desk hold until D0, sheet un-warps to fill the frame D0..D1, film dissolves in V0..V1, film V1..V2, hold after
   function tp(t){ return V1+(t/DUR)*(V2-V1); }
   var STAGES=[[0,0.16],[0.16,tp(3.0)],[tp(3.0),tp(7.0)],[tp(7.0),tp(9.5)],[tp(9.5),tp(11.6)],[tp(11.6),tp(13.0)],[tp(13.0),tp(15.0)],[tp(15.0),1.0]];
   var LBL=['Blueprint','Staked','Excavation & base','Pavers','Seat wall & fire','Plantings','Lawn','Lights on'];
@@ -348,7 +348,7 @@ a{color:inherit}
     heroP=p;
     // desk: the camera drops onto the sheet until the drawing fills the frame in the film's exact perspective
     var u=lin(p,D0,D1); var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2; bpImg.style.transform=deskMatrix(e); bpImg.style.opacity=1;
-    var fade=lin(p,V0,V1); seq.style.opacity=fade;
+    var fade=lin(p,V0,V1); fade=fade*fade*(3-2*fade); seq.style.opacity=fade;
     var q=dwell(p); targetF=Math.max(0,Math.min(FRAMES-1, (lin(q,V1,V2))*(FRAMES-1)));
     heroPhotos.style.setProperty('--scrim', 0.45+0.55*fade);
     var st2=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st2=i;
