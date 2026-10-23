@@ -233,7 +233,7 @@ body.light-head .top .btn-fill{background:var(--ink);color:var(--paper)}
   // progressive: coarse first so scrubbing works almost immediately, then fill in
   [16,8,4,2,1].forEach(function(step,si){ setTimeout(function(){ for (var i=0;i<FRAMES;i+=step) load(i); }, si*900); });
   function nearest(i){ i=Math.round(i); if (imgs[i]&&imgs[i].complete&&imgs[i].naturalWidth) return imgs[i]; for (var d=1;d<FRAMES;d++){ var a=imgs[i-d], b=imgs[i+d]; if (a&&a.complete&&a.naturalWidth) return a; if (b&&b.complete&&b.naturalWidth) return b; } return null; }
-  function sizeCanvas(){ var dpr=Math.min(window.devicePixelRatio||1,1.5); var w=Math.round(seq.clientWidth*dpr), h=Math.round(seq.clientHeight*dpr); if (seq.width!==w||seq.height!==h){ seq.width=w; seq.height=h; drawnF=-1; needDraw=true; } }
+  function sizeCanvas(){ var dpr=Math.min(window.devicePixelRatio||1,2); var w=Math.round(seq.clientWidth*dpr), h=Math.round(seq.clientHeight*dpr); if (seq.width!==w||seq.height!==h){ seq.width=w; seq.height=h; drawnF=-1; needDraw=true; } }
   function draw(f){ var im=nearest(f); if (!im) return; sizeCanvas(); var W=seq.width,H=seq.height, iw=im.naturalWidth, ih=im.naturalHeight; var sc=Math.max(W/iw,H/ih); var dw=iw*sc, dh=ih*sc; ctx.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); drawnF=f; }
   var lastT=performance.now();
   function loop(now){
