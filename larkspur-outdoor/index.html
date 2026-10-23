@@ -45,7 +45,11 @@ a{color:inherit}
 
 
 /* header */
-.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;gap:.6rem;height:68px}
+.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;gap:.6rem;height:68px;transition:color .3s}
+body.light-head .top{color:var(--ink)}
+body.light-head .top .pill{background:rgba(255,255,255,.7);border-color:#d8d2c4;color:#55504a}
+body.light-head .top .pill b{color:var(--ink)}
+body.light-head .top .btn-fill{background:var(--ink);color:var(--paper)}
 .brand{font-family:var(--display);font-size:1.5rem;text-decoration:none;letter-spacing:-.01em}
 .spacer{flex:1}
 .pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:10px;padding:.55rem .9rem;text-decoration:none;color:var(--fg-2);white-space:nowrap}
@@ -89,61 +93,43 @@ a{color:inherit}
 
 /* summary */
 .summary{position:relative;z-index:3;background:var(--paper);color:var(--ink);padding-block:5rem 6rem;color-scheme:light}
-.summary .in{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:4rem;align-items:start}
-.side-col{position:sticky;top:calc(68px + env(safe-area-inset-top,0px) + 16px);display:grid;gap:1rem}
-.grp{display:grid;gap:.45rem;margin-top:1.4rem}
-.grp .lbl{color:#8a8375}
-.chips{display:flex;gap:.45rem;flex-wrap:wrap}
-.chip{display:flex;align-items:center;gap:.6rem;border:1px solid #d8d2c4;background:#fff;border-radius:10px;padding:.45rem .8rem .45rem .5rem;text-align:left;color:var(--ink);transition:background .15s,border-color .15s,transform .15s}
-.chip:hover{border-color:var(--ink);transform:translateY(-1px)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.chip .sw{width:26px;height:26px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12);background:var(--sw,#777)}
-.chip .t{display:grid;line-height:1.15}
-.chip .t b{font-weight:600;font-size:.84rem}
-.chip .t small{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;opacity:.7}
+.summary .in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:4rem;align-items:start}
 .summary .mono{color:#7a7366}
 .summary h2{margin-top:.6rem}
-.summary .lede{color:#55504a;max-width:28rem;margin-top:1rem}
-.summary .acts{display:flex;flex-wrap:wrap;gap:.6rem}
-.summary .btn-fill{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 1.2rem}
-.summary .btn-fill:hover{background:#000}
-.summary .btn-line{border:1px solid #cfc9bb;background:transparent;color:var(--ink);font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 1.2rem;backdrop-filter:none}
-.summary .btn-line:hover{border-color:var(--ink)}
-.sheet{background:#fff;border:1px solid #e3ded2;border-radius:14px;padding:1.2rem 1.4rem;display:grid}
-.sheet .row{display:flex;justify-content:space-between;gap:1rem;padding:.75rem 0;border-bottom:1px solid #eeeae0;font-size:.9rem}
-.sheet .row span:first-child{color:#8a8375;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;align-self:center}
-.sheet .row span:last-child{text-align:right;font-weight:600}
-.sheet .tot{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:var(--ink);color:var(--paper);border-radius:10px;padding:.9rem 1.1rem;margin-top:1rem}
-.sheet .tot .mono{color:var(--fg-3)}
-.sheet .tot b{font-family:var(--display);font-weight:400;font-size:1.7rem;font-variant-numeric:tabular-nums}
-.sheet .fine{font-size:.72rem;color:#8a8375;padding-top:.8rem}
-@media (max-width:860px){.summary{padding-block:4rem}.summary .in{grid-template-columns:1fr;gap:2.4rem}.side-col{position:static}}
-
-.site-foot{position:relative;z-index:3;background:var(--ink);color:var(--fg-3);padding-block:2.2rem;font-size:.8rem}
-.site-foot .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
-.site-foot .brand{color:var(--fg);font-size:1.1rem}
-
-/* modal */
-.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(5,8,7,.7);padding-top:env(safe-area-inset-top,0px)}
-.modal.open{display:flex}
-.modal .card{position:relative;background:var(--paper);color:var(--ink);width:min(540px,100%);max-height:calc(100% - env(safe-area-inset-top,0px));overflow:auto;border-radius:18px 18px 0 0;padding:1.4rem;padding-left:max(1.4rem,env(safe-area-inset-left,0px));padding-right:max(1.4rem,env(safe-area-inset-right,0px));padding-bottom:max(1.4rem,env(safe-area-inset-bottom,0px));display:grid;gap:1rem;color-scheme:light}
-@media (min-width:600px){.modal{align-items:center;padding:1rem}.modal .card{border-radius:18px}}
-.modal h3{font-size:2rem}
-.modal .x{position:absolute;right:.8rem;top:.6rem;font-size:1.6rem;line-height:1;padding:.3rem .5rem;color:#8a8375}
-.mini{display:flex;flex-wrap:wrap;gap:.4rem}
-.mini span{font-size:.74rem;background:#fff;border:1px solid #e3ded2;border-radius:999px;padding:.25rem .6rem}
-.mini .tot{font-family:var(--mono);font-weight:500;border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.summary .lede{color:#55504a;max-width:30rem;margin-top:1rem}
+.summary .fine{font-size:.74rem;color:#8a8375;margin-top:1rem}
+.pkgs{display:grid;gap:.6rem;margin-top:1.6rem}
+.pkg{display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;text-align:left;padding:1rem 1.1rem;border:1.5px solid #d8d2c4;border-radius:12px;background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.pkg:hover{border-color:var(--ink)}
+.pkg[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,18,16,.1)}
+.pkg .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid #b8b1a2;position:relative}
+.pkg[aria-pressed="true"] .dot{border-color:var(--ink)}
+.pkg[aria-pressed="true"] .dot::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ink)}
+.pkg .t{display:grid;gap:.15rem;min-width:0}
+.pkg .t b{font-size:1.05rem;font-weight:600}
+.pkg .t small{color:#6d675d;font-size:.85rem}
+.pkg .pr{font-family:var(--mono);font-size:.82rem;white-space:nowrap;color:var(--ink)}
+.lead{background:#fff;border:1px solid #e3ded2;border-radius:16px;padding:1.4rem;display:grid;gap:.9rem;position:sticky;top:calc(68px + env(safe-area-inset-top,0px) + 16px)}
+.lead-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.lead-head b{font-family:var(--display);font-weight:400;font-size:1.6rem;font-variant-numeric:tabular-nums}
 .fields{display:grid;gap:.7rem;grid-template-columns:1fr 1fr}
 .fields label{display:grid;gap:.3rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#7a7366;min-width:0}
 .fields label.full{grid-column:1/-1}
 .fields input{font:inherit;font-family:var(--body);font-size:.95rem;padding:.75rem .85rem;border:1px solid #d8d2c4;border-radius:10px;background:#fff;color:var(--ink);width:100%;min-width:0}
 .fields input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,18,16,.12)}
-.modal .fine{font-size:.74rem;color:#8a8375}
-.modal .done{display:none;gap:.8rem}
-.modal.sent form{display:none}
-.modal.sent .done{display:grid}
-.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--paper);color:var(--ink);padding:.7rem 1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.lead .btn-fill{width:100%;justify-content:center;padding:.95rem;background:var(--ink);color:var(--paper)}
+.lead .btn-fill:hover{background:#000}
+.lead .fine{margin-top:0}
+#form-err{min-height:1.1em;color:#9b2c2c}
+.lead .done{display:none;gap:.6rem}
+.lead.sent .fields,.lead.sent .btn-fill,.lead.sent #form-err,.lead.sent .fine{display:none}
+.lead.sent .done{display:grid}
+@media (max-width:860px){.summary{padding-block:4rem}.summary .in{grid-template-columns:1fr;gap:2.4rem}.lead{position:static}}
+@media (max-width:480px){.pkg{grid-template-columns:auto 1fr}.pkg .pr{grid-column:2}}
+.site-foot{position:relative;z-index:3;background:var(--ink);color:var(--fg-3);padding-block:2.2rem;font-size:.8rem}
+.site-foot .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
+.site-foot .brand{color:var(--fg);font-size:1.1rem}
+
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 </style>
 </head>
@@ -155,7 +141,7 @@ a{color:inherit}
   <a class="brand" href="#top">Larkspur.</a>
   <span class="spacer"></span>
   <a class="pill mono" href="#summary"><span class="lbl">Est.</span> <b id="pill-total">$9K–$13K</b></a>
-  <button class="btn btn-fill mono" type="button" data-open-form>Start my build</button>
+  <a class="btn btn-fill mono" href="#summary">Start my build</a>
 </header>
 
 
@@ -182,27 +168,28 @@ a{color:inherit}
   </div>
 </section>
 
-<section class="summary gutter" id="summary" data-sec="summary">
+<section class="summary gutter" id="summary">
   <div class="in">
-    <div class="cfg">
+    <div class="pick">
       <span class="mono">Your yard</span>
       <h2>Let's build yours.</h2>
-      <p class="lede">Pick what you'd want. The ballpark updates as you go. Then send it to us and we'll walk your lot, measure the grade and turn it into a real number.</p>
-      <div class="grp"><span class="lbl mono">Patio size · <b id="patio-sub" style="color:var(--ink);font-weight:500"></b></span><div class="chips" id="pane-size"></div></div>
-      <div class="grp"><span class="lbl mono">Stone</span><div class="chips" id="pane-paver"></div></div>
-      <div class="grp"><span class="lbl mono">Seat wall</span><div class="chips" id="pane-wall"></div></div>
-      <div class="grp"><span class="lbl mono">Fire</span><div class="chips" id="pane-fire"></div></div>
-      <div class="grp"><span class="lbl mono">Plantings</span><div class="chips" id="pane-beds"></div></div>
-      <div class="grp"><span class="lbl mono">Lawn</span><div class="chips" id="pane-lawn"></div></div>
-      <div class="grp"><span class="lbl mono">Lighting</span><div class="chips" id="pane-light"></div></div>
+      <p class="lede">Three ways to start. Pick the one that's closest and we'll walk your lot, measure the grade and turn it into a real number.</p>
+      <div class="pkgs" id="pkgs"></div>
+      <p class="fine">Illustrative demo ranges for a 24' × 17' patio, not a quote. Final pricing depends on access, grade and what we find under the sod.</p>
     </div>
-    <div class="side-col">
-      <div class="sheet" id="sheet"></div>
-      <div class="acts">
-        <button class="btn btn-fill" type="button" data-open-form>Send me my design →</button>
-        <button class="btn btn-line" type="button" id="share">Share with your partner</button>
+    <form class="lead" id="lead" novalidate>
+      <div class="lead-head"><span class="mono">Request a site visit</span><b id="lead-total" class="num"></b></div>
+      <div class="fields">
+        <label class="full">Full name<input id="f-name" name="name" type="text" autocomplete="name" required></label>
+        <label>Phone<input id="f-phone" name="phone" type="tel" autocomplete="tel" required></label>
+        <label>Email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
+        <label class="full">Where's the yard? (ZIP)<input id="f-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></label>
       </div>
-    </div>
+      <p class="fine" id="form-err"></p>
+      <button class="btn btn-fill mono" type="submit">Send me my design →</button>
+      <p class="fine">No spam, ever. Someone from the crew calls within one business day.</p>
+      <div class="done"><p><b>Got it.</b> We'll call within one business day to set up the walk-through.</p><p class="fine">This is a demo. On a live site this lands in your inbox or CRM with the package attached.</p></div>
+    </form>
   </div>
 </section>
 </main>
@@ -214,86 +201,25 @@ a{color:inherit}
   </div>
 </footer>
 
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div class="card">
-    <h3 id="modal-title">Build this in my yard</h3>
-    <button class="x" type="button" data-close-form aria-label="Close">×</button>
-    <div class="mini" id="mini"></div>
-    <form id="lead" novalidate>
-      <div class="fields">
-        <label class="full">Full name<input id="f-name" name="name" type="text" autocomplete="name" required></label>
-        <label>Phone<input id="f-phone" name="phone" type="tel" autocomplete="tel" required></label>
-        <label>Email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
-        <label class="full">Where's the yard? (ZIP)<input id="f-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></label>
-      </div>
-      <p class="fine" id="form-err" style="min-height:1.2em;color:#9b2c2c"></p>
-      <button class="btn btn-fill mono" type="submit" style="width:100%;justify-content:center;background:var(--ink);color:var(--paper);padding:.9rem">Request my site visit</button>
-      <p class="fine" style="margin-top:.7rem">No spam, ever. Ballpark ranges are for illustration, not a quote.</p>
-    </form>
-    <div class="done">
-      <p><b>Got it.</b> Someone from the crew will call within one business day to set up the walk-through. Your selections are attached to the request.</p>
-      <p class="fine">This is a demo. On a live site this lands in your inbox or CRM with the selections and ballpark attached.</p>
-      <button class="btn btn-line" type="button" data-close-form style="color:var(--ink);border-color:#cfc9bb;backdrop-filter:none;background:transparent">Close</button>
-    </div>
-  </div>
-</div>
-<div class="toast" id="toast">Copied</div>
 
 <script>
 (function(){
   'use strict';
-  // ================= pricing =================
-  var SIZE = {250:{w:18,d:14,f:1,add:[0,0],lbl:'250 sq ft',sub:'18\' × 14\''}, 400:{w:24,d:17,f:1.6,add:[5000,8000],lbl:'400 sq ft',sub:'24\' × 17\''}, 600:{w:30,d:20,f:2.4,add:[11000,16000],lbl:'600 sq ft',sub:'30\' × 20\''}};
-  var BASE = [9000,13000];
-  var PAVERS = [
-    {id:'concrete', name:'Concrete paver', sub:'Charcoal blend', add:[0,0], sw:'#6f6b66', cols:['#6a6661','#85817b','#5b5753','#9a958d'], tile:[1,0.5]},
-    {id:'travertine', name:'Travertine', sub:'Ivory, tumbled', add:[3000,5000], sw:'#dccfb5', cols:['#e4d9c2','#d6c8ab','#ecE3cf','#cfc1a4'], tile:[2,1.33]},
-    {id:'bluestone', name:'Bluestone', sub:'Thermal finish', add:[4000,7000], sw:'#5c6b78', cols:['#5a6977','#4c5a66','#6b7a86','#56657a'], tile:[2,1]},
-    {id:'flagstone', name:'Flagstone', sub:'PA fieldstone', add:[5000,8000], sw:'#8b8172', cols:['#8d8373','#7a7062','#9c9282','#6e6558'], tile:[1.6,1.2], irregular:true}
+  // ================= packages =================
+  var PKGS=[
+    {id:'patio', name:'The Patio', sub:'400 sq ft paver patio, compacted base, edge restraint, fresh sod', r:[16500,25000]},
+    {id:'fire',  name:'Patio + Fire', sub:'Everything above, plus the curved seat wall and built-in fire pit', r:[23000,36000]},
+    {id:'yard',  name:'The Whole Yard', sub:'Everything above, plus foundation beds, privacy screen and low-voltage lighting', r:[33000,52000]}
   ];
-  var WALL = [
-    {id:'none', name:'No seat wall', sub:'Open edge', add:[0,0], sw:'#4f7f3a'},
-    {id:'wall', name:'Seat wall', sub:'18" · stone cap', add:[3000,5000], sw:'#9d9283'}
-  ];
-  var FIRE = [
-    {id:'none', name:'No fire', sub:'Keep it simple', add:[0,0], sw:'#2a2f2c'},
-    {id:'table', name:'Gas fire table', sub:'48" propane', add:[2500,4000], sw:'#3a3a3a'},
-    {id:'pit', name:'Built-in fire pit', sub:'44" wood-burning', add:[3500,6000], sw:'#e0702a'},
-    {id:'place', name:'Outdoor fireplace', sub:'7\' stacked stone', add:[12000,20000], sw:'#7a6f62'}
-  ];
-  var BEDS = [
-    {id:'found', name:'Foundation beds', sub:'Boxwood · hydrangea', add:[2500,4500], sw:'#4f7f3a'},
-    {id:'screen', name:'Privacy screen', sub:'Green Giant arborvitae', add:[3000,6000], sw:'#245232'},
-    {id:'polli', name:'Pollinator garden', sub:'Coneflower · bee balm', add:[1800,3000], sw:'#d35a8e'}
-  ];
-  var LAWN = [
-    {id:'sod', name:'Tall fescue sod', sub:'Green by the weekend', add:[2500,4000], sw:'#4f8a3b'},
-    {id:'seed', name:'Seed & straw', sub:'Green by June', add:[900,1500], sw:'#9a8a4a'},
-    {id:'none', name:'Existing lawn', sub:'We blend the edges', add:[0,0], sw:'#6b7a4a'}
-  ];
-  var LIGHT = [
-    {id:'none', name:'No lighting', sub:'Daylight only', add:[0,0], sw:'#8fb6dc'},
-    {id:'path', name:'Path lights', sub:'8 fixtures', add:[1600,2400], sw:'#e4b45c'},
-    {id:'full', name:'Full lighting', sub:'Path + uplights · 16', add:[4000,7000], sw:'#ffd27a'}
-  ];
-  var state = {size:400, paver:'concrete', wall:'none', fire:'none', beds:[], lawn:'sod', light:'none'};
-  var SHOW = {wall:'wall', fire:'pit', beds:['found','screen'], light:'path'};
-
+  var state={pkg:'fire'};
   function find(list,id){ for (var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
   function fmtK(n){ var k=Math.round(n/500)/2; return '$'+(k%1===0?k:k.toFixed(1))+'K'; }
   function range(r){ return fmtK(r[0])+'–'+fmtK(r[1]); }
-  function addR(a,b){ return [a[0]+b[0],a[1]+b[1]]; }
-  function scaled(r,f){ return [Math.round(r[0]*f),Math.round(r[1]*f)]; }
-  function patioRange(){ var s=SIZE[state.size]; return addR(addR(BASE,s.add),scaled(find(PAVERS,state.paver).add,s.f)); }
-  function total(){
-    var t=patioRange(); t=addR(t,find(WALL,state.wall).add); t=addR(t,find(FIRE,state.fire).add);
-    state.beds.forEach(function(b){ t=addR(t,find(BEDS,b).add); });
-    t=addR(t,find(LAWN,state.lawn).add); t=addR(t,find(LIGHT,state.light).add); return t;
-  }
+  function total(){ return find(PKGS,state.pkg).r; }
 
   // ================= hero: blueprint, then a scroll-scrubbed build film =================
   var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
-  var FRAMES=289, FPS=16, DUR=18.04, D0=0.03, D1=0.15, V0=0.05, V1=0.15, V2=0.955; // desk hold until D0, sheet un-warps to fill the frame D0..D1, film dissolves in V0..V1, film V1..V2, hold after
+  var FRAMES=289, FPS=16, DUR=18.04, D0=0.02, D1=0.15, V0=0.085, V1=0.15, V2=0.955; // desk hold until D0, sheet un-warps to fill the frame D0..D1, film dissolves in V0..V1, film V1..V2, hold after
   function tp(t){ return V1+(t/DUR)*(V2-V1); }
   var STAGES=[[0,0.16],[0.16,tp(3.0)],[tp(3.0),tp(7.0)],[tp(7.0),tp(9.5)],[tp(9.5),tp(11.6)],[tp(11.6),tp(13.0)],[tp(13.0),tp(15.0)],[tp(15.0),1.0]];
   var LBL=['Blueprint','Staked','Excavation & base','Pavers','Seat wall & fire','Plantings','Lawn','Lights on'];
@@ -318,36 +244,23 @@ a{color:inherit}
   }
   requestAnimationFrame(loop);
   window.addEventListener('resize', function(){ sizeCanvas(); needDraw=true; });
-  // perspective un-warp: maps the sheet's four corners (fractions of the desk image) to the frame corners
-  var SHEET=[[0.1602,0.1514],[0.9609,0.2653],[0.9012,1.2028],[0.0168,0.8056]];
-  function homography(src,dst){ // 4-point DLT: solve the 8x8 system A h = b with Gauss-Jordan, h9 = 1
-    var A=[], B=[];
-    for (var i=0;i<4;i++){ var x=src[i][0],y=src[i][1],X=dst[i][0],Y=dst[i][1];
-      A.push([x,y,1,0,0,0,-X*x,-X*y]); B.push(X);
-      A.push([0,0,0,x,y,1,-Y*x,-Y*y]); B.push(Y); }
-    for (var c=0;c<8;c++){
-      var piv=c; for (var r=c+1;r<8;r++) if (Math.abs(A[r][c])>Math.abs(A[piv][c])) piv=r;
-      var tr=A[c]; A[c]=A[piv]; A[piv]=tr; var tb=B[c]; B[c]=B[piv]; B[piv]=tb;
-      var d=A[c][c]; for (var k=0;k<8;k++) A[c][k]/=d; B[c]/=d;
-      for (var r2=0;r2<8;r2++){ if (r2===c) continue; var f=A[r2][c]; if (!f) continue; for (var k2=0;k2<8;k2++) A[r2][k2]-=f*A[c][k2]; B[r2]-=f*B[c]; }
-    }
-    return [B[0],B[1],B[2],B[3],B[4],B[5],B[6],B[7],1];
-  }
-  function deskMatrix(t){ // t: 0 = photo as is, 1 = sheet fills the viewport
+  // push-in: the sheet is an axis-aligned rectangle in the desk photo, so a uniform scale about its center lands exactly on frame 1
+  var SHEET={x0:0.14766,y0:0.15347,x1:0.85313,y1:0.84792};
+  function deskTransform(t){
     var w=heroPhotos.clientWidth, h=heroPhotos.clientHeight;
-    // the desk image is object-fit:cover; compute its drawn rect
     var iw=2560, ih=1440, sc=Math.max(w/iw,h/ih), dw=iw*sc, dh=ih*sc, ox=(w-dw)/2, oy=(h-dh)/2;
-    var src=SHEET.map(function(c){ return [ox+c[0]*dw, oy+c[1]*dh]; });
-    var dst=[[0,0],[w,0],[w,h],[0,h]];
-    var mix=src.map(function(c,i){ return [c[0]+(dst[i][0]-c[0])*t, c[1]+(dst[i][1]-c[1])*t]; });
-    var H=homography(src,mix);
-    // CSS matrix3d (column-major) from 3x3 homography
-    return 'matrix3d('+[H[0],H[3],0,H[6], H[1],H[4],0,H[7], 0,0,1,0, H[2],H[5],0,H[8]].map(function(v){ return v.toFixed(6); }).join(',')+')';
+    var sx0=ox+SHEET.x0*dw, sy0=oy+SHEET.y0*dh, sw=(SHEET.x1-SHEET.x0)*dw, sh=(SHEET.y1-SHEET.y0)*dh;
+    // the film is drawn object-fit:cover; its drawn rect in the viewport:
+    var fsc=Math.max(w/iw,h/ih), fw=iw*fsc, fh=ih*fsc, fx=(w-fw)/2, fy=(h-fh)/2;
+    var k=fw/sw; // scale needed for the sheet to cover the film's rect
+    var S=1+(k-1)*t, tx=(fx-sx0)*t*0+ ( (fx - sx0*S) )*t, ty=((fy - sy0*S))*t;
+    // interpolate translation so that at t=1 the sheet's top-left maps to the film's top-left
+    return 'translate('+tx.toFixed(2)+'px,'+ty.toFixed(2)+'px) scale('+S.toFixed(5)+')';
   }
   function applyHero(p){
     heroP=p;
     // desk: the camera drops onto the sheet until the drawing fills the frame in the film's exact perspective
-    var u=lin(p,D0,D1); var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2; bpImg.style.transform=deskMatrix(e); bpImg.style.opacity=1;
+    var u=lin(p,D0,D1); var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2; bpImg.style.transform=deskTransform(e); bpImg.style.opacity=1;
     var fade=lin(p,V0,V1); fade=fade*fade*(3-2*fade); seq.style.opacity=fade;
     var q=dwell(p); targetF=Math.max(0,Math.min(FRAMES-1, (lin(q,V1,V2))*(FRAMES-1)));
     heroPhotos.style.setProperty('--scrim', 0.45+0.55*fade);
@@ -359,48 +272,19 @@ a{color:inherit}
     var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
     var travel=r.height-vh; var p=Math.max(0,Math.min(1,-r.top/travel));
     if (r.bottom>vh*0.5){ mode='hero'; applyHero(p); } else { mode='sec'; }
+    document.body.classList.toggle('light-head', r.bottom < 68 + 10);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
 
   function resize(){}
-  // ---- options UI ----
-  function chip(o, pressed, extra){ var b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=o.id; b.setAttribute('aria-pressed', pressed); b.style.setProperty('--sw', o.sw); b.innerHTML='<span class="sw"></span><span class="t"><b>'+o.name+'</b><small>'+(extra||'')+'</small></span>'; return b; }
-  function priceTxt(add,f){ if(!add[0]&&!add[1]) return 'Included'; return '+'+range(f?scaled(add,f):add); }
-  function buildPanes(){
-    var ps=document.getElementById('pane-size'); ps.innerHTML='';
-    Object.keys(SIZE).forEach(function(k){ var s=SIZE[k]; var o={id:k,name:s.lbl,sw:'#2a2f2c'}; var b=chip(o, +k===state.size, s.sub+' · '+(k==='250'?'Base':'+'+range(s.add))); b.addEventListener('click',function(){ state.size=+k; rebuild(); }); ps.appendChild(b); });
-    var pp=document.getElementById('pane-paver'); pp.innerHTML='';
-    PAVERS.forEach(function(o){ var b=chip(o,o.id===state.paver, priceTxt(o.add,SIZE[state.size].f)); b.addEventListener('click',function(){ state.paver=o.id; rebuild(); }); pp.appendChild(b); });
-    var pw=document.getElementById('pane-wall'); pw.innerHTML='';
-    WALL.forEach(function(o){ var b=chip(o,o.id===state.wall, priceTxt(o.add)); b.addEventListener('click',function(){ state.wall=o.id; refresh(); }); pw.appendChild(b); });
-    var pf=document.getElementById('pane-fire'); pf.innerHTML='';
-    FIRE.forEach(function(o){ var b=chip(o,o.id===state.fire, priceTxt(o.add)); b.addEventListener('click',function(){ state.fire=o.id; refresh(); }); pf.appendChild(b); });
-    var pb=document.getElementById('pane-beds'); pb.innerHTML='';
-    BEDS.forEach(function(o){ var b=chip(o,state.beds.indexOf(o.id)>=0, priceTxt(o.add)); b.addEventListener('click',function(){ var i=state.beds.indexOf(o.id); if(i>=0) state.beds.splice(i,1); else state.beds.push(o.id); refresh(); }); pb.appendChild(b); });
-    var pl=document.getElementById('pane-lawn'); pl.innerHTML='';
-    LAWN.forEach(function(o){ var b=chip(o,o.id===state.lawn, priceTxt(o.add)); b.addEventListener('click',function(){ state.lawn=o.id; refresh(); }); pl.appendChild(b); });
-    var pli=document.getElementById('pane-light'); pli.innerHTML='';
-    LIGHT.forEach(function(o){ var b=chip(o,o.id===state.light, priceTxt(o.add)); b.addEventListener('click',function(){ state.light=o.id; refresh(); }); pli.appendChild(b); });
+  // ---- packages UI ----
+  function buildPkgs(){
+    var c=document.getElementById('pkgs'); c.innerHTML='';
+    PKGS.forEach(function(o){ var b=document.createElement('button'); b.type='button'; b.className='pkg'; b.setAttribute('aria-pressed', o.id===state.pkg);
+      b.innerHTML='<span class="dot"></span><span class="t"><b>'+o.name+'</b><small>'+o.sub+'</small></span><span class="pr">'+range(o.r)+'</span>';
+      b.addEventListener('click', function(){ state.pkg=o.id; buildPkgs(); paintPrices(); }); c.appendChild(b); });
   }
-  function rebuild(){ refresh(); }
-  function refresh(){ buildPanes(); paintPrices(); }
-
-  // ---- prices / summary ----
-  function rows(){ return [
-    ['Patio', SIZE[state.size].lbl+' · '+find(PAVERS,state.paver).name],
-    ['Seat wall', state.wall==='wall'?'18" stone-capped':'None'],
-    ['Fire', find(FIRE,state.fire).name],
-    ['Plantings', state.beds.length? state.beds.map(function(b){return find(BEDS,b).name;}).join(', ') : 'Not chosen'],
-    ['Lawn', find(LAWN,state.lawn).name],
-    ['Lighting', find(LIGHT,state.light).name] ]; }
-  function paintPrices(){
-    var t=range(total()); document.getElementById('pill-total').textContent=t;
-    document.querySelectorAll('.live-total').forEach(function(n){ n.textContent=t; }); document.getElementById('patio-sub').textContent=range(patioRange());
-    var h=''; rows().forEach(function(r){ h+='<div class="row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'; });
-    h+='<div class="tot"><span class="mono">Ballpark</span><b>'+t.replace('–',' – ')+'</b></div><p class="fine">Illustrative demo ranges, not a quote. Final pricing depends on access, grade and what we find under the sod.</p>';
-    document.getElementById('sheet').innerHTML=h;
-    var m=''; rows().forEach(function(r){ if (r[1]!=='None'&&r[1]!=='Not chosen') m+='<span>'+r[1]+'</span>'; }); m+='<span class="tot">'+t+'</span>'; document.getElementById('mini').innerHTML=m;
-  }
+  function paintPrices(){ var t=range(total()); document.getElementById('pill-total').textContent=t; document.getElementById('lead-total').textContent=t.replace('–',' – '); }
 
   // ---- watch the build (auto-scroll) ----
   var auto=null;
@@ -413,33 +297,20 @@ a{color:inherit}
   });
   document.querySelectorAll('a[href^="#"]').forEach(function(a){ a.addEventListener('click', function(e){ var id=a.getAttribute('href').slice(1); var el=document.getElementById(id); if(!el) return; e.preventDefault(); stopAuto(); el.scrollIntoView({behavior:'smooth',block:'start'}); }); });
 
-  // ---- modal / share ----
-  var modal=document.getElementById('modal');
-  function openForm(){ modal.classList.add('open'); modal.classList.remove('sent'); document.getElementById('f-name').focus(); }
-  function closeForm(){ modal.classList.remove('open'); }
-  document.querySelectorAll('[data-open-form]').forEach(function(b){ b.addEventListener('click', openForm); });
-  document.querySelectorAll('[data-close-form]').forEach(function(b){ b.addEventListener('click', closeForm); });
-  modal.addEventListener('click', function(e){ if (e.target===modal) closeForm(); });
-  document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeForm(); });
-  document.getElementById('lead').addEventListener('submit', function(e){
+  // ---- lead form ----
+  var lead=document.getElementById('lead');
+  lead.addEventListener('submit', function(e){
     e.preventDefault(); var err=document.getElementById('form-err'); err.textContent='';
     var name=document.getElementById('f-name').value.trim(), phone=document.getElementById('f-phone').value.trim(), email=document.getElementById('f-email').value.trim(), zip=document.getElementById('f-zip').value.trim();
     if (!name){ err.textContent='Add your name so we know who to call.'; return; }
     if (!/^[\d\s().+-]{7,}$/.test(phone)){ err.textContent='That phone number doesn\'t look right.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Check the email address.'; return; }
     if (!/^\d{5}$/.test(zip)){ err.textContent='ZIP should be five digits.'; return; }
-    modal.classList.add('sent');
-  });
-  function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },1600); }
-  document.getElementById('share').addEventListener('click', function(){
-    var lines=['Our Larkspur backyard']; rows().forEach(function(r){ lines.push(r[0]+': '+r[1]); }); lines.push('Ballpark: '+range(total()).replace('–',' – ')); lines.push(location.href.split('#')[0]);
-    var text=lines.join('\n');
-    function fallback(){ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('Copied. Paste it in a text.'); }catch(e){ toast('Select and copy the summary above.'); } document.body.removeChild(ta); }
-    try { navigator.clipboard.writeText(text).then(function(){ toast('Copied. Paste it in a text.'); }, fallback); } catch(e){ fallback(); }
+    lead.classList.add('sent');
   });
 
   // ---- boot ----
-  buildPanes(); paintPrices(); onScroll();
+  buildPkgs(); paintPrices(); onScroll();
 })();
 </script>
 
