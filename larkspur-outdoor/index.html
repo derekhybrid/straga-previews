@@ -97,7 +97,7 @@ a{color:inherit}
 /* configurator sections */
 .room{position:relative;z-index:2;height:100vh;height:100svh;min-height:560px;display:grid;grid-template-rows:auto 1fr auto;padding-top:calc(68px + env(safe-area-inset-top,0px) + 18px);padding-bottom:max(28px,env(safe-area-inset-bottom,0px));overflow:hidden;background:var(--ink)}
 .room>.bg{position:absolute;inset:0;z-index:-1}
-.room>.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none;opacity:0;transition:opacity .9s ease;transform:scale(1.06);will-change:transform,opacity}
+.room>.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 72%;max-width:none;opacity:0;transition:opacity .9s ease;transform:scale(1.06);will-change:transform,opacity}
 .room>.bg img.on{opacity:1}
 .room.in>.bg img.on{animation:kb 14s ease-out forwards}
 @keyframes kb{from{transform:scale(1.06)}to{transform:scale(1.0)}}
@@ -217,7 +217,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="patio" data-sec="patio">
-  <div class="bg"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="Finished paver patio off the back of the house in late-morning light" class="on" data-img="patio-day"></div>
+  <div class="bg"></div>
   <div class="head"><span class="mono">Step one · Patio</span><h2>Make it yours.</h2><p class="lead">The size sets the base price. The stone is where the look comes from.</p></div>
   <div></div>
   <div class="ctl">
@@ -232,7 +232,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="fire" data-sec="fire">
-  <div class="bg"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="" data-img="patio-day" class="on"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="Stone seat wall and fire pit at golden hour" data-img="fire-dusk"></div>
+  <div class="bg"></div>
   <div class="head"><span class="mono">Step two · Fire &amp; seating</span><h2>Stay out later.</h2><p class="lead">A seat wall turns the edge of the patio into the best seats. The fire is why people sit there.</p></div>
   <div></div>
   <div class="ctl">
@@ -244,7 +244,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="plants" data-sec="plants">
-  <div class="bg"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="" data-img="fire-dusk"><img src="renders/patio-day.jpg" srcset="renders/patio-day-m.jpg 1280w, renders/patio-day.jpg 2560w" sizes="100vw" alt="" data-img="patio-day"><img src="renders/plants-day.jpg" srcset="renders/plants-day-m.jpg 1280w, renders/plants-day.jpg 2560w" sizes="100vw" alt="Foundation beds and arborvitae privacy screen in afternoon light" data-img="plants-day" class="on"></div>
+  <div class="bg"></div>
   <div class="head"><span class="mono">Step three · Plantings &amp; lawn</span><h2>Soften the edges.</h2><p class="lead">Pick any of these. Everything is chosen for Zone 7a and guaranteed for a season.</p></div>
   <div></div>
   <div class="ctl">
@@ -256,7 +256,7 @@ a{color:inherit}
 </section>
 
 <section class="room gutter" id="lighting" data-sec="lighting">
-  <div class="bg"><img src="renders/fire-dusk.jpg" srcset="renders/fire-dusk-m.jpg 1280w, renders/fire-dusk.jpg 2560w" sizes="100vw" alt="" data-img="fire-dusk"><img src="renders/lights-night.jpg" srcset="renders/lights-night-m.jpg 1280w, renders/lights-night.jpg 2560w" sizes="100vw" alt="Path lights, uplit trees and the fire at blue hour" data-img="lights-night"></div>
+  <div class="bg"></div>
   <div class="head"><span class="mono">Step four · Lighting</span><h2>Keep it after dark.</h2><p class="lead">Low-voltage LED, warm white, on a timer. You'll use the yard twice as much.</p></div>
   <div></div>
   <div class="ctl">
@@ -402,16 +402,21 @@ a{color:inherit}
     if (st2!==curStage){ var prev=curStage; curStage=st2; caps.forEach(function(c){ var ci=+c.dataset.i; c.classList.toggle('on', ci===st2); c.classList.toggle('out', ci===prev && prev<st2); }); ringLbl.textContent=LBL[st2]; }
     ring.style.strokeDashoffset = 69.1*(1-p); document.getElementById('rail').style.width=(p*100).toFixed(2)+'%';
   }
+  function patioImg(){ return state.paver==='concrete' ? 'patio-day' : 'patio-'+state.paver; }
+  function fireImg(){ return {table:'fire-table', pit:'fire-dusk', place:'fireplace'}[state.fire] || (state.wall==='wall' ? 'fire-dusk' : patioImg()); }
   function photoFor(sec){
-    if (sec==='patio') return 'patio-day';
-    if (sec==='fire') return (state.fire==='none' && state.wall==='none') ? 'patio-day' : 'fire-dusk';
-    if (sec==='plants') return state.beds.length ? 'plants-day' : ((state.fire!=='none'||state.wall==='wall') ? 'fire-dusk' : 'patio-day');
-    if (sec==='lighting') return state.light==='none' ? 'fire-dusk' : 'lights-night';
+    if (sec==='patio') return patioImg();
+    if (sec==='fire') return fireImg();
+    if (sec==='plants') return state.beds.length ? 'plants-day' : fireImg();
+    if (sec==='lighting') return state.light==='none' ? (state.fire==='none' && state.wall==='none' ? patioImg() : fireImg()) : 'lights-night';
     return null;
   }
+  function ensureImg(bg,name){ var im=bg.querySelector('img[data-img="'+name+'"]'); if (im) return im; im=document.createElement('img'); im.dataset.img=name; im.alt=''; im.sizes='100vw'; im.srcset='renders/'+name+'-m.jpg 1280w, renders/'+name+'.jpg 2560w'; im.src='renders/'+name+'.jpg'; bg.appendChild(im); return im; }
   function paintPhotos(){
-    ['patio','fire','plants','lighting'].forEach(function(sec){ var want=photoFor(sec); var el=document.getElementById(sec); el.querySelectorAll('.bg img').forEach(function(im){ im.classList.toggle('on', im.dataset.img===want); }); });
+    ['patio','fire','plants','lighting'].forEach(function(sec){ var want=photoFor(sec); var bg=document.getElementById(sec).querySelector('.bg'); var im=ensureImg(bg,want); bg.querySelectorAll('img').forEach(function(x){ x.classList.toggle('on', x===im); }); if (!im.complete) requestAnimationFrame(function(){ im.classList.add('on'); }); });
   }
+  // warm the variant renders after the hero film has had a head start, so chip taps swap instantly
+  setTimeout(function(){ ['patio-travertine','patio-bluestone','patio-flagstone','fire-table','fireplace','fire-dusk','plants-day','lights-night','patio-day'].forEach(function(n){ var i=new Image(); i.sizes='100vw'; i.srcset='renders/'+n+'-m.jpg 1280w, renders/'+n+'.jpg 2560w'; i.src='renders/'+n+'.jpg'; }); }, 6000);
   function applySection(sec){ /* photos handled by paintPhotos */ }
   function onScroll(){
     var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
