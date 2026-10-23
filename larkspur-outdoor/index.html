@@ -245,7 +245,7 @@ body.light-head .top .btn-fill{background:var(--ink);color:var(--paper)}
   requestAnimationFrame(loop);
   window.addEventListener('resize', function(){ sizeCanvas(); needDraw=true; });
   // push-in: the sheet is an axis-aligned rectangle in the desk photo, so a uniform scale about its center lands exactly on frame 1
-  var SHEET={x0:0.14766,y0:0.15347,x1:0.85313,y1:0.84792};
+  var SHEET={x0:0.14414,y0:0.15208,x1:0.85586,y1:0.85};
   function deskTransform(t){
     var w=heroPhotos.clientWidth, h=heroPhotos.clientHeight;
     var iw=2560, ih=1440, sc=Math.max(w/iw,h/ih), dw=iw*sc, dh=ih*sc, ox=(w-dw)/2, oy=(h-dh)/2;
