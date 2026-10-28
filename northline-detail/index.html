@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Watch a filthy M4 come back to showroom under the lights, then book a detail. Mobile or studio, South Jersey.">
+<meta name="theme-color" content="#0a0b0d">
+<meta name="robots" content="noindex, nofollow">
+<title>Northline Detail Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-screen scroll-scrubbed detail film behind a sticky caption; opener is the dirty car with the bay lights snapping on; one CTA screen with three packages and a booking form. */
+:root{
+  --ink:#0a0b0d;
+  --ink-2:#121417;
+  --paper:#f3f4f6;
+  --paper-2:#e6e8ec;
+  --fg:#f5f6f8;
+  --fg-2:rgba(245,246,248,.72);
+  --fg-3:rgba(245,246,248,.48);
+  --gold:#3df2c9;
+  --line:rgba(245,246,248,.16);
+  --display:"Bebas Neue", "Oswald", Impact, sans-serif;
+  --body:"Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+h1{font-size:clamp(3.6rem,9vw,8.5rem)}
+h2{font-size:clamp(2.8rem,6vw,5.2rem)}
+h1 em,h2 em{font-style:normal;color:var(--gold)}
+p{margin:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase}
+.gutter{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+@media (max-width:640px){.gutter{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}}
+
+
+/* header */
+.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;gap:.6rem;height:68px;transition:color .3s}
+body.light-head .top{color:var(--ink)}
+body.light-head .top .pill{background:rgba(255,255,255,.7);border-color:#d8d2c4;color:#55504a}
+body.light-head .top .pill b{color:var(--ink)}
+body.light-head .top .btn-fill{background:var(--ink);color:var(--paper)}
+.brand{font-family:var(--display);font-size:1.6rem;text-decoration:none;letter-spacing:.04em;text-transform:uppercase}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:10px;padding:.55rem .9rem;text-decoration:none;color:var(--fg-2);white-space:nowrap}
+.pill b{font-weight:500;color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:10px;padding:.6rem 1rem;white-space:nowrap;transition:background .15s,color .15s,transform .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-fill{background:var(--gold);color:var(--ink);font-weight:600}
+.btn-fill:hover{background:#6ff7d9}
+.btn-line{border:1px solid var(--line);background:rgba(13,18,16,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn-line:hover{border-color:var(--fg-3)}
+@media (max-width:560px){.top .btn-fill{display:none}.pill .lbl{display:none}}
+
+
+/* hero */
+.hero{position:relative;height:1150vh;z-index:2}
+.hero-view{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-content:end;padding-bottom:max(30px,env(safe-area-inset-bottom,0px));pointer-events:none;overflow:hidden}
+.hero-photos{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-photos img,#seq{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none;will-change:transform,opacity}
+#bp-img{transform-origin:50% 50%}
+#lights{position:absolute;inset:0;background:#000;pointer-events:none}
+#bp-bg{display:none;object-fit:cover;filter:blur(28px) brightness(.45) saturate(1.1);transform:scale(1.12)}
+body.portrait #bp-bg{display:block}
+body.portrait #bp-img{object-fit:contain;object-position:50% 42%}
+body.reel{cursor:none}
+body.reel .hud,body.reel .rail{opacity:0;transition:opacity .4s}
+.hero-photos img{opacity:1}
+#seq{opacity:0}
+.hero-photos::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,14,12,.82) 0%,rgba(10,14,12,.12) 42%,rgba(10,14,12,0) 70%),linear-gradient(to bottom,rgba(10,14,12,.5) 0%,rgba(10,14,12,0) 26%),linear-gradient(to right,rgba(10,14,12,.45) 0%,rgba(10,14,12,0) 50%);opacity:var(--scrim,0)}
+.cap{z-index:2;position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:calc(max(30px,env(safe-area-inset-bottom,0px)) + 64px);display:grid;gap:.9rem;max-width:42rem;opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.cap.out{opacity:0;transform:translateY(-10px);transition-duration:.35s}
+.cap.on{opacity:1;transform:none}
+.cap .eyebrow{display:flex;align-items:center;gap:.7rem;color:var(--fg-3)}
+.cap .eyebrow i{display:block;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.cap .eyebrow b{color:var(--fg-2);font-weight:400}
+.cap p{color:var(--fg-2);max-width:30rem;font-size:.95rem;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+.cap p.spec{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3)}
+.rail{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(244,241,234,.12);z-index:2}
+.rail i{display:block;height:100%;width:0;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.hud{z-index:2;position:absolute;left:max(28px,env(safe-area-inset-left,0px));right:max(28px,env(safe-area-inset-right,0px));bottom:max(30px,env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.hud>*{pointer-events:auto}
+.ring{display:flex;align-items:center;gap:.6rem;color:var(--fg-3)}
+.ring svg{width:26px;height:26px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:2}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--gold);stroke-dasharray:69.1;stroke-dashoffset:62;transition:stroke-dashoffset .2s}
+@media (max-width:640px){.cap,.hud{left:max(18px,env(safe-area-inset-left,0px));right:max(18px,env(safe-area-inset-right,0px))}.cap{max-width:100%}.hud .ring span{display:none}}
+
+/* summary */
+.summary{position:relative;z-index:3;background:var(--paper);color:var(--ink);padding-block:5rem 6rem;color-scheme:light}
+.summary .in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:4rem;align-items:start}
+.summary .mono{color:#7a7366}
+.summary h2{margin-top:.6rem}
+.summary .lede{color:#55504a;max-width:30rem;margin-top:1rem}
+.summary .fine{font-size:.74rem;color:#8a8375;margin-top:1rem}
+.segs{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1.4rem}
+.seg{border:1.5px solid #cfd3da;background:#fff;border-radius:999px;padding:.5rem 1rem;font-size:.85rem;font-weight:600;color:var(--ink)}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pkgs{display:grid;gap:.6rem;margin-top:1rem}
+.pkg{display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;text-align:left;padding:1rem 1.1rem;border:1.5px solid #d8d2c4;border-radius:12px;background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.pkg:hover{border-color:var(--ink)}
+.pkg[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,18,16,.1)}
+.pkg .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid #b8b1a2;position:relative}
+.pkg[aria-pressed="true"] .dot{border-color:var(--ink)}
+.pkg[aria-pressed="true"] .dot::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ink)}
+.pkg .t{display:grid;gap:.15rem;min-width:0}
+.pkg .t b{font-size:1.05rem;font-weight:600}
+.pkg .t small{color:#6d675d;font-size:.85rem}
+.pkg .pr{font-family:var(--mono);font-size:.82rem;white-space:nowrap;color:var(--ink)}
+.lead{background:#fff;border:1px solid #e3ded2;border-radius:16px;padding:1.4rem;display:grid;gap:.9rem;position:sticky;top:calc(68px + env(safe-area-inset-top,0px) + 16px)}
+.lead-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.lead-head b{font-family:var(--display);font-weight:400;font-size:1.9rem;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.fields{display:grid;gap:.7rem;grid-template-columns:1fr 1fr}
+.fields label{display:grid;gap:.3rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#7a7366;min-width:0}
+.fields label.full{grid-column:1/-1}
+.fields input::placeholder{color:#b4b8c0}
+.fields input{font:inherit;font-family:var(--body);font-size:.95rem;padding:.75rem .85rem;border:1px solid #d8d2c4;border-radius:10px;background:#fff;color:var(--ink);width:100%;min-width:0}
+.fields input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,18,16,.12)}
+.lead .btn-fill{width:100%;justify-content:center;padding:.95rem;background:var(--ink);color:var(--paper)}
+.lead .btn-fill:hover{background:#000}
+.lead .fine{margin-top:0}
+#form-err{min-height:1.1em;color:#9b2c2c}
+.lead .done{display:none;gap:.6rem}
+.lead.sent .fields,.lead.sent .btn-fill,.lead.sent #form-err,.lead.sent .fine{display:none}
+.lead.sent .done{display:grid}
+@media (max-width:860px){.summary{padding-block:4rem}.summary .in{grid-template-columns:1fr;gap:2.4rem}.lead{position:static}}
+@media (max-width:480px){.pkg{grid-template-columns:auto 1fr}.pkg .pr{grid-column:2}}
+.site-foot{position:relative;z-index:3;background:var(--ink);color:var(--fg-3);padding-block:2.2rem;font-size:.8rem}
+.site-foot .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
+.site-foot .brand{color:var(--fg);font-size:1.1rem}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+
+
+<header class="top gutter">
+  <a class="brand" href="#top">Northline</a>
+  <span class="spacer"></span>
+  <a class="pill mono" href="#summary"><span class="lbl">From</span> <b id="pill-total">$149</b></a>
+  <a class="btn btn-fill mono" href="#summary">Book a detail</a>
+</header>
+
+
+<main id="top">
+<section class="hero" id="build">
+  <div class="hero-view gutter">
+    <div class="hero-photos" aria-hidden="true">
+      <img src="renders/m4-dirty-m.jpg" alt="" id="bp-bg">
+      <img src="renders/m4-dirty.jpg" srcset="renders/m4-dirty-m.jpg 1280w, renders/m4-dirty.jpg 2560w" sizes="100vw" alt="" id="bp-img">
+      <canvas id="seq"></canvas>
+      <div id="lights"></div>
+    </div>
+    <div class="cap on" data-i="0"><span class="eyebrow mono"><b>01 / 08</b><i></i>Intake</span><h1>It came in<br><em>like this.</em></h1><p>A week of salted highway on a car that deserves better. Every detail starts with an honest look under the lights.</p></div>
+    <div class="cap" data-i="1"><span class="eyebrow mono"><b>02 / 08</b><i></i>Snow foam</span><h1>Lift it,<br><em>don't grind it.</em></h1><p>Thick foam loosens the grit and carries it off before anything touches the paint. No swirls from the wash itself.</p><p class="spec">pH-neutral foam · 5 min dwell</p></div>
+    <div class="cap" data-i="2"><span class="eyebrow mono"><b>03 / 08</b><i></i>Rinse &amp; contact wash</span><h1>Two buckets.<br><em>No shortcuts.</em></h1><p>Pressure rinse, then a grit-guarded two-bucket wash with a fresh mitt for the lower panels.</p></div>
+    <div class="cap" data-i="3"><span class="eyebrow mono"><b>04 / 08</b><i></i>Wheels &amp; decon</span><h1>Brake dust<br><em>bleeds purple.</em></h1><p>Iron remover dissolves the embedded particles you can't see. Then clay, so the paint is bare and smooth before any polish.</p><p class="spec">Iron decon · clay bar · tar remover</p></div>
+    <div class="cap" data-i="4"><span class="eyebrow mono"><b>05 / 08</b><i></i>Paint correction</span><h1>Swirls<br><em>gone.</em></h1><p>Machine polish, panel by panel, until the reflection of the light bar is a razor line instead of a haze.</p><p class="spec">1-step or 2-step · measured with a paint gauge</p></div>
+    <div class="cap" data-i="5"><span class="eyebrow mono"><b>06 / 08</b><i></i>Ceramic coating</span><h1>Locked in<br><em>for years.</em></h1><p>A true SiO₂ ceramic coat bonds to the corrected paint. Water beads, dirt slides, washes take half the time.</p><p class="spec">9H ceramic · 5-year coating</p></div>
+    <div class="cap" data-i="6"><span class="eyebrow mono"><b>07 / 08</b><i></i>Interior</span><h1>Like the day<br><em>it was delivered.</em></h1><p>Steam, extraction and a brush in every seam. Leather fed, carbon wiped, screen spotless.</p><p class="spec">Steam · hot-water extraction · leather conditioner</p></div>
+    <div class="cap" data-i="7"><span class="eyebrow mono"><b>08 / 08</b><i></i>Finish</span><h1>Ready for<br><em>the drive home.</em></h1><p>Tires dressed, glass polished, one last walk-around under the bars. This is what your car is supposed to look like.</p></div>
+    <div class="rail" aria-hidden="true"><i id="rail"></i></div>
+    <div class="hud">
+      <span class="ring mono"><svg viewBox="0 0 26 26"><circle class="bg" cx="13" cy="13" r="11"/><circle class="fg" id="ring" cx="13" cy="13" r="11"/></svg><span id="ring-lbl">Intake</span></span>
+      <button class="btn btn-line mono" type="button" id="watch">▶ Watch the detail</button>
+    </div>
+  </div>
+</section>
+
+<section class="summary gutter" id="summary">
+  <div class="in">
+    <div class="pick">
+      <span class="mono">Your car</span>
+      <h2>Book a <em>detail.</em></h2>
+      <p class="lede">Three packages. Pick the one that fits, tell us where the car is, and we'll confirm a slot within the hour.</p>
+      <div class="segs" id="where">
+        <button class="seg" type="button" data-where="mobile" aria-pressed="true">We come to you</button>
+        <button class="seg" type="button" data-where="shop" aria-pressed="false">Drop it at the shop</button>
+      </div>
+      <div class="pkgs" id="pkgs"></div>
+      <p class="fine">Demo pricing for a coupe or sedan. SUVs and trucks add 20%. Paint correction is quoted after an in-person paint inspection.</p>
+    </div>
+    <form class="lead" id="lead" novalidate>
+      <div class="lead-head"><span class="mono">Reserve a slot</span><b id="lead-total" class="num"></b></div>
+      <div class="fields">
+        <label class="full">Full name<input id="f-name" name="name" type="text" autocomplete="name" required></label>
+        <label>Phone<input id="f-phone" name="phone" type="tel" autocomplete="tel" required></label>
+        <label>Email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
+        <label>Year / make / model<input id="f-car" name="car" type="text" placeholder="2025 BMW M4" required></label>
+        <label>ZIP<input id="f-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></label>
+      </div>
+      <p class="fine" id="form-err"></p>
+      <button class="btn btn-fill mono" type="submit">Reserve my slot →</button>
+      <p class="fine">No deposit to reserve. We text to confirm, usually within the hour.</p>
+      <div class="done"><p><b>Got it.</b> We'll text you within the hour to lock in a time.</p><p class="fine">This is a demo. On a live site this lands in your inbox or CRM with the package and vehicle attached.</p></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="site-foot gutter">
+  <div class="in">
+    <span><a class="brand" href="#top">Northline</a> Detail Co. · Cherry Hill, NJ · Mobile &amp; studio · Insured</span>
+    <span>Demo site by Straga Solutions · car and bay are AI-visualized</span>
+  </div>
+</footer>
+
+
+<script>
+(function(){
+  'use strict';
+  // ================= packages =================
+  var PKGS=[
+    {id:'wash',    name:'Wash & Protect',       sub:'Snow foam, two-bucket wash, wheels and tires, interior vacuum and wipe-down, 6-month sealant', mobile:[149,149], shop:[129,129]},
+    {id:'full',    name:'Full Detail',          sub:'Everything above, plus iron and clay decon, one-step polish, steam and extraction inside, leather conditioned', mobile:[449,549], shop:[399,499]},
+    {id:'ceramic', name:'Correction + Ceramic', sub:'Everything above, plus two-step paint correction and a 5-year 9H ceramic coating on paint, wheels and glass', mobile:[1495,1995], shop:[1395,1895]}
+  ];
+  var state={pkg:'full', where:'mobile'};
+  function find(list,id){ for (var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
+  function fmt(n){ return '$'+n.toLocaleString('en-US'); }
+  function range(r){ return r[0]===r[1] ? fmt(r[0]) : fmt(r[0])+'–'+fmt(r[1]); }
+  function total(){ return find(PKGS,state.pkg)[state.where]; }
+
+  // ================= hero: lights snap on over the dirty car, then a scroll-scrubbed detail film =================
+  var heroEl=document.getElementById('build'), caps=Array.prototype.slice.call(document.querySelectorAll('.cap')), ring=document.getElementById('ring'), ringLbl=document.getElementById('ring-lbl');
+  var FRAMES=383, FPS=16, DUR=23.96, L0=0.0, L1=0.05, V0=0.07, V1=0.11, V2=0.96; // lights snap on L0..L1 over the still, film dissolves in V0..V1, film V1..V2, hold after
+  // film seconds where each caption starts: segment starts from the joined file, with the 8 captions mapped onto 6 segments
+  var BEATS=[0, 1.2, 5.375, 9.125, 12.833, 16.5, 20.25, 22.6];
+  function tp(t){ return V1+(t/DUR)*(V2-V1); }
+  var STAGES=BEATS.map(function(t,i){ return [i===0?0:tp(t), i===BEATS.length-1?1.0:tp(BEATS[i+1])]; });
+  var LBL=['Intake','Snow foam','Contact wash','Wheels & decon','Correction','Ceramic','Interior','Finish'];
+  function lin(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+  function dwell(p){ for (var i=0;i<STAGES.length;i++){ var a=STAGES[i][0], b=STAGES[i][1]; if (p>=a && p<b){ var u=(p-a)/(b-a); var m=Math.min(1,u/0.85); return a+(b-a)*(0.88*m*m*(3-2*m) + 0.12*u); } } return p; }
+  var mode='hero', activeSec='build', heroP=0, curStage=-1;
+  var bpImg=document.getElementById('bp-img'), seq=document.getElementById('seq'), ctx=seq.getContext('2d'), heroPhotos=document.querySelector('.hero-photos');
+  var imgs=new Array(FRAMES), loaded=0, targetF=0, curF=0, drawnF=-1, needDraw=true;
+  function src(i){ return 'frames/'+('000'+(i+1)).slice(-4)+'.jpg'; }
+  function load(i){ if (imgs[i]) return; var im=new Image(); im.decoding='async'; im.onload=function(){ loaded++; needDraw=true; }; im.src=src(i); imgs[i]=im; }
+  // progressive: coarse first so scrubbing works almost immediately, then fill in
+  [16,8,4,2,1].forEach(function(step,si){ setTimeout(function(){ for (var i=0;i<FRAMES;i+=step) load(i); }, si*900); });
+  function nearest(i){ i=Math.round(i); if (imgs[i]&&imgs[i].complete&&imgs[i].naturalWidth) return imgs[i]; for (var d=1;d<FRAMES;d++){ var a=imgs[i-d], b=imgs[i+d]; if (a&&a.complete&&a.naturalWidth) return a; if (b&&b.complete&&b.naturalWidth) return b; } return null; }
+  function sizeCanvas(){ var dpr=Math.min(window.devicePixelRatio||1,2); var w=Math.round(seq.clientWidth*dpr), h=Math.round(seq.clientHeight*dpr); if (seq.width!==w||seq.height!==h){ seq.width=w; seq.height=h; drawnF=-1; needDraw=true; } }
+  function isPortrait(){ return heroPhotos.clientHeight > heroPhotos.clientWidth*1.05; }
+  function fit(w,h,iw,ih){ // portrait: contain, sitting a little above center; landscape: cover
+    if (isPortrait()){ var sc=Math.min(w/iw,h/ih), dw=iw*sc, dh=ih*sc; return {x:(w-dw)/2, y:(h-dh)*0.42, w:dw, h:dh}; }
+    var sc2=Math.max(w/iw,h/ih), dw2=iw*sc2, dh2=ih*sc2; return {x:(w-dw2)/2, y:(h-dh2)/2, w:dw2, h:dh2};
+  }
+  var bgCanvas=document.createElement('canvas'), bgCtx=bgCanvas.getContext('2d');
+  function draw(f){ var im=nearest(f); if (!im) return; sizeCanvas(); var W=seq.width,H=seq.height, iw=im.naturalWidth, ih=im.naturalHeight;
+    if (isPortrait()){ // blurred, darkened cover copy behind the contained frame
+      var bw=Math.max(1,Math.round(W/40)), bh=Math.max(1,Math.round(H/40)); if (bgCanvas.width!==bw||bgCanvas.height!==bh){ bgCanvas.width=bw; bgCanvas.height=bh; }
+      var s2=Math.max(bw/iw,bh/ih); bgCtx.drawImage(im,(bw-iw*s2)/2,(bh-ih*s2)/2,iw*s2,ih*s2);
+      ctx.save(); ctx.filter='brightness(.45) saturate(1.1)'; ctx.imageSmoothingEnabled=true; ctx.drawImage(bgCanvas,0,0,W,H); ctx.restore();
+    }
+    var r=fit(W,H,iw,ih); ctx.drawImage(im,r.x,r.y,r.w,r.h); drawnF=f; }
+  var lastT=performance.now();
+  function loop(now){
+    requestAnimationFrame(loop); var dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+    if (mode!=='hero') return;
+    var k=1-Math.exp(-dt*14); curF+= (targetF-curF)*k; if (Math.abs(targetF-curF)<0.02) curF=targetF;
+    var f=Math.round(curF); if (f!==drawnF || needDraw){ needDraw=false; draw(f); }
+  }
+  requestAnimationFrame(loop);
+  function setPortrait(){ document.body.classList.toggle('portrait', isPortrait()); }
+  setPortrait(); window.addEventListener('resize', function(){ setPortrait(); sizeCanvas(); needDraw=true; });
+  // reel mode: ?reel=30 sets the Watch-the-build duration in seconds, hides the cursor and the HUD while it runs
+  var REEL=(function(){ var m=location.search.match(/[?&]reel=([\d.]+)/); return m?+m[1]:0; })();
+  function applyHero(p){
+    heroP=p;
+    // lights: the bay is dark on the still, the LED bars snap on in two flickers, then a slow push-in until the film takes over
+    var l=lin(p,L0,L1); var on = l<0.18?0 : l<0.26?0.55 : l<0.34?0.1 : l<0.5?0.85 : 1;
+    document.getElementById('lights').style.opacity=(1-on)*0.96;
+    var z=1+0.06*lin(p,L1,V1); bpImg.style.transform='scale('+z.toFixed(4)+')'; bpImg.style.opacity=1;
+    var fade=lin(p,V0,V1); fade=fade*fade*(3-2*fade); seq.style.opacity=fade;
+    var q=dwell(p); targetF=Math.max(0,Math.min(FRAMES-1, (lin(q,V1,V2))*(FRAMES-1)));
+    heroPhotos.style.setProperty('--scrim', 0.6+0.4*fade);
+    var st2=0; for (var i=0;i<STAGES.length;i++) if (p>=STAGES[i][0]) st2=i;
+    if (st2!==curStage){ var prev=curStage; curStage=st2; caps.forEach(function(c){ var ci=+c.dataset.i; c.classList.toggle('on', ci===st2); c.classList.toggle('out', ci===prev && prev<st2); }); ringLbl.textContent=LBL[st2]; }
+    ring.style.strokeDashoffset = 69.1*(1-p); document.getElementById('rail').style.width=(p*100).toFixed(2)+'%';
+  }
+  function onScroll(){
+    var r=heroEl.getBoundingClientRect(); var vh=window.innerHeight;
+    var travel=r.height-vh; var p=Math.max(0,Math.min(1,-r.top/travel));
+    if (r.bottom>vh*0.5){ mode='hero'; applyHero(p); } else { mode='sec'; }
+    document.body.classList.toggle('light-head', r.bottom < 68 + 10);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  function resize(){}
+  // ---- packages UI ----
+  function buildPkgs(){
+    var c=document.getElementById('pkgs'); c.innerHTML='';
+    PKGS.forEach(function(o){ var b=document.createElement('button'); b.type='button'; b.className='pkg'; b.setAttribute('aria-pressed', o.id===state.pkg);
+      b.innerHTML='<span class="dot"></span><span class="t"><b>'+o.name+'</b><small>'+o.sub+'</small></span><span class="pr">'+range(o[state.where])+'</span>';
+      b.addEventListener('click', function(){ state.pkg=o.id; buildPkgs(); paintPrices(); }); c.appendChild(b); });
+  }
+  function paintPrices(){ var t=range(total()); document.getElementById('pill-total').textContent=range(PKGS[0][state.where]); document.getElementById('lead-total').textContent=t.replace('–',' – '); }
+  document.querySelectorAll('#where .seg').forEach(function(b){ b.addEventListener('click', function(){ state.where=b.dataset.where; document.querySelectorAll('#where .seg').forEach(function(x){ x.setAttribute('aria-pressed', x===b); }); buildPkgs(); paintPrices(); }); });
+
+  // ---- watch the build (auto-scroll) ----
+  var auto=null;
+  function stopAuto(){ if (auto){ cancelAnimationFrame(auto); auto=null; } document.body.classList.remove('reel'); }
+  ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev, stopAuto, {passive:true}); });
+  document.getElementById('watch').addEventListener('click', function(){
+    stopAuto(); var start=performance.now(), from=window.scrollY, to=heroEl.offsetTop+heroEl.offsetHeight-window.innerHeight, dur=REEL?REEL*1000:24000; if (REEL) document.body.classList.add('reel');
+    function step(now){ var x=Math.min(1,(now-start)/dur); var e= x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e); if (x<1) auto=requestAnimationFrame(step); else auto=null; }
+    auto=requestAnimationFrame(step);
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){ a.addEventListener('click', function(e){ var id=a.getAttribute('href').slice(1); var el=document.getElementById(id); if(!el) return; e.preventDefault(); stopAuto(); el.scrollIntoView({behavior:'smooth',block:'start'}); }); });
+
+  // ---- lead form ----
+  var lead=document.getElementById('lead');
+  lead.addEventListener('submit', function(e){
+    e.preventDefault(); var err=document.getElementById('form-err'); err.textContent='';
+    var name=document.getElementById('f-name').value.trim(), phone=document.getElementById('f-phone').value.trim(), email=document.getElementById('f-email').value.trim(), zip=document.getElementById('f-zip').value.trim();
+    if (!name){ err.textContent='Add your name so we know who to call.'; return; }
+    if (!/^[\d\s().+-]{7,}$/.test(phone)){ err.textContent='That phone number doesn\'t look right.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Check the email address.'; return; }
+    if (!document.getElementById('f-car').value.trim()){ err.textContent='Tell us what you drive.'; return; }
+    if (!/^\d{5}$/.test(zip)){ err.textContent='ZIP should be five digits.'; return; }
+    lead.classList.add('sent');
+  });
+
+  // ---- boot ----
+  buildPkgs(); paintPrices(); onScroll();
+})();
+</script>
+
+</body>
+</html>
