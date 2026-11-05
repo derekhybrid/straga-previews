@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Walk through a pool we'd build for you. Five photoreal stops at dusk, then one text to start the plan.">
+<meta name="theme-color" content="#06080b">
+<meta name="robots" content="noindex, nofollow">
+<title>Linden Pools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Linden Pools — a backyard you walk through. Five photoreal 360° stops rendered in WebGL with depth parallax; scrolling walks the path, the cursor looks around, and the only exit is the card by the fire. */
+:root{
+  --ink:#06080b; --fg:#f2eee6; --fg-2:rgba(242,238,230,.72); --fg-3:rgba(242,238,230,.46);
+  --gold:#e8c07a; --water:#67c6d9; --line:rgba(242,238,230,.18);
+  --serif:"Cormorant Garamond", Georgia, serif; --sans:"Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase}
+.serif{font-family:var(--serif);font-weight:400}
+
+#gl{position:fixed;inset:0;z-index:0;touch-action:pan-y}
+#gl canvas{display:block;width:100%;height:100%}
+.track{position:relative;z-index:1;pointer-events:none}
+
+/* intro curtain */
+#intro{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--ink);transition:opacity 1.6s cubic-bezier(.4,0,.2,1),visibility 1.6s}
+#intro.gone{opacity:0;visibility:hidden;pointer-events:none}
+#intro .in{display:grid;justify-items:center;gap:1.4rem;text-align:center;padding:0 24px}
+#intro .wordmark{font-family:var(--serif);font-size:clamp(2.6rem,7vw,5.4rem);letter-spacing:.06em;line-height:1;font-weight:400}
+#intro .wordmark em{font-style:italic;color:var(--gold)}
+#intro p{color:var(--fg-2);max-width:26rem;font-weight:300;font-size:1.05rem}
+#intro .row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem}
+.btn{display:inline-flex;align-items:center;gap:.6rem;border:1px solid var(--line);border-radius:999px;padding:.8rem 1.3rem;transition:border-color .2s,background .2s,transform .2s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(6,8,11,.35)}
+.btn:hover{border-color:var(--gold)}
+.btn-gold{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:500}
+.btn-gold:hover{background:#f0cc8a}
+#intro .load{width:160px;height:1px;background:var(--line);position:relative;overflow:hidden}
+#intro .load i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--gold);transition:width .3s}
+
+/* HUD */
+.hud{position:fixed;inset:0;z-index:10;pointer-events:none}
+.hud>*{pointer-events:auto}
+.brand{position:absolute;left:max(28px,env(safe-area-inset-left,0px));top:calc(22px + env(safe-area-inset-top,0px));font-family:var(--serif);font-size:1.35rem;letter-spacing:.08em;text-decoration:none;display:flex;align-items:center;gap:.6rem}
+.brand i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.tools{position:absolute;right:max(28px,env(safe-area-inset-right,0px));top:calc(18px + env(safe-area-inset-top,0px));display:flex;gap:.5rem}
+.tools .btn{padding:.6rem .95rem}
+.stop{position:absolute;left:max(28px,env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));display:grid;gap:.3rem;max-width:28rem}
+.stop .n{color:var(--fg-3);display:flex;gap:.7rem;align-items:center}
+.stop .n b{color:var(--gold);font-weight:500}
+.stop h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.6vw,3.6rem);line-height:1;margin:0;letter-spacing:.02em;text-shadow:0 2px 24px rgba(0,0,0,.6)}
+.stop h1 em{font-style:italic;color:var(--gold)}
+.stop p{margin:0;color:var(--fg-2);font-weight:300;max-width:24rem;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.stop .txt{transition:opacity .8s,transform .8s;opacity:1}
+.stop .txt.swap{opacity:0;transform:translateY(8px);transition-duration:.35s}
+.level{position:absolute;right:max(28px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:2px;height:min(32vh,260px);background:var(--line);overflow:hidden}
+.level i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,var(--water),var(--gold));box-shadow:0 0 14px var(--water)}
+.level span{position:absolute;right:12px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;color:var(--fg-3);white-space:nowrap}
+.hint{position:absolute;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:var(--fg-3);display:flex;align-items:center;gap:.6rem;transition:opacity .6s}
+.hint i{display:block;width:1px;height:28px;background:linear-gradient(var(--fg-3),transparent);animation:drip 1.6s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(.2);transform-origin:top;opacity:0}40%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+.hint.off{opacity:0}
+.skip{position:absolute;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translateX(-50%);color:var(--fg-3)}
+.skip:hover{color:var(--fg)}
+@media (max-width:640px){.level,.skip{display:none}.stop{right:18px;left:18px}}
+body.reel .hud,body.reel #labels{opacity:0;transition:opacity .4s}
+body.reel{cursor:none}
+
+/* 3D labels */
+#labels{position:fixed;inset:0;z-index:9;pointer-events:none}
+.lab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);opacity:0;transition:opacity .6s;display:grid;gap:.25rem;white-space:nowrap}
+.lab.on{opacity:1}
+.lab i{display:block;width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);margin:0 auto}
+.lab b{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--fg)}
+.lab span{font-size:.78rem;color:var(--fg-2);font-weight:300}
+.lab .ln{width:1px;height:34px;background:linear-gradient(var(--gold),transparent);margin:0 auto}
+
+/* the card by the fire */
+#cta{position:fixed;z-index:11;right:max(28px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%) translateX(40px);width:min(420px,calc(100vw - 36px));opacity:0;visibility:hidden;transition:opacity 1s,transform 1s cubic-bezier(.2,.8,.2,1),visibility 1s;pointer-events:none}
+#cta.on{opacity:1;visibility:visible;transform:translateY(-50%);pointer-events:auto}
+.card{background:rgba(10,12,16,.42);border:1px solid rgba(242,238,230,.16);border-radius:22px;padding:1.6rem;backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);box-shadow:0 40px 90px -40px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);display:grid;gap:1rem}
+.card h2{font-family:var(--serif);font-weight:400;font-size:2.1rem;line-height:1;margin:0;letter-spacing:.02em}
+.card h2 em{font-style:italic;color:var(--gold)}
+.card p{margin:0;color:var(--fg-2);font-weight:300}
+.price{display:flex;align-items:baseline;gap:.5rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:.8rem 0}
+.price b{font-family:var(--serif);font-size:2rem;font-weight:400;color:var(--gold)}
+.price span{color:var(--fg-3);font-size:.8rem}
+.fields{display:grid;gap:.6rem}
+.fields label{display:grid;gap:.3rem;font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-3)}
+.fields input{font:inherit;font-family:var(--sans);font-size:.95rem;padding:.75rem .9rem;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.25);color:var(--fg);width:100%}
+.fields input:focus{outline:none;border-color:var(--gold)}
+.card .btn-gold{justify-content:center;padding:.95rem}
+.card .fine{font-size:.72rem;color:var(--fg-3)}
+#form-err{min-height:1em;color:#f0a090;font-size:.8rem}
+.card .done{display:none}
+.card.sent .fields,.card.sent .btn-gold,.card.sent #form-err,.card.sent .price{display:none}
+.card.sent .done{display:grid;gap:.5rem}
+@media (max-width:640px){#cta{right:18px;left:18px;width:auto;top:auto;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(30px)}#cta.on{transform:none}.card{padding:1.2rem}}
+
+.grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:8;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:grain 1.2s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-2%)}100%{transform:translate(0,0)}}
+.foot{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:10;color:var(--fg-3);font-size:.62rem;opacity:.7;pointer-events:none;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<div id="gl"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div id="intro">
+  <div class="in">
+    <span class="mono" style="color:var(--fg-3)">Linden Pools · Haddonfield, NJ</span>
+    <div class="wordmark">A backyard you<br>can <em>walk through.</em></div>
+    <p>Five minutes at dusk in a pool we'd build for you. Move to look around. Scroll to walk.</p>
+    <div class="load" aria-hidden="true"><i id="load-bar"></i></div>
+    <div class="row"><button class="btn btn-gold" id="enter" type="button">Enter the yard</button><button class="btn" id="enter-sound" type="button">Enter with sound</button></div>
+  </div>
+</div>
+
+<div class="hud" aria-live="polite">
+  <a class="brand" href="#top"><i></i>Linden</a>
+  <button class="skip mono" id="skip" type="button">Skip to the plan ↓</button>
+  <div class="tools"><button class="btn mono" id="snd" type="button" aria-pressed="false">Sound off</button></div>
+  <div class="level" aria-hidden="true"><i id="lvl"></i><span class="mono" id="lvl-lbl">Arriving</span></div>
+  <div class="stop"><div class="txt" id="stop-txt"><span class="n mono"><b id="stop-n">01</b><span id="stop-k">Arrival</span></span><h1 id="stop-h">The gate <em>opens.</em></h1><p id="stop-p">Twenty minutes after sunset. The path is lit, the water is warm, and nobody's home but you.</p></div></div>
+  <div class="hint mono" id="hint"><i></i>Scroll to walk</div>
+</div>
+<div id="labels" aria-hidden="true"></div>
+
+<div id="cta">
+  <form class="card" id="lead" novalidate>
+    <span class="mono" style="color:var(--fg-3)">Sit a minute</span>
+    <h2>Build this <em>in your yard.</em></h2>
+    <p>Spring slots open in January. We'll measure your yard, render it exactly like this, and send the plan to your phone.</p>
+    <div class="price"><b id="cta-price">from $689</b><span>/ month · 40-ft pool, spa, fire feature, travertine deck</span></div>
+    <div class="fields">
+      <label>Your name<input id="f-name" type="text" autocomplete="name" required></label>
+      <label>Phone<input id="f-phone" type="tel" autocomplete="tel" required></label>
+    </div>
+    <p id="form-err"></p>
+    <button class="btn btn-gold" type="submit">Text me the plan</button>
+    <p class="fine">No pressure, no emails. One text with the plan and a day we could come measure.</p>
+    <div class="done"><p><b>Done.</b> Check your phone in a minute. The yard's here whenever you want to walk it again.</p><p class="fine">Demo site by Straga Solutions · the backyard is AI-visualized</p></div>
+  </form>
+</div>
+<div class="foot mono">Demo site by Straga Solutions</div>
+
+<div class="track" id="track" style="height:1200vh"></div>
+
+<script type="module">
+import * as THREE from './vendor/three.module.min.js';
+
+/* ================= world config ================= */
+const STOPS=[
+  {id:'arrival', k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
+    fx:{fireflies:.5, fire:{yaw:-1,pitch:2,r:52,op:.7}, pit:{op:0}, steam:{op:0}, bubbles:0},
+    labels:[{yaw:-46,pitch:-20,b:'Path lighting',s:'warm 2700K, dusk to dawn'},{yaw:0,pitch:-3,b:'The pool',s:'sixty feet ahead'}]},
+  {id:'deck', k:'The deck', h:'Stand at <em>the edge.</em>', p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
+    fx:{fireflies:.4, fire:{yaw:0,pitch:2,r:49,op:1}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.9}, bubbles:0},
+    labels:[{yaw:-50,pitch:-8,b:'Tanning ledge',s:'9 inches of water, two loungers'},{yaw:46,pitch:-1,b:'Raised spa',s:'104°, glass-tile spillover'},{yaw:0,pitch:3,b:'Fire feature',s:'linear burner, 40,000 BTU'}]},
+  {id:'water', k:'The water', h:'Go <em>under.</em>', p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
+    fx:{fireflies:0, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:1},
+    labels:[{yaw:0,pitch:-22,b:'Pebble finish',s:'midnight blue, 15-year'},{yaw:-21,pitch:-7,b:'Sun shelf',s:'from below'}]},
+  {id:'night', k:'Night', h:'Then it gets <em>dark.</em>', p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
+    fx:{fireflies:1, fire:{yaw:0,pitch:2,r:49,op:1.1}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:1}, bubbles:0},
+    labels:[{yaw:-42,pitch:-8,b:'Landscape lighting',s:'every path, every bed'},{yaw:46,pitch:-2,b:'Automation',s:'lights, heat and fire from one app'}]},
+  {id:'fire', k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true,
+    fx:{fireflies:.8, fire:{yaw:-10,pitch:1,r:52,op:.8}, pit:{yaw:0,pitch:-25,r:21,op:1.3}, steam:{yaw:32,pitch:0,r:46,op:.4}, bubbles:0},
+    labels:[]}
+];
+const N=STOPS.length;
+const SMALL=(Math.min(screen.width,screen.height)*(window.devicePixelRatio||1))<1600;
+const PANO=(s)=>'pano/'+s.id+(SMALL?'-m':'')+'.jpg', DEPTH=(s)=>'pano/'+s.id+'-depth.jpg', MASK=(s)=>'pano/'+s.id+'-water.jpg';
+const REEL=(()=>{ const m=location.search.match(/[?&]reel=([\d.]+)/); return m?+m[1]:0; })();
+if (REEL) document.body.classList.add('reel');
+
+/* ================= renderer ================= */
+const holder=document.getElementById('gl');
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.75));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+holder.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 400);
+const MAXTEX=renderer.capabilities.maxTextureSize;
+
+/* ================= panorama sphere with depth parallax ================= */
+const sphereVS=`
+  uniform sampler2D depthMap; uniform float hasDepth; uniform float parallax; uniform vec2 fov;
+  varying vec3 vDir; varying vec2 vUv2;
+  const float PI=3.14159265;
+  vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fov.x+0.5, asin(clamp(d.y,-1.0,1.0))/fov.y+0.5); }
+  void main(){
+    vec3 d=normalize(position); vDir=d; vUv2=dirToUv(d);
+    vec2 cu=clamp(vUv2, 0.0, 1.0);
+    float dep = hasDepth>0.5 ? texture2D(depthMap, cu).r : 0.0;
+    float r = 60.0*(1.0 - parallax*dep);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(d*r, 1.0);
+  }`;
+const sphereFS=`
+  uniform sampler2D map; uniform float opacity; uniform float exposure; uniform float night; uniform float time; uniform vec2 fov;
+  varying vec3 vDir; varying vec2 vUv2;
+  const float PI=3.14159265;
+  void main(){
+    vec2 uv=vec2(atan(vDir.x,-vDir.z)/fov.x+0.5, asin(clamp(vDir.y,-1.0,1.0))/fov.y+0.5);
+    vec2 cu=clamp(uv,0.0,1.0);
+    vec3 c=texture2D(map, cu).rgb;
+    // fade to dark outside the photographed field so the edges never read as a border
+    vec2 e=abs(uv-0.5)*2.0; float edge=1.0-smoothstep(0.86,1.0,max(e.x,e.y));
+    c*=exposure*edge;
+    gl_FragColor=vec4(c, opacity);
+  }`;
+function makeSphere(){
+  const geo=new THREE.SphereGeometry(1, 192, 96);
+  const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
+  const m=new THREE.Mesh(geo, mat); m.frustumCulled=false; scene.add(m); return m;
+}
+const sphA=makeSphere(), sphB=makeSphere(); sphA.renderOrder=0; sphB.renderOrder=1;
+
+/* ================= textures ================= */
+const loader=new THREE.TextureLoader();
+const tex={}, pending={};
+function loadTex(url, srgb){ if (tex[url]) return Promise.resolve(tex[url]); if (pending[url]) return pending[url];
+  pending[url]=new Promise((res)=>{ loader.load(url, (t)=>{ t.colorSpace=srgb?THREE.SRGBColorSpace:THREE.NoColorSpace; t.minFilter=THREE.LinearMipmapLinearFilter; t.magFilter=THREE.LinearFilter; t.generateMipmaps=true; t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; tex[url]=t; res(t); }, undefined, ()=>{ tex[url]=null; res(null); }); });
+  return pending[url]; }
+const stopTex=STOPS.map(()=>({pano:null,depth:null,mask:null,ready:false}));
+async function loadStop(i){ const s=STOPS[i]; if (stopTex[i].ready) return; const [p,d,m]=await Promise.all([loadTex(PANO(s),true), loadTex(DEPTH(s),false), loadTex(MASK(s),false)]); stopTex[i]={pano:p,depth:d,mask:m,ready:!!p}; }
+
+/* ================= particles (fireflies / steam / fire / bubbles) ================= */
+const ptVS=`
+  attribute float aSize; attribute float aSeed; attribute vec3 aVel;
+  uniform float time; uniform float kind; uniform float pixelRatio;
+  varying float vA; varying float vSeed;
+  void main(){
+    vec3 p=position; float t=time*0.001;
+    if (kind<0.5){ // fireflies: slow wander + blink
+      p += vec3(sin(t*0.7+aSeed*9.0), sin(t*0.5+aSeed*5.0)*0.5, cos(t*0.6+aSeed*7.0))*1.2;
+      vA = smoothstep(0.2,1.0, 0.5+0.5*sin(t*2.2+aSeed*31.0)) * smoothstep(0.0,0.3,fract(t*0.11+aSeed));
+    } else if (kind<1.5){ // steam: rise and fade
+      float life=fract(t*0.18+aSeed); p += aVel*life*0.16 + vec3(sin(t+aSeed*20.0)*0.015*life,0.0,cos(t*0.8+aSeed*13.0)*0.015*life); vA=(1.0-life)*smoothstep(0.0,0.15,life)*0.28;
+    } else if (kind<2.5){ // fire: fast rise, flicker
+      float life=fract(t*0.9+aSeed); p += aVel*life*0.07 + vec3(sin(t*9.0+aSeed*40.0)*0.004*life,0.0,0.0); vA=(1.0-life)*(1.0-life)*smoothstep(0.0,0.08,life);
+    } else { // bubbles: rise, wobble
+      float life=fract(t*0.12+aSeed); p += vec3(sin(t*2.0+aSeed*30.0)*0.3, life*14.0, cos(t*1.7+aSeed*21.0)*0.3); vA=(1.0-smoothstep(0.85,1.0,life))*0.8;
+    }
+    vSeed=aSeed;
+    vec4 mv=modelViewMatrix*vec4(p,1.0);
+    gl_PointSize = min(70.0, aSize * pixelRatio * (60.0/ max(4.0,-mv.z)));
+    gl_Position=projectionMatrix*mv;
+  }`;
+const ptFS=`
+  uniform vec3 color; uniform float opacity; uniform float kind;
+  varying float vA; varying float vSeed;
+  void main(){
+    vec2 q=gl_PointCoord-0.5; float d=length(q);
+    float a = kind<2.5 && kind>1.5 ? smoothstep(0.5,0.05,d) : smoothstep(0.5,0.0,d);
+    if (kind>2.5){ a = smoothstep(0.5,0.42,d)*0.35 + smoothstep(0.5,0.47,d)*(1.0-smoothstep(0.42,0.5,d))*0.9; }
+    gl_FragColor=vec4(color, a*vA*opacity);
+  }`;
+function makeParticles(kind, count, color, size, spawn){
+  const g=new THREE.BufferGeometry(); const pos=new Float32Array(count*3), sz=new Float32Array(count), seed=new Float32Array(count), vel=new Float32Array(count*3);
+  for (let i=0;i<count;i++){ const v=spawn(i); pos.set([v.x,v.y,v.z], i*3); sz[i]=size*(0.6+Math.random()*0.8); seed[i]=Math.random(); vel.set([ (Math.random()-0.5)*0.4, 0.6+Math.random()*0.8, (Math.random()-0.5)*0.4 ], i*3); }
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('aSize', new THREE.BufferAttribute(sz,1)); g.setAttribute('aSeed', new THREE.BufferAttribute(seed,1)); g.setAttribute('aVel', new THREE.BufferAttribute(vel,3));
+  const m=new THREE.ShaderMaterial({vertexShader:ptVS, fragmentShader:ptFS, uniforms:{time:{value:0}, kind:{value:kind}, color:{value:new THREE.Color(color)}, opacity:{value:0}, pixelRatio:{value:renderer.getPixelRatio()}}, transparent:true, depthWrite:false, depthTest:false, blending:THREE.AdditiveBlending});
+  const p=new THREE.Points(g,m); p.frustumCulled=false; p.renderOrder=5; scene.add(p); return p;
+}
+function dirFrom(yawDeg,pitchDeg){ const y=THREE.MathUtils.degToRad(yawDeg), p=THREE.MathUtils.degToRad(pitchDeg); return new THREE.Vector3(Math.sin(y)*Math.cos(p), Math.sin(p), -Math.cos(y)*Math.cos(p)); }
+// emitters spawn in a local cone around -Z at radius 1; per stop we orient (yaw/pitch) and scale (distance) the whole system
+function cone(sx,sy){ return ()=>new THREE.Vector3((Math.random()-0.5)*sx, (Math.random()-0.5)*sy, -1).normalize(); }
+const fireflies=makeParticles(0, 260, '#ffd27a', 2.2, ()=>{ const d=dirFrom(-60+Math.random()*120, -4+Math.random()*22); return d.multiplyScalar(10+Math.random()*30); });
+const fireFar=makeParticles(2, 160, '#ff9a3c', 3.2, cone(0.42,0.05));
+const firePit=makeParticles(2, 240, '#ffa64a', 7, cone(0.22,0.08));
+const steam=makeParticles(1, 110, '#dfe9ee', 4.5, cone(0.3,0.08));
+const bubbles=makeParticles(3, 140, '#cfeaf5', 1.2, ()=>{ const d=dirFrom(-60+Math.random()*120, -30+Math.random()*20); return d.multiplyScalar(6+Math.random()*20); });
+const _e=new THREE.Euler();
+function placeEmitter(pt, a, b, xf, base){ const A=a||{}, B=b||{}; const ao=A.op||0, bo=B.op||0; const op=THREE.MathUtils.lerp(ao,bo,xf); pt.material.uniforms.opacity.value=op; pt.visible=op>0.001; if(!pt.visible) return;
+  const src = (ao>0 && bo>0) ? {yaw:THREE.MathUtils.lerp(A.yaw,B.yaw,xf), pitch:THREE.MathUtils.lerp(A.pitch,B.pitch,xf), r:THREE.MathUtils.lerp(A.r,B.r,xf)} : (ao>0? A : B);
+  _e.set(THREE.MathUtils.degToRad(src.pitch), -THREE.MathUtils.degToRad(src.yaw), 0, 'YXZ'); pt.quaternion.setFromEuler(_e); pt.scale.setScalar(src.r); pt.position.copy(base); }
+
+/* ================= post: ripple sim + composite ================= */
+const SIMW=512, SIMH=256;
+const rtOpts={minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, format:THREE.RGBAFormat, type:THREE.HalfFloatType, depthBuffer:false, stencilBuffer:false};
+let simA=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts), simB=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts), simC=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts);
+simA.texture.wrapS=simB.texture.wrapS=simC.texture.wrapS=THREE.ClampToEdgeWrapping;
+const sceneRT=new THREE.WebGLRenderTarget(innerWidth, innerHeight, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthBuffer:false, stencilBuffer:false});
+const quadGeo=new THREE.PlaneGeometry(2,2); const quadCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1); const quadScene=new THREE.Scene();
+const simMat=new THREE.ShaderMaterial({uniforms:{prev:{value:null}, prev2:{value:null}, drop:{value:new THREE.Vector3(-10,-10,0)}, drop2:{value:new THREE.Vector3(-10,-10,0)}, texel:{value:new THREE.Vector2(1/SIMW,1/SIMH)}, damp:{value:0.975}},
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
+  fragmentShader:`uniform sampler2D prev, prev2; uniform vec3 drop, drop2; uniform vec2 texel; uniform float damp; varying vec2 vUv;
+    void main(){ float h=texture2D(prev,vUv).r; float l=texture2D(prev,vUv-vec2(texel.x,0.)).r, r=texture2D(prev,vUv+vec2(texel.x,0.)).r, u=texture2D(prev,vUv+vec2(0.,texel.y)).r, d=texture2D(prev,vUv-vec2(0.,texel.y)).r;
+      float o=texture2D(prev2,vUv).r; float n=(l+r+u+d)*0.5 - o; n*=damp;
+      vec2 dd=vUv-drop.xy; dd.x*=2.0; float g=exp(-dot(dd,dd)*9000.0)*drop.z; n+=g;
+      vec2 d2=vUv-drop2.xy; d2.x*=2.0; n+=exp(-dot(d2,d2)*9000.0)*drop2.z;
+      gl_FragColor=vec4(n,0.,0.,1.); }`});
+const simMesh=new THREE.Mesh(quadGeo, simMat); quadScene.add(simMesh);
+const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, tex:{value:sceneRT.texture}, height:{value:null}, mask:{value:null}, hasMask:{value:0}, invPV:{value:new THREE.Matrix4()}, time:{value:0}, under:{value:0}, aspect:{value:1}, vig:{value:1}, dusk:{value:0}, ripple:{value:1}, splash:{value:0}, resolution:{value:new THREE.Vector2(innerWidth,innerHeight)}},
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
+  fragmentShader:`uniform sampler2D tex, height, mask; uniform float hasMask, time, under, aspect, vig, dusk, ripple, splash; uniform mat4 invPV; uniform vec2 resolution; varying vec2 vUv;
+    const float PI=3.14159265;
+    uniform vec2 fov;
+    vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fov.x+0.5, asin(clamp(d.y,-1.0,1.0))/fov.y+0.5); }
+    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y); }
+    void main(){
+      vec2 ndc=vUv*2.0-1.0; vec4 w=invPV*vec4(ndc,1.0,1.0); vec3 dir=normalize(w.xyz/w.w);
+      vec2 eq=dirToUv(dir);
+      float m = (hasMask>0.5 && eq.x>0.0 && eq.x<1.0 && eq.y>0.0 && eq.y<1.0) ? texture2D(mask, eq).r : 0.0;
+      vec2 off=vec2(0.0);
+      if (m>0.01 && ripple>0.0){ vec2 tx=vec2(1.0/512.0,1.0/256.0); float hl=texture2D(height,eq-vec2(tx.x,0.)).r, hr=texture2D(height,eq+vec2(tx.x,0.)).r, hu=texture2D(height,eq+vec2(0.,tx.y)).r, hd=texture2D(height,eq-vec2(0.,tx.y)).r; off=vec2(hr-hl,hu-hd)*0.22*m*ripple; }
+      vec3 c=texture2D(tex, vUv+off).rgb;
+      if (m>0.01){ float spec=clamp((off.x+off.y)*60.0,0.0,1.0); c+=vec3(0.9,0.85,0.7)*spec*0.25*m; }
+      if (under>0.001){
+        vec2 cp=eq*vec2(26.0,13.0); float ca=noise(cp+time*0.00035)*noise(cp*1.7-time*0.0005); ca=pow(ca,2.2)*2.2;
+        c = mix(c, c*vec3(0.8,0.96,1.04)+ca*vec3(0.55,0.8,0.95)*0.12, under);
+        float rays=0.0; for (int i=0;i<6;i++){ float fi=float(i); rays+=noise(vec2(vUv.x*5.0+fi*0.7+time*0.0001*(1.0+fi*0.3), vUv.y*0.3+fi))*0.16; } rays*=smoothstep(0.1,1.0,vUv.y);
+        c += vec3(0.5,0.75,0.95)*rays*0.18*under;
+      }
+      // chromatic edge + vignette + dusk glow
+      vec2 cc=(vUv-0.5)*vec2(aspect,1.0); float rr=dot(cc,cc);
+      float ab=rr*0.004; c.r=texture2D(tex, vUv+off+vec2(ab,0.0)).r*(1.0-under*0.5)+c.r*under*0.5;
+      c*= 1.0 - vig*smoothstep(0.25,1.6,rr)*0.75;
+      c += vec3(0.08,0.05,0.02)*dusk*smoothstep(0.9,0.0,rr)*0.5;
+      c = mix(c, vec3(0.62,0.86,1.0), splash*0.55*smoothstep(1.4,0.0,rr));
+      gl_FragColor=vec4(c,1.0);
+    }`});
+const postMesh=new THREE.Mesh(quadGeo, postMat); const postScene=new THREE.Scene(); postScene.add(postMesh);
+function runSim(){ simMat.uniforms.prev.value=simA.texture; simMat.uniforms.prev2.value=simB.texture; quadScene.children[0]=simMesh; renderer.setRenderTarget(simC); renderer.render(quadScene, quadCam); const t=simB; simB=simA; simA=simC; simC=t; simMat.uniforms.drop.value.z*=0.0; simMat.uniforms.drop2.value.z*=0.0; }
+
+/* ================= labels ================= */
+const labelHost=document.getElementById('labels'); const labelEls=[];
+STOPS.forEach((s,si)=>{ s.labels.forEach((l)=>{ const el=document.createElement('div'); el.className='lab'; el.innerHTML='<i></i><div class="ln"></div><b>'+l.b+'</b><span>'+l.s+'</span>'; labelHost.appendChild(el); labelEls.push({el, stop:si, dir:dirFrom(l.yaw,l.pitch)}); }); });
+
+/* ================= state ================= */
+let yaw=0, pitch=0, tYaw=0, tPitch=0, mouseX=0, mouseY=0, headX=0, headY=0;
+let p=0, tp=0; // walk progress 0..N-1
+let entered=false, lastScrollAt=0, sound=false, enterAt=0;
+const v3=new THREE.Vector3(), q=new THREE.Quaternion(), e=new THREE.Euler();
+function setLook(x,y){ tYaw = x*0.38; tPitch = -y*0.1; }
+window.addEventListener('pointermove', (ev)=>{ if (ev.pointerType==='touch') return; mouseX=(ev.clientX/innerWidth)*2-1; mouseY=(ev.clientY/innerHeight)*2-1; setLook(mouseX,mouseY); dropAt(ev.clientX, ev.clientY, 0.012); }, {passive:true});
+window.addEventListener('pointerdown', (ev)=>{ if (ev.target.closest('.hud,#cta,#intro')) return; dropAt(ev.clientX, ev.clientY, 0.22); });
+// touch: horizontal drag looks, vertical scroll walks
+let tx0=0, tyaw0=0;
+holder.addEventListener('touchstart', (ev)=>{ tx0=ev.touches[0].clientX; tyaw0=tYaw; }, {passive:true});
+holder.addEventListener('touchmove', (ev)=>{ const dx=(ev.touches[0].clientX-tx0)/innerWidth; tYaw=THREE.MathUtils.clamp(tyaw0 - dx*1.4, -0.5, 0.5); dropAt(ev.touches[0].clientX, ev.touches[0].clientY, 0.03); }, {passive:true});
+// gyro (iOS asks on first tap)
+function enableGyro(){ const go=()=>window.addEventListener('deviceorientation', (ev)=>{ if (ev.gamma==null) return; const g=THREE.MathUtils.degToRad(ev.gamma), b=THREE.MathUtils.degToRad(ev.beta); tYaw = THREE.MathUtils.clamp(-g*0.9,-0.5,0.5); tPitch = THREE.MathUtils.clamp((b-Math.PI/4)*0.5,-0.15,0.15); }, {passive:true});
+  if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then((r)=>{ if (r==='granted') go(); }).catch(()=>{}); } else if ('ondeviceorientation' in window && matchMedia('(pointer:coarse)').matches) go(); }
+
+function screenToDir(x,y){ v3.set((x/innerWidth)*2-1, -(y/innerHeight)*2+1, 0.5).unproject(camera).sub(camera.position).normalize(); return v3; }
+const FOVX=THREE.MathUtils.degToRad(140), FOVY=THREE.MathUtils.degToRad(70);
+function dirToUv(d){ return [Math.atan2(d.x,-d.z)/FOVX+0.5, Math.asin(THREE.MathUtils.clamp(d.y,-1,1))/FOVY+0.5]; }
+let dropToggle=0;
+function dropAt(x,y,strength){ const d=screenToDir(x,y); const uv=dirToUv(d); const u=dropToggle++%2? simMat.uniforms.drop2.value : simMat.uniforms.drop.value; u.set(uv[0],uv[1],strength); }
+
+/* scroll → walk */
+const track=document.getElementById('track'); track.style.height=((N-1)*240+100)+'vh';
+function onScroll(){ const max=track.offsetHeight-innerHeight; tp=THREE.MathUtils.clamp(scrollY/max,0,1)*(N-1); lastScrollAt=performance.now(); document.getElementById('hint').classList.toggle('off', scrollY>40); }
+window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+/* HUD text */
+let curStop=-1; const stopTxt=document.getElementById('stop-txt');
+function setStop(i){ if (i===curStop) return; curStop=i; const s=STOPS[i]; stopTxt.classList.add('swap'); setTimeout(()=>{ document.getElementById('stop-n').textContent=('0'+(i+1)).slice(-2); document.getElementById('stop-k').textContent=s.k; document.getElementById('stop-h').innerHTML=s.h; document.getElementById('stop-p').textContent=s.p; document.getElementById('lvl-lbl').textContent=s.k; stopTxt.classList.remove('swap'); }, 360); }
+
+/* ================= frame ================= */
+let last=performance.now();
+function frame(now){
+  requestAnimationFrame(frame); const dt=Math.min(0.05,(now-last)/1000); last=now; const t=now;
+  // walk easing (so even a flick glides)
+  const kp=1-Math.exp(-dt*(REEL?6:4.5)); p+=(tp-p)*kp; if (Math.abs(tp-p)<0.0005) p=tp;
+  const i=Math.min(N-1, Math.floor(p)), f=p-i; const s=STOPS[i], s2=STOPS[Math.min(N-1,i+1)];
+  // reel: gentle automatic look-around
+  if (REEL){ tYaw=Math.sin(t*0.00022)*0.3; tPitch=Math.sin(t*0.00017)*0.06-0.02; }
+  // idle drift when the mouse hasn't moved on a stop (keeps the world breathing)
+  const ky=1-Math.exp(-dt*3.2); yaw+=(tYaw+Math.sin(t*0.0003)*0.025-yaw)*ky; pitch+=(tPitch+Math.sin(t*0.00023)*0.012-pitch)*ky;
+  headX+=(mouseX-headX)*ky; headY+=(mouseY-headY)*ky;
+  // camera: look + small head offset + forward walk within the sphere
+  const walk = f<0.6 ? THREE.MathUtils.smoothstep(f,0,0.6)*9.0 : 9.0;         // 0 → 9 units forward over the stop
+  const xf = THREE.MathUtils.smoothstep(f,0.6,1.0);                           // crossfade to next stop
+  const walk2 = s2.hold ? walk : -7.0*(1-xf);                                  // next stop starts 7 units back and glides in (or holds the same camera for a time-lapse dissolve)
+  const dip = (!s.under && s2.under) ? -0.5*Math.sin(Math.PI*xf)*xf : 0.0; e.set(pitch+dip, -yaw, 0, 'YXZ'); q.setFromEuler(e); camera.quaternion.copy(q);
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(q), right=new THREE.Vector3(1,0,0).applyQuaternion(q);
+  camera.position.set(0,0,0).addScaledVector(right, headX*1.6).addScaledVector(new THREE.Vector3(0,1,0), -headY*0.6);
+  camera.fov = (innerWidth<innerHeight? 62:54) - 4*THREE.MathUtils.smoothstep(f,0,1) + (s.under?3:0); camera.updateProjectionMatrix();
+  // spheres
+  const A=stopTex[i], B=stopTex[Math.min(N-1,i+1)];
+  sphA.material.uniforms.map.value=A.pano; sphA.material.uniforms.depthMap.value=A.depth; sphA.material.uniforms.hasDepth.value=A.depth?1:0; sphA.material.uniforms.opacity.value=1; const gate = entered ? THREE.MathUtils.smoothstep((t-enterAt)/2600,0,1) : 0.0; sphA.material.uniforms.exposure.value=(1.0-0.15*xf)*(0.15+0.85*gate);
+  sphA.position.copy(fwd).multiplyScalar(-walk);     // moving the sphere back == camera walking forward
+  sphB.material.uniforms.map.value=B.pano; sphB.material.uniforms.depthMap.value=B.depth; sphB.material.uniforms.hasDepth.value=B.depth?1:0; sphB.material.uniforms.opacity.value= (i<N-1)? xf : 0; sphB.material.uniforms.exposure.value=1.0; sphB.visible = i<N-1 && xf>0.001;
+  sphB.position.copy(fwd).multiplyScalar(-walk2);
+  sphA.material.uniforms.time.value=sphB.material.uniforms.time.value=t;
+  // fx blend between stops
+  fireflies.material.uniforms.opacity.value=THREE.MathUtils.lerp(s.fx.fireflies, s2.fx.fireflies, xf); fireflies.position.copy(sphA.position);
+  bubbles.material.uniforms.opacity.value=THREE.MathUtils.lerp(s.fx.bubbles, s2.fx.bubbles, xf); bubbles.position.copy(sphA.position);
+  placeEmitter(fireFar, s.fx.fire, s2.fx.fire, xf, sphA.position); placeEmitter(firePit, s.fx.pit, s2.fx.pit, xf, sphA.position); placeEmitter(steam, s.fx.steam, s2.fx.steam, xf, sphA.position);
+  [fireflies,steam,fireFar,firePit,bubbles].forEach((pt)=>{ pt.material.uniforms.time.value=t; });
+  // post uniforms
+  const under=THREE.MathUtils.lerp(s.under?1:0, s2.under?1:0, xf);
+  postMat.uniforms.under.value=under; postMat.uniforms.splash.value = ((s.under?1:0)!==(s2.under?1:0)) ? Math.pow(4*xf*(1-xf),6.0) : 0.0; postMat.uniforms.time.value=t; postMat.uniforms.aspect.value=innerWidth/innerHeight; postMat.uniforms.dusk.value=1-THREE.MathUtils.lerp(s.night,s2.night,xf);
+  postMat.uniforms.mask.value = xf<0.5 ? A.mask : B.mask; postMat.uniforms.hasMask.value = postMat.uniforms.mask.value?1:0; postMat.uniforms.ripple.value=1-under;
+  camera.updateMatrixWorld(); postMat.uniforms.invPV.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).invert();
+  // sim + render
+  runSim(); postMat.uniforms.height.value=simA.texture;
+  renderer.setRenderTarget(sceneRT); renderer.render(scene, camera); renderer.setRenderTarget(null); renderer.render(postScene, quadCam);
+  // hud
+  setStop(xf>0.5? Math.min(N-1,i+1) : i);
+  document.getElementById('lvl').style.height=(p/(N-1)*100).toFixed(1)+'%';
+  const ctaOn = p > N-1-0.35; document.getElementById('cta').classList.toggle('on', ctaOn && entered);
+  // labels: project
+  const active = xf>0.5? Math.min(N-1,i+1) : i; const show = (f>0.12 && f<0.62) || (i===N-1);
+  labelEls.forEach((L)=>{ const on = L.stop===active && show && entered && !REEL; if (!on){ L.el.classList.remove('on'); return; } v3.copy(L.dir).multiplyScalar(40).sub(camera.position); const behind = v3.dot(fwd) < 4; v3.add(camera.position).project(camera); if (behind || Math.abs(v3.x)>1.05 || Math.abs(v3.y)>1.05){ L.el.classList.remove('on'); return; } L.el.style.left=((v3.x+1)/2*innerWidth)+'px'; L.el.style.top=((1-v3.y)/2*innerHeight)+'px'; L.el.classList.add('on'); });
+  // preload ahead
+  if (f>0.3 && i+2<N) loadStop(i+2);
+}
+
+/* ================= resize ================= */
+window.addEventListener('resize', ()=>{ renderer.setSize(innerWidth, innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio()); postMat.uniforms.resolution.value.set(innerWidth,innerHeight); onScroll(); });
+sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio());
+
+/* ================= audio (ambient loops crossfaded by stop) ================= */
+let actx=null, gains=[]; const AUDIO=['audio/dusk.mp3','audio/deck.mp3','audio/under.mp3','audio/night.mp3','audio/fire.mp3'];
+function startAudio(){ if (actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  AUDIO.forEach((url,i)=>{ const el=new Audio(url); el.loop=true; el.crossOrigin='anonymous'; el.volume=1; const src=actx.createMediaElementSource(el); const g=actx.createGain(); g.gain.value=0; src.connect(g).connect(actx.destination); el.play().catch(()=>{}); gains.push(g); });
+  setInterval(()=>{ if (!sound) return; const i=Math.min(N-1,Math.floor(p)), f=p-i; const xf=THREE.MathUtils.smoothstep(f,0.6,1); gains.forEach((g,k)=>{ let v=0; if (k===i) v=1-xf; if (k===i+1) v=xf; g.gain.setTargetAtTime(v*0.8, actx.currentTime, 0.4); }); }, 120); }
+function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textContent=on?'Sound on':'Sound off'; b.setAttribute('aria-pressed', on); if (on) startAudio(); if (!on && gains.length) gains.forEach((g)=>g.gain.setTargetAtTime(0, actx.currentTime, 0.3)); if (on && actx) actx.resume(); }
+document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
+
+/* ================= enter ================= */
+function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
+document.getElementById('enter').addEventListener('click', ()=>enter(false));
+document.getElementById('enter-sound').addEventListener('click', ()=>enter(true));
+document.getElementById('skip').addEventListener('click', ()=>{ window.scrollTo({top:track.offsetHeight-innerHeight, behavior:'smooth'}); });
+document.querySelector('.brand').addEventListener('click', (ev)=>{ ev.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); });
+function autoWalk(){ const start=performance.now(), to=track.offsetHeight-innerHeight, dur=REEL*1000; (function step(now){ const x=Math.min(1,(now-start)/dur); const e2=x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0,to*e2); if (x<1) requestAnimationFrame(step); })(start); }
+
+/* ================= lead form ================= */
+document.getElementById('lead').addEventListener('submit', (ev)=>{ ev.preventDefault(); const err=document.getElementById('form-err'); err.textContent=''; const name=document.getElementById('f-name').value.trim(), phone=document.getElementById('f-phone').value.trim(); if (!name){ err.textContent='Your name, so we know who to text.'; return; } if (!/^[\d\s().+-]{7,}$/.test(phone)){ err.textContent='That number doesn\'t look right.'; return; } document.getElementById('lead').classList.add('sent'); });
+
+/* ================= boot: load first two stops, then open the gate ================= */
+const bar=document.getElementById('load-bar'); let loaded=0; const need=2;
+Promise.all([loadStop(0).then(()=>{ bar.style.width=(++loaded/need*100)+'%'; }), loadStop(1).then(()=>{ bar.style.width=(++loaded/need*100)+'%'; })]).then(()=>{ document.getElementById('enter').disabled=false; if (REEL) setTimeout(()=>enter(false), 600); });
+requestAnimationFrame(frame);
+</script>
+
+</body>
+</html>
