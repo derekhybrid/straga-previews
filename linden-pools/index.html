@@ -196,10 +196,10 @@ const MAXTEX=renderer.capabilities.maxTextureSize;
 
 /* ================= panorama sphere with depth parallax ================= */
 const sphereVS=`
-  uniform sampler2D depthMap; uniform float hasDepth; uniform float parallax; uniform vec2 fov;
+  uniform sampler2D depthMap; uniform float hasDepth; uniform float parallax; uniform vec2 fov; uniform vec2 fovMap;
   varying vec3 vDir; varying vec2 vUv2;
   const float PI=3.14159265;
-  vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fov.x+0.5, asin(clamp(d.y,-1.0,1.0))/fov.y+0.5); }
+  vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fovMap.x+0.5, asin(clamp(d.y,-1.0,1.0))/fovMap.y+0.5); }
   void main(){
     vec3 d=normalize(position); vDir=d; vUv2=dirToUv(d);
     vec2 cu=clamp(vUv2, 0.0, 1.0);
@@ -222,7 +222,7 @@ const sphereFS=`
   }`;
 function makeSphere(){
   const geo=new THREE.SphereGeometry(1, 192, 96);
-  const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
+  const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, fovMap:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
   const m=new THREE.Mesh(geo, mat); m.frustumCulled=false; scene.add(m); return m;
 }
 const sphA=makeSphere(), sphB=makeSphere(); sphA.renderOrder=0; sphB.renderOrder=1;
@@ -233,8 +233,14 @@ const tex={}, pending={};
 function loadTex(url, srgb){ if (tex[url]) return Promise.resolve(tex[url]); if (pending[url]) return pending[url];
   pending[url]=new Promise((res)=>{ loader.load(url, (t)=>{ t.colorSpace=srgb?THREE.SRGBColorSpace:THREE.NoColorSpace; t.minFilter=THREE.LinearMipmapLinearFilter; t.magFilter=THREE.LinearFilter; t.generateMipmaps=true; t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; tex[url]=t; res(t); }, undefined, ()=>{ tex[url]=null; res(null); }); });
   return pending[url]; }
-const stopTex=STOPS.map(()=>({pano:null,depth:null,mask:null,fire:null,ready:false}));
-async function loadStop(i){ const s=STOPS[i]; if (stopTex[i].ready) return; const [p,d,m,f]=await Promise.all([loadTex(PANO(s),true), loadTex(DEPTH(s),false), loadTex(MASK(s),false), loadTex(FIRE(s),false)]); stopTex[i]={pano:p,depth:d,mask:m,fire:f,ready:!!p}; }
+const stopTex=STOPS.map(()=>({pano:null,depth:null,mask:null,fire:null,video:null,vtex:null,vfov:null,ready:false}));
+const LOOP=(s)=>'pano/'+s.id+'-loop.mp4';
+function attachVideo(i){ const st=stopTex[i]; if (st.video) return; const v=document.createElement('video'); v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.crossOrigin='anonymous'; v.src=LOOP(STOPS[i]);
+  v.addEventListener('loadedmetadata', ()=>{ st.vfov=new THREE.Vector2(THREE.MathUtils.degToRad(140), THREE.MathUtils.degToRad(140)*(v.videoHeight/v.videoWidth)); });
+  v.addEventListener('error', ()=>{ st.video=null; }, {once:true});
+  const vt=new THREE.VideoTexture(v); vt.colorSpace=THREE.SRGBColorSpace; vt.minFilter=THREE.LinearFilter; vt.magFilter=THREE.LinearFilter; vt.generateMipmaps=false; vt.wrapS=vt.wrapT=THREE.ClampToEdgeWrapping; st.video=v; st.vtex=vt; }
+function videoReady(st){ return st.video && st.video.readyState>=3 && st.vfov; }
+async function loadStop(i){ const s=STOPS[i]; if (stopTex[i].ready) return; const [p,d,m,f]=await Promise.all([loadTex(PANO(s),true), loadTex(DEPTH(s),false), loadTex(MASK(s),false), loadTex(FIRE(s),false)]); Object.assign(stopTex[i],{pano:p,depth:d,mask:m,fire:f,ready:!!p}); attachVideo(i); }
 
 /* ================= particles (fireflies / steam / fire / bubbles) ================= */
 const ptVS=`
@@ -398,7 +404,7 @@ function enableGyro(){ const go=()=>window.addEventListener('deviceorientation',
   if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then((r)=>{ if (r==='granted') go(); }).catch(()=>{}); } else if ('ondeviceorientation' in window && matchMedia('(pointer:coarse)').matches) go(); }
 
 function screenToDir(x,y){ v3.set((x/innerWidth)*2-1, -(y/innerHeight)*2+1, 0.5).unproject(camera).sub(camera.position).normalize(); return v3; }
-const FOVX=THREE.MathUtils.degToRad(140), FOVY=THREE.MathUtils.degToRad(70);
+const FOVX=THREE.MathUtils.degToRad(140), FOVY=THREE.MathUtils.degToRad(70); const FOV21=new THREE.Vector2(FOVX,FOVY);
 function dirToUv(d){ return [Math.atan2(d.x,-d.z)/FOVX+0.5, Math.asin(THREE.MathUtils.clamp(d.y,-1,1))/FOVY+0.5]; }
 let dropToggle=0;
 function dropAt(x,y,strength){ const d=screenToDir(x,y); const uv=dirToUv(d); if (uv[0]>0.74 || uv[1]>0.5) return; const u=dropToggle++%2? simMat.uniforms.drop2.value : simMat.uniforms.drop.value; u.set(uv[0],uv[1],strength); }
@@ -435,9 +441,12 @@ function frame(now){
   // spheres
   const A=stopTex[i], B=stopTex[Math.min(N-1,i+1)];
   sphA.material.uniforms.parallax.value=(s.parallax!=null? s.parallax: 0.72); sphB.material.uniforms.parallax.value=(s2.parallax!=null? s2.parallax: 0.72);
-  sphA.material.uniforms.map.value=A.pano; sphA.material.uniforms.depthMap.value=A.depth; sphA.material.uniforms.hasDepth.value=A.depth?1:0; sphA.material.uniforms.opacity.value=1; const gate = entered ? THREE.MathUtils.smoothstep((t-enterAt)/2600,0,1) : 0.0; sphA.material.uniforms.exposure.value=(1.0-0.15*xf)*(0.15+0.85*gate);
+  stopTex.forEach((st,k)=>{ if (!st.video) return; const near = k===i || k===i+1; if (near && entered){ if (st.video.paused) st.video.play().catch(()=>{}); } else if (!st.video.paused) st.video.pause(); });
+  const useA=videoReady(A), useB=videoReady(B);
+  sphA.material.uniforms.fov.value.copy(useA? A.vfov : FOV21); sphB.material.uniforms.fov.value.copy(useB? B.vfov : FOV21);
+  sphA.material.uniforms.map.value=useA? A.vtex : A.pano; sphA.material.uniforms.depthMap.value=A.depth; sphA.material.uniforms.hasDepth.value=A.depth?1:0; sphA.material.uniforms.opacity.value=1; const gate = entered ? THREE.MathUtils.smoothstep((t-enterAt)/2600,0,1) : 0.0; sphA.material.uniforms.exposure.value=(1.0-0.15*xf)*(0.15+0.85*gate);
   sphA.position.copy(fwd).multiplyScalar(-walk);     // moving the sphere back == camera walking forward
-  sphB.material.uniforms.map.value=B.pano; sphB.material.uniforms.depthMap.value=B.depth; sphB.material.uniforms.hasDepth.value=B.depth?1:0; sphB.material.uniforms.opacity.value= (i<N-1)? xf : 0; sphB.material.uniforms.exposure.value=1.0; sphB.visible = i<N-1 && xf>0.001;
+  sphB.material.uniforms.map.value=useB? B.vtex : B.pano; sphB.material.uniforms.depthMap.value=B.depth; sphB.material.uniforms.hasDepth.value=B.depth?1:0; sphB.material.uniforms.opacity.value= (i<N-1)? xf : 0; sphB.material.uniforms.exposure.value=1.0; sphB.visible = i<N-1 && xf>0.001;
   sphB.position.copy(fwd).multiplyScalar(-walk2);
   sphA.material.uniforms.time.value=sphB.material.uniforms.time.value=t;
   // fx blend between stops
@@ -448,7 +457,7 @@ function frame(now){
   // post uniforms
   const under=THREE.MathUtils.lerp(s.under?1:0, s2.under?1:0, xf);
   postMat.uniforms.under.value=under; postMat.uniforms.splash.value = ((s.under?1:0)!==(s2.under?1:0)) ? Math.pow(4*xf*(1-xf),6.0) : 0.0; postMat.uniforms.time.value=t; postMat.uniforms.aspect.value=innerWidth/innerHeight; postMat.uniforms.dusk.value=1-THREE.MathUtils.lerp(s.night,s2.night,xf);
-  postMat.uniforms.mask.value = xf<0.5 ? A.mask : B.mask; postMat.uniforms.hasMask.value = postMat.uniforms.mask.value?1:0; postMat.uniforms.ripple.value=1-under;
+  postMat.uniforms.mask.value = xf<0.5 ? A.mask : B.mask; postMat.uniforms.hasMask.value = postMat.uniforms.mask.value?1:0; postMat.uniforms.ripple.value=(1-under)*((xf<0.5? useA: useB)? 0.3 : 1.0);
   postMat.uniforms.fireA.value=A.fire||blackTex; postMat.uniforms.fireB.value=B.fire||blackTex; postMat.uniforms.fireMix.value = (i<N-1)? xf : 0;
   camera.updateMatrixWorld(); postMat.uniforms.invPV.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).invert();
   // sim + render
@@ -478,7 +487,7 @@ function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textC
 document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
 
 /* ================= enter ================= */
-function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
+function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); stopTex.forEach((st,k)=>{ if (st.video && k<2) st.video.play().catch(()=>{}); }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
 document.getElementById('enter').addEventListener('click', ()=>enter(false));
 document.getElementById('enter-sound').addEventListener('click', ()=>enter(true));
 document.getElementById('skip').addEventListener('click', ()=>{ window.scrollTo({top:track.offsetHeight-innerHeight, behavior:'smooth'}); });
