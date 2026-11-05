@@ -220,6 +220,14 @@ const sphereFS=`
     c*=exposure*edge;
     gl_FragColor=vec4(c, opacity);
   }`;
+const maskFS=`
+  uniform sampler2D mask, fire; uniform float hasMask, hasFire, opacity;
+  varying vec3 vDir; varying vec2 vUv2;
+  void main(){ vec2 cu=clamp(vUv2,0.0,1.0); bool inside = vUv2.x>0.0 && vUv2.x<1.0 && vUv2.y>0.0 && vUv2.y<1.0;
+    float w = (hasMask>0.5 && inside) ? texture2D(mask, cu).r : 0.0; vec3 f = (hasFire>0.5 && inside) ? texture2D(fire, cu).rgb : vec3(0.0);
+    gl_FragColor=vec4(w, f.r, f.b, opacity); }`;
+function makeMaskMat(){ return new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:maskFS, uniforms:{depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(1,1)}, fovMap:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, mask:{value:null}, fire:{value:null}, hasMask:{value:0}, hasFire:{value:0}, opacity:{value:1}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false}); }
+const maskMatA=makeMaskMat(), maskMatB=makeMaskMat();
 function makeSphere(){
   const geo=new THREE.SphereGeometry(1, 192, 96);
   const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, fovMap:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
@@ -299,6 +307,9 @@ const rtOpts={minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, format
 let simA=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts), simB=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts), simC=new THREE.WebGLRenderTarget(SIMW,SIMH,rtOpts);
 simA.texture.wrapS=simB.texture.wrapS=simC.texture.wrapS=THREE.ClampToEdgeWrapping;
 const sceneRT=new THREE.WebGLRenderTarget(innerWidth, innerHeight, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthBuffer:false, stencilBuffer:false});
+const maskRT=new THREE.WebGLRenderTarget(Math.round(innerWidth/2), Math.round(innerHeight/2), {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthBuffer:false, stencilBuffer:false});
+function syncMask(mm, sm, st){ mm.uniforms.depthMap.value=sm.uniforms.depthMap.value; mm.uniforms.hasDepth.value=sm.uniforms.hasDepth.value; mm.uniforms.parallax.value=sm.uniforms.parallax.value; mm.uniforms.opacity.value=sm.uniforms.opacity.value; mm.uniforms.mask.value=st.mask; mm.uniforms.hasMask.value=st.mask?1:0; mm.uniforms.fire.value=st.fire; mm.uniforms.hasFire.value=st.fire?1:0; }
+function runMaskPass(A,B){ syncMask(maskMatA, sphA.material, A); syncMask(maskMatB, sphB.material, B); const ma=sphA.material, mb=sphB.material; sphA.material=maskMatA; sphB.material=maskMatB; const pts=[fireflies,steam,fireFar,firePit,bubbles]; const vis=pts.map(p=>p.visible); pts.forEach(p=>p.visible=false); renderer.setRenderTarget(maskRT); renderer.setClearColor(0x000000,0); renderer.clear(); renderer.render(scene, camera); sphA.material=ma; sphB.material=mb; pts.forEach((p,i)=>p.visible=vis[i]); }
 const quadGeo=new THREE.PlaneGeometry(2,2); const quadCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1); const quadScene=new THREE.Scene();
 const simMat=new THREE.ShaderMaterial({uniforms:{prev:{value:null}, prev2:{value:null}, drop:{value:new THREE.Vector3(-10,-10,0)}, drop2:{value:new THREE.Vector3(-10,-10,0)}, texel:{value:new THREE.Vector2(1/SIMW,1/SIMH)}, damp:{value:0.975}},
   vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
@@ -309,9 +320,9 @@ const simMat=new THREE.ShaderMaterial({uniforms:{prev:{value:null}, prev2:{value
       vec2 d2=vUv-drop2.xy; d2.x*=2.0; n+=exp(-dot(d2,d2)*9000.0)*drop2.z;
       gl_FragColor=vec4(n,0.,0.,1.); }`});
 const simMesh=new THREE.Mesh(quadGeo, simMat); quadScene.add(simMesh);
-const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, tex:{value:sceneRT.texture}, bloom:{value:null}, height:{value:null}, mask:{value:null}, hasMask:{value:0}, fireA:{value:null}, fireB:{value:null}, fireMix:{value:0}, invPV:{value:new THREE.Matrix4()}, time:{value:0}, under:{value:0}, aspect:{value:1}, vig:{value:1}, dusk:{value:0}, ripple:{value:1}, splash:{value:0}, resolution:{value:new THREE.Vector2(innerWidth,innerHeight)}},
+const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, tex:{value:sceneRT.texture}, bloom:{value:null}, height:{value:null}, mask:{value:null}, hasMask:{value:0}, fireA:{value:null}, fireB:{value:null}, fireMix:{value:0}, masks:{value:maskRT.texture}, invPV:{value:new THREE.Matrix4()}, time:{value:0}, under:{value:0}, aspect:{value:1}, vig:{value:1}, dusk:{value:0}, ripple:{value:1}, splash:{value:0}, resolution:{value:new THREE.Vector2(innerWidth,innerHeight)}},
   vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
-  fragmentShader:`uniform sampler2D tex, bloom, height, mask, fireA, fireB; uniform float hasMask, time, under, aspect, vig, dusk, ripple, splash, fireMix; uniform mat4 invPV; uniform vec2 resolution; varying vec2 vUv;
+  fragmentShader:`uniform sampler2D tex, bloom, height, mask, fireA, fireB, masks; uniform float hasMask, time, under, aspect, vig, dusk, ripple, splash, fireMix; uniform mat4 invPV; uniform vec2 resolution; varying vec2 vUv;
     const float PI=3.14159265;
     uniform vec2 fov;
     vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fov.x+0.5, asin(clamp(d.y,-1.0,1.0))/fov.y+0.5); }
@@ -323,7 +334,7 @@ const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(T
       vec2 eq=dirToUv(dir); bool inside = eq.x>0.0 && eq.x<1.0 && eq.y>0.0 && eq.y<1.0;
       float t=time*0.001;
       // ---------- water: a living surface, not a lens ----------
-      float m = (hasMask>0.5 && inside) ? texture2D(mask, eq).r : 0.0;
+      vec4 mk=texture2D(masks, vUv); float m = mk.r;
       vec2 off=vec2(0.0); float glint=0.0;
       if (m>0.01 && ripple>0.0){
         float persp = smoothstep(0.5,0.12,eq.y);                       // nearer water (lower in frame) moves more
@@ -339,7 +350,7 @@ const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(T
         glint = (pow(clamp(1.0-abs(g.y*6.0),0.0,1.0),10.0)*0.5*persp + ring*0.6) * m;
       }
       // ---------- fire: shimmer + flicker inside the real flames ----------
-      vec3 fa = inside ? texture2D(fireA, eq).rgb : vec3(0.0); vec3 fb = inside ? texture2D(fireB, eq).rgb : vec3(0.0); vec3 fm = mix(fa, fb, fireMix);
+      vec3 fm = vec3(mk.g, 0.0, mk.b);
       float flick = 0.86 + 0.22*noise(vec2(t*2.6, 1.3)) + 0.12*noise(vec2(t*9.0, 7.7));
       if (fm.r>0.02){
         // no warping: only a faint internal lick inside the brightest part of the flames
@@ -462,7 +473,7 @@ function frame(now){
   camera.updateMatrixWorld(); postMat.uniforms.invPV.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).invert();
   // sim + render
   runSim(); postMat.uniforms.height.value=simA.texture;
-  renderer.setRenderTarget(sceneRT); renderer.render(scene, camera); runBloom(); renderer.setRenderTarget(null); renderer.render(postScene, quadCam);
+  runMaskPass(A,B); renderer.setRenderTarget(sceneRT); renderer.render(scene, camera); runBloom(); renderer.setRenderTarget(null); renderer.render(postScene, quadCam);
   // hud
   setStop(xf>0.5? Math.min(N-1,i+1) : i);
   document.getElementById('lvl').style.height=(p/(N-1)*100).toFixed(1)+'%';
@@ -475,7 +486,7 @@ function frame(now){
 }
 
 /* ================= resize ================= */
-window.addEventListener('resize', ()=>{ renderer.setSize(innerWidth, innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio()); postMat.uniforms.resolution.value.set(innerWidth,innerHeight); const nbw=Math.max(64,Math.round(innerWidth/4)), nbh=Math.max(64,Math.round(innerHeight/4)); bloomA.setSize(nbw,nbh); bloomB.setSize(nbw,nbh); blurMat.uniforms.texel.value.set(1/nbw,1/nbh); onScroll(); });
+window.addEventListener('resize', ()=>{ renderer.setSize(innerWidth, innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio()); postMat.uniforms.resolution.value.set(innerWidth,innerHeight); const nbw=Math.max(64,Math.round(innerWidth/4)), nbh=Math.max(64,Math.round(innerHeight/4)); bloomA.setSize(nbw,nbh); bloomB.setSize(nbw,nbh); maskRT.setSize(Math.round(innerWidth/2), Math.round(innerHeight/2)); blurMat.uniforms.texel.value.set(1/nbw,1/nbh); onScroll(); });
 sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio());
 
 /* ================= audio (ambient loops crossfaded by stop) ================= */
