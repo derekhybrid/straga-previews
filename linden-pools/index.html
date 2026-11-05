@@ -164,16 +164,16 @@ const STOPS=[
   {id:'arrival', k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
     fx:{fireflies:.5, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:0},
     labels:[{yaw:-46,pitch:-20,b:'Path lighting',s:'warm 2700K, dusk to dawn'},{yaw:0,pitch:-3,b:'The pool',s:'sixty feet ahead'}]},
-  {id:'deck', k:'The deck', h:'Stand at <em>the edge.</em>', p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
+  {id:'deck', k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
     fx:{fireflies:.4, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.7}, bubbles:0},
     labels:[{yaw:-50,pitch:-8,b:'Tanning ledge',s:'9 inches of water, two loungers'},{yaw:46,pitch:-1,b:'Raised spa',s:'104°, glass-tile spillover'},{yaw:0,pitch:3,b:'Fire feature',s:'linear burner, 40,000 BTU'}]},
-  {id:'water', k:'The water', h:'Go <em>under.</em>', p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
+  {id:'water', k:'The water', h:'Go <em>under.</em>', parallax:0.45, walk:6, p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
     fx:{fireflies:0, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:1},
     labels:[{yaw:0,pitch:-22,b:'Pebble finish',s:'midnight blue, 15-year'},{yaw:-21,pitch:-7,b:'Sun shelf',s:'from below'}]},
-  {id:'night', k:'Night', h:'Then it gets <em>dark.</em>', p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
+  {id:'night', k:'Night', h:'Then it gets <em>dark.</em>', parallax:0.6, walk:7, p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
     fx:{fireflies:1, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.8}, bubbles:0},
     labels:[{yaw:-42,pitch:-8,b:'Landscape lighting',s:'every path, every bed'},{yaw:46,pitch:-2,b:'Automation',s:'lights, heat and fire from one app'}]},
-  {id:'fire', k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true,
+  {id:'fire', k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true, parallax:0.28, walk:2.5,
     fx:{fireflies:.8, fire:{op:0}, pit:{yaw:0,pitch:-22,r:21,op:.45}, steam:{yaw:32,pitch:0,r:46,op:.35}, bubbles:0},
     labels:[]}
 ];
@@ -203,7 +203,7 @@ const sphereVS=`
   void main(){
     vec3 d=normalize(position); vDir=d; vUv2=dirToUv(d);
     vec2 cu=clamp(vUv2, 0.0, 1.0);
-    float dep = hasDepth>0.5 ? texture2D(depthMap, cu).r : 0.0;
+    float dep = hasDepth>0.5 ? texture2D(depthMap, cu).r : 0.0; dep = dep*dep*(3.0-2.0*dep)*0.85 + dep*0.15; dep = min(dep, 0.82);
     float r = 60.0*(1.0 - parallax*dep);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(d*r, 1.0);
   }`;
@@ -328,21 +328,21 @@ const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(T
         vec2 g = vec2(hx-h0, hy-h0);
         vec2 tx=vec2(1.0/512.0,1.0/256.0); float hl=texture2D(height,eq-vec2(tx.x,0.)).r, hr=texture2D(height,eq+vec2(tx.x,0.)).r, hu=texture2D(height,eq+vec2(0.,tx.y)).r, hd=texture2D(height,eq-vec2(0.,tx.y)).r;
         vec2 rg = vec2(hr-hl, hu-hd);
-        off = (g*0.012*(0.25+persp) + rg*0.05) * m * ripple; off.x*=0.35;   // reflections slide mostly vertically
-        float ring = smoothstep(0.004,0.03,length(rg));
+        off = (g*0.012*(0.25+persp) + rg*0.02) * m * ripple; off.x*=0.35;   // reflections slide mostly vertically
+        float ring = smoothstep(0.006,0.04,length(rg))*persp;
         glint = (pow(clamp(1.0-abs(g.y*6.0),0.0,1.0),10.0)*0.5*persp + ring*0.6) * m;
       }
       // ---------- fire: shimmer + flicker inside the real flames ----------
       vec3 fa = inside ? texture2D(fireA, eq).rgb : vec3(0.0); vec3 fb = inside ? texture2D(fireB, eq).rgb : vec3(0.0); vec3 fm = mix(fa, fb, fireMix);
       float flick = 0.86 + 0.22*noise(vec2(t*2.6, 1.3)) + 0.12*noise(vec2(t*9.0, 7.7));
-      if (fm.g>0.01){
-        float n1 = noise(eq*vec2(90.0,160.0) + vec2(0.0, -t*2.6)) - 0.5;      // heat rising through the air above the flames
-        float n2 = noise(eq*vec2(220.0,380.0) + vec2(t*0.7, -t*6.5)) - 0.5;    // the flames themselves, fast and fine
-        off += vec2(n1*0.9, n1*0.5)*0.009*fm.g + vec2(n2, n2*1.6)*0.006*fm.r;
+      if (fm.r>0.02){
+        // no warping: only a faint internal lick inside the brightest part of the flames
+        float n2 = noise(eq*vec2(260.0,420.0) + vec2(t*0.5, -t*7.0)) - 0.5;
+        off += vec2(0.0, n2)*0.0022*fm.r*fm.r;
       }
       vec3 c=texture2D(tex, vUv+off).rgb;
       c += vec3(1.0,0.93,0.8)*glint*0.35;
-      if (fm.b>0.003){ c *= 1.0 + fm.r*(flick-1.0)*1.6 + fm.b*(flick-1.0)*0.5; c += vec3(1.0,0.5,0.15)*fm.b*0.22*flick; }
+      if (fm.b>0.003){ float fl2 = 0.9 + 0.2*noise(vec2(t*3.1, eq.x*14.0)); c *= 1.0 + fm.r*(fl2-1.0)*1.4 + fm.b*(flick-1.0)*0.45; c += vec3(1.0,0.5,0.15)*fm.b*0.2*flick; }
       // ---------- bloom ----------
       c += texture2D(bloom, vUv+off*0.5).rgb*0.55;
       if (under>0.001){
@@ -387,12 +387,12 @@ let p=0, tp=0; // walk progress 0..N-1
 let entered=false, lastScrollAt=0, sound=false, enterAt=0;
 const v3=new THREE.Vector3(), q=new THREE.Quaternion(), e=new THREE.Euler();
 function setLook(x,y){ tYaw = x*0.38; tPitch = -y*0.1; }
-window.addEventListener('pointermove', (ev)=>{ if (ev.pointerType==='touch') return; mouseX=(ev.clientX/innerWidth)*2-1; mouseY=(ev.clientY/innerHeight)*2-1; setLook(mouseX,mouseY); dropAt(ev.clientX, ev.clientY, 0.012); }, {passive:true});
-window.addEventListener('pointerdown', (ev)=>{ if (ev.target.closest('.hud,#cta,#intro')) return; dropAt(ev.clientX, ev.clientY, 0.22); });
+window.addEventListener('pointermove', (ev)=>{ if (ev.pointerType==='touch') return; mouseX=(ev.clientX/innerWidth)*2-1; mouseY=(ev.clientY/innerHeight)*2-1; setLook(mouseX,mouseY); }, {passive:true});
+window.addEventListener('pointerdown', (ev)=>{ if (ev.target.closest('.hud,#cta,#intro')) return; dropAt(ev.clientX, ev.clientY, 0.05); });
 // touch: horizontal drag looks, vertical scroll walks
 let tx0=0, tyaw0=0;
 holder.addEventListener('touchstart', (ev)=>{ tx0=ev.touches[0].clientX; tyaw0=tYaw; }, {passive:true});
-holder.addEventListener('touchmove', (ev)=>{ const dx=(ev.touches[0].clientX-tx0)/innerWidth; tYaw=THREE.MathUtils.clamp(tyaw0 - dx*1.4, -0.5, 0.5); dropAt(ev.touches[0].clientX, ev.touches[0].clientY, 0.03); }, {passive:true});
+holder.addEventListener('touchmove', (ev)=>{ const dx=(ev.touches[0].clientX-tx0)/innerWidth; tYaw=THREE.MathUtils.clamp(tyaw0 - dx*1.4, -0.5, 0.5); }, {passive:true});
 // gyro (iOS asks on first tap)
 function enableGyro(){ const go=()=>window.addEventListener('deviceorientation', (ev)=>{ if (ev.gamma==null) return; const g=THREE.MathUtils.degToRad(ev.gamma), b=THREE.MathUtils.degToRad(ev.beta); tYaw = THREE.MathUtils.clamp(-g*0.9,-0.5,0.5); tPitch = THREE.MathUtils.clamp((b-Math.PI/4)*0.5,-0.15,0.15); }, {passive:true});
   if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then((r)=>{ if (r==='granted') go(); }).catch(()=>{}); } else if ('ondeviceorientation' in window && matchMedia('(pointer:coarse)').matches) go(); }
@@ -401,7 +401,7 @@ function screenToDir(x,y){ v3.set((x/innerWidth)*2-1, -(y/innerHeight)*2+1, 0.5)
 const FOVX=THREE.MathUtils.degToRad(140), FOVY=THREE.MathUtils.degToRad(70);
 function dirToUv(d){ return [Math.atan2(d.x,-d.z)/FOVX+0.5, Math.asin(THREE.MathUtils.clamp(d.y,-1,1))/FOVY+0.5]; }
 let dropToggle=0;
-function dropAt(x,y,strength){ const d=screenToDir(x,y); const uv=dirToUv(d); const u=dropToggle++%2? simMat.uniforms.drop2.value : simMat.uniforms.drop.value; u.set(uv[0],uv[1],strength); }
+function dropAt(x,y,strength){ const d=screenToDir(x,y); const uv=dirToUv(d); if (uv[0]>0.74 || uv[1]>0.5) return; const u=dropToggle++%2? simMat.uniforms.drop2.value : simMat.uniforms.drop.value; u.set(uv[0],uv[1],strength); }
 
 /* scroll → walk */
 const track=document.getElementById('track'); track.style.height=((N-1)*240+100)+'vh';
@@ -425,15 +425,16 @@ function frame(now){
   const ky=1-Math.exp(-dt*3.2); yaw+=(tYaw+Math.sin(t*0.0003)*0.025-yaw)*ky; pitch+=(tPitch+Math.sin(t*0.00023)*0.012-pitch)*ky;
   headX+=(mouseX-headX)*ky; headY+=(mouseY-headY)*ky;
   // camera: look + small head offset + forward walk within the sphere
-  const walk = f<0.6 ? THREE.MathUtils.smoothstep(f,0,0.6)*9.0 : 9.0;         // 0 → 9 units forward over the stop
+  const WALK=(s.walk!=null? s.walk: 9.0); const walk = f<0.6 ? THREE.MathUtils.smoothstep(f,0,0.6)*WALK : WALK;         // forward over the stop
   const xf = THREE.MathUtils.smoothstep(f,0.6,1.0);                           // crossfade to next stop
-  const walk2 = s2.hold ? walk : -7.0*(1-xf);                                  // next stop starts 7 units back and glides in (or holds the same camera for a time-lapse dissolve)
+  const walk2 = s2.hold ? walk : -(s2.walk!=null? s2.walk*0.8 : 7.0)*(1-xf);                                  // next stop starts 7 units back and glides in (or holds the same camera for a time-lapse dissolve)
   const dip = (!s.under && s2.under) ? -0.5*Math.sin(Math.PI*xf)*xf : 0.0; e.set(pitch+dip, -yaw, 0, 'YXZ'); q.setFromEuler(e); camera.quaternion.copy(q);
   const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(q), right=new THREE.Vector3(1,0,0).applyQuaternion(q);
   camera.position.set(0,0,0).addScaledVector(right, headX*1.6).addScaledVector(new THREE.Vector3(0,1,0), -headY*0.6);
   camera.fov = (innerWidth<innerHeight? 62:54) - 4*THREE.MathUtils.smoothstep(f,0,1) + (s.under?3:0); camera.updateProjectionMatrix();
   // spheres
   const A=stopTex[i], B=stopTex[Math.min(N-1,i+1)];
+  sphA.material.uniforms.parallax.value=(s.parallax!=null? s.parallax: 0.72); sphB.material.uniforms.parallax.value=(s2.parallax!=null? s2.parallax: 0.72);
   sphA.material.uniforms.map.value=A.pano; sphA.material.uniforms.depthMap.value=A.depth; sphA.material.uniforms.hasDepth.value=A.depth?1:0; sphA.material.uniforms.opacity.value=1; const gate = entered ? THREE.MathUtils.smoothstep((t-enterAt)/2600,0,1) : 0.0; sphA.material.uniforms.exposure.value=(1.0-0.15*xf)*(0.15+0.85*gate);
   sphA.position.copy(fwd).multiplyScalar(-walk);     // moving the sphere back == camera walking forward
   sphB.material.uniforms.map.value=B.pano; sphB.material.uniforms.depthMap.value=B.depth; sphB.material.uniforms.hasDepth.value=B.depth?1:0; sphB.material.uniforms.opacity.value= (i<N-1)? xf : 0; sphB.material.uniforms.exposure.value=1.0; sphB.visible = i<N-1 && xf>0.001;
