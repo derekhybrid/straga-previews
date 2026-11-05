@@ -161,19 +161,19 @@ import * as THREE from './vendor/three.module.min.js';
 
 /* ================= world config ================= */
 const STOPS=[
-  {id:'arrival', k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
+  {id:'arrival', vx:[0.985,0.985,0.0,0.0256], k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
     fx:{fireflies:.5, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:0},
     labels:[{yaw:-46,pitch:-20,b:'Path lighting',s:'warm 2700K, dusk to dawn'},{yaw:0,pitch:-3,b:'The pool',s:'sixty feet ahead'}]},
-  {id:'deck', k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
+  {id:'deck', vx:[0.98,0.98,0.0027,0.0285], k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
     fx:{fireflies:.4, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.7}, bubbles:0},
     labels:[{yaw:-50,pitch:-8,b:'Tanning ledge',s:'9 inches of water, two loungers'},{yaw:46,pitch:-1,b:'Raised spa',s:'104°, glass-tile spillover'},{yaw:0,pitch:3,b:'Fire feature',s:'linear burner, 40,000 BTU'}]},
-  {id:'water', k:'The water', h:'Go <em>under.</em>', parallax:0.45, walk:6, p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
+  {id:'water', vx:[0.985,0.985,0.0,0.015], k:'The water', h:'Go <em>under.</em>', parallax:0.45, walk:6, p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
     fx:{fireflies:0, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:1},
     labels:[{yaw:0,pitch:-22,b:'Pebble finish',s:'midnight blue, 15-year'},{yaw:-21,pitch:-7,b:'Sun shelf',s:'from below'}]},
-  {id:'night', k:'Night', h:'Then it gets <em>dark.</em>', parallax:0.6, walk:7, p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
+  {id:'night', vx:[0.985,0.985,0.0,0.0256], k:'Night', h:'Then it gets <em>dark.</em>', parallax:0.6, walk:7, p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
     fx:{fireflies:1, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.8}, bubbles:0},
     labels:[{yaw:-42,pitch:-8,b:'Landscape lighting',s:'every path, every bed'},{yaw:46,pitch:-2,b:'Automation',s:'lights, heat and fire from one app'}]},
-  {id:'fire', k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true, parallax:0.28, walk:2.5,
+  {id:'fire', vx:[1.0,1.0,-0.0063,0.019], k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true, parallax:0.28, walk:2.5,
     fx:{fireflies:.8, fire:{op:0}, pit:{yaw:0,pitch:-22,r:21,op:.45}, steam:{yaw:32,pitch:0,r:46,op:.35}, bubbles:0},
     labels:[]}
 ];
@@ -208,12 +208,12 @@ const sphereVS=`
     gl_Position = projectionMatrix * modelViewMatrix * vec4(d*r, 1.0);
   }`;
 const sphereFS=`
-  uniform sampler2D map; uniform float opacity; uniform float exposure; uniform float night; uniform float time; uniform vec2 fov;
+  uniform sampler2D map; uniform float opacity; uniform float exposure; uniform float night; uniform float time; uniform vec2 fov; uniform vec4 vidXf;
   varying vec3 vDir; varying vec2 vUv2;
   const float PI=3.14159265;
   void main(){
     vec2 uv=vec2(atan(vDir.x,-vDir.z)/fov.x+0.5, asin(clamp(vDir.y,-1.0,1.0))/fov.y+0.5);
-    vec2 cu=clamp(uv,0.0,1.0);
+    vec2 cu=clamp(uv*vidXf.xy+vidXf.zw,0.0,1.0);
     vec3 c=texture2D(map, cu).rgb;
     // fade to dark outside the photographed field so the edges never read as a border
     vec2 e=abs(uv-0.5)*2.0; float edge=1.0-smoothstep(0.86,1.0,max(e.x,e.y));
@@ -230,7 +230,7 @@ function makeMaskMat(){ return new THREE.ShaderMaterial({vertexShader:sphereVS, 
 const maskMatA=makeMaskMat(), maskMatB=makeMaskMat();
 function makeSphere(){
   const geo=new THREE.SphereGeometry(1, 192, 96);
-  const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, fovMap:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
+  const mat=new THREE.ShaderMaterial({vertexShader:sphereVS, fragmentShader:sphereFS, uniforms:{map:{value:null}, depthMap:{value:null}, hasDepth:{value:0}, parallax:{value:0.72}, fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, fovMap:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, vidXf:{value:new THREE.Vector4(1,1,0,0)}, opacity:{value:1}, exposure:{value:1}, night:{value:0}, time:{value:0}}, side:THREE.BackSide, transparent:true, depthWrite:false, depthTest:false});
   const m=new THREE.Mesh(geo, mat); m.frustumCulled=false; scene.add(m); return m;
 }
 const sphA=makeSphere(), sphB=makeSphere(); sphA.renderOrder=0; sphB.renderOrder=1;
@@ -455,6 +455,7 @@ function frame(now){
   stopTex.forEach((st,k)=>{ if (!st.video) return; const near = k===i || k===i+1; if (near && entered){ if (st.video.paused) st.video.play().catch(()=>{}); } else if (!st.video.paused) st.video.pause(); });
   const useA=videoReady(A), useB=videoReady(B);
   sphA.material.uniforms.fov.value.copy(useA? A.vfov : FOV21); sphB.material.uniforms.fov.value.copy(useB? B.vfov : FOV21);
+  const ia=useA&&s.vx? s.vx:[1,1,0,0], ib=useB&&s2.vx? s2.vx:[1,1,0,0]; sphA.material.uniforms.vidXf.value.set(ia[0],ia[1],ia[2],ia[3]); sphB.material.uniforms.vidXf.value.set(ib[0],ib[1],ib[2],ib[3]);
   sphA.material.uniforms.map.value=useA? A.vtex : A.pano; sphA.material.uniforms.depthMap.value=A.depth; sphA.material.uniforms.hasDepth.value=A.depth?1:0; sphA.material.uniforms.opacity.value=1; const gate = entered ? THREE.MathUtils.smoothstep((t-enterAt)/2600,0,1) : 0.0; sphA.material.uniforms.exposure.value=(1.0-0.15*xf)*(0.15+0.85*gate);
   sphA.position.copy(fwd).multiplyScalar(-walk);     // moving the sphere back == camera walking forward
   sphB.material.uniforms.map.value=useB? B.vtex : B.pano; sphB.material.uniforms.depthMap.value=B.depth; sphB.material.uniforms.hasDepth.value=B.depth?1:0; sphB.material.uniforms.opacity.value= (i<N-1)? xf : 0; sphB.material.uniforms.exposure.value=1.0; sphB.visible = i<N-1 && xf>0.001;
