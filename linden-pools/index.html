@@ -536,7 +536,9 @@ document.getElementById('guide').addEventListener('click', ()=>{ if (guiding){ s
 document.getElementById('skip').addEventListener('click', ()=>{ window.scrollTo({top:track.offsetHeight-innerHeight, behavior:'smooth'}); });
 document.querySelector('.brand').addEventListener('click', (ev)=>{ ev.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); });
 // guided walk: glide to each beat, park there while the guide talks (or ~5 s without sound), then move on
-let guideToken=0;
+let guideToken=0, auto=null;
+function stopAuto(){ if (auto && auto!==1) cancelAnimationFrame(auto); auto=null; if (guiding){ guideToken++; guiding=false; document.getElementById('guide').textContent='Guide me'; } document.body.classList.remove('reel'); }
+['wheel','touchstart','keydown'].forEach((ev)=>{ window.addEventListener(ev, ()=>{ if (guiding || (auto && !REEL)) stopAuto(); }, {passive:true}); });
 function scrollFor(pp){ const max=track.offsetHeight-innerHeight; return max*pp/(N-1); }
 function glide(from, to, ms){ return new Promise((res)=>{ const t0=performance.now(); (function st(now){ const x=Math.min(1,(now-t0)/ms); const e2=x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e2); if (x<1 && auto) auto=requestAnimationFrame(st); else res(); })(t0); }); }
 async function guideWalk(){ stopAuto(); const tok=++guideToken; guiding=true; document.getElementById('guide').textContent='Guiding…'; auto=1;
