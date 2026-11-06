@@ -129,7 +129,7 @@ body.reel{cursor:none}
 <div class="hud" aria-live="polite">
   <a class="brand" href="#top"><i></i>Linden</a>
   <button class="skip mono" id="skip" type="button">Skip to the plan ↓</button>
-  <div class="tools"><button class="btn mono" id="snd" type="button" aria-pressed="false">Sound off</button></div>
+  <div class="tools"><button class="btn mono" id="guide" type="button">Guide me</button><button class="btn mono" id="snd" type="button" aria-pressed="false">Sound off</button></div>
   <div class="level" aria-hidden="true"><i id="lvl"></i><span class="mono" id="lvl-lbl">Arriving</span></div>
   <div class="stop"><div class="txt" id="stop-txt"><span class="n mono"><b id="stop-n">01</b><span id="stop-k">Arrival</span></span><h1 id="stop-h">The gate <em>opens.</em></h1><p id="stop-p">Twenty minutes after sunset. The path is lit, the water is warm, and nobody's home but you.</p></div></div>
   <div class="hint mono" id="hint"><i></i>Scroll to walk</div>
@@ -161,19 +161,19 @@ import * as THREE from './vendor/three.module.min.js';
 
 /* ================= world config ================= */
 const STOPS=[
-  {id:'arrival', vx:[0.985,0.985,0.0,0.0256], walk:4, k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
+  {id:'arrival', vx:[0.985,0.985,0.0,0.0256], walk:4, beats:[{at:0.04,hold:0.16,aim:[0,0],line:'a1'},{at:0.34,hold:0.14,aim:[-22,-7],line:'a2'}], k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
     fx:{fireflies:.5, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:0},
     labels:[{yaw:-46,pitch:-20,b:'Path lighting',s:'warm 2700K, dusk to dawn'},{yaw:0,pitch:-3,b:'The pool',s:'sixty feet ahead'}]},
-  {id:'deck', vx:[0.98,0.98,0.0027,0.0285], k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
+  {id:'deck', vx:[0.98,0.98,0.0027,0.0285], beats:[{at:0.03,hold:0.1,aim:[0,0],line:'d1'},{at:0.17,hold:0.14,aim:[27,0],line:'d2'},{at:0.35,hold:0.14,aim:[-27,-3],line:'d3'},{at:0.52,hold:0.12,aim:[0,2],line:'d4'}], k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
     fx:{fireflies:.4, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.7}, bubbles:0},
     labels:[{yaw:-50,pitch:-8,b:'Tanning ledge',s:'9 inches of water, two loungers'},{yaw:46,pitch:-1,b:'Raised spa',s:'104°, glass-tile spillover'},{yaw:0,pitch:3,b:'Fire feature',s:'linear burner, 40,000 BTU'}]},
-  {id:'water', vx:[0.985,0.985,0.0,0.015], k:'The water', h:'Go <em>under.</em>', parallax:0.45, walk:6, p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
+  {id:'water', vx:[0.985,0.985,0.0,0.015], beats:[{at:0.04,hold:0.12,aim:[0,0],line:'w1'},{at:0.22,hold:0.14,aim:[0,-9],line:'w2'},{at:0.42,hold:0.14,aim:[0,8],line:'w3'}], k:'The water', h:'Go <em>under.</em>', parallax:0.45, walk:6, p:'Ninety degrees in October. Pebble floor, LED lights, and the quietest place in the whole yard.', night:0.5, under:true,
     fx:{fireflies:0, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:1},
     labels:[{yaw:0,pitch:-22,b:'Pebble finish',s:'midnight blue, 15-year'},{yaw:-21,pitch:-7,b:'Sun shelf',s:'from below'}]},
-  {id:'night', vx:[0.985,0.985,0.0,0.0256], k:'Night', h:'Then it gets <em>dark.</em>', parallax:0.6, walk:7, p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
+  {id:'night', vx:[0.985,0.985,0.0,0.0256], beats:[{at:0.04,hold:0.12,aim:[0,0],line:'n1'},{at:0.22,hold:0.14,aim:[0,8],line:'n2'},{at:0.42,hold:0.14,aim:[27,0],line:'n3'}], k:'Night', h:'Then it gets <em>dark.</em>', parallax:0.6, walk:7, p:'This is the hour you built it for. Lights on, fire on, the house glowing behind you.', night:1, hold:true,
     fx:{fireflies:1, fire:{op:0}, pit:{op:0}, steam:{yaw:41,pitch:5,r:40,op:.8}, bubbles:0},
     labels:[{yaw:-42,pitch:-8,b:'Landscape lighting',s:'every path, every bed'},{yaw:46,pitch:-2,b:'Automation',s:'lights, heat and fire from one app'}]},
-  {id:'fire', vx:[1.0,1.0,-0.0063,0.019], k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true, parallax:0.28, walk:2.5,
+  {id:'fire', vx:[1.0,1.0,-0.0063,0.019], beats:[{at:0.05,hold:0.14,aim:[0,-9],line:'f1'},{at:0.3,hold:0.2,aim:[0,-4],line:'f2'}], k:'The fire pit', h:'Sit <em>a minute.</em>', p:'Everything you walked past is one plan. It starts with a text.', night:1, cta:true, parallax:0.28, walk:2.5,
     fx:{fireflies:.8, fire:{op:0}, pit:{yaw:0,pitch:-22,r:21,op:.45}, steam:{yaw:32,pitch:0,r:46,op:.35}, bubbles:0},
     labels:[]}
 ];
@@ -409,7 +409,11 @@ const labelHost=document.getElementById('labels'); const labelEls=[];
 STOPS.forEach((s,si)=>{ s.labels.forEach((l)=>{ const el=document.createElement('div'); el.className='lab'; el.innerHTML='<i></i><div class="ln"></div><b>'+l.b+'</b><span>'+l.s+'</span>'; labelHost.appendChild(el); labelEls.push({el, stop:si, dir:dirFrom(l.yaw,l.pitch)}); }); });
 
 /* ================= state ================= */
-let yaw=0, pitch=0, tYaw=0, tPitch=0, mouseX=0, mouseY=0, headX=0, headY=0;
+let yaw=0, pitch=0, tYaw=0, tPitch=0, mouseX=0, mouseY=0, headX=0, headY=0, aimW=0, aimYaw=0, aimPitch=0, curBeat=null;
+// scroll fraction f (0..1 inside a stop) -> walk fraction with holds removed, plus which beat we're sitting in
+function holdMap(st, f){ const bs=st.beats||[]; let total=bs.reduce((a,b)=>a+b.hold,0); let g=f, beat=null; let removed=0;
+  for (const b of bs){ if (f<b.at){ break; } if (f<b.at+b.hold){ g=b.at-removed; beat=b; break; } removed+=b.hold; g=f-removed; }
+  return {g: g/(1-total), beat}; }
 let p=0, tp=0; // walk progress 0..N-1
 let entered=false, lastScrollAt=0, sound=false, enterAt=0;
 const v3=new THREE.Vector3(), q=new THREE.Quaternion(), e=new THREE.Euler();
@@ -445,11 +449,14 @@ function frame(now){
   requestAnimationFrame(frame); const dt=Math.min(0.05,(now-last)/1000); last=now; const t=now;
   // walk easing (so even a flick glides)
   const kp=1-Math.exp(-dt*(REEL?6:4.5)); p+=(tp-p)*kp; if (Math.abs(tp-p)<0.0005) p=tp;
-  const i=Math.min(N-1, Math.floor(p)), f=p-i; const s=STOPS[i], s2=STOPS[Math.min(N-1,i+1)];
+  const i=Math.min(N-1, Math.floor(p)), fRaw=p-i; const s=STOPS[i], s2=STOPS[Math.min(N-1,i+1)];
+  const hm=holdMap(s, fRaw); const f=Math.min(1, hm.g);
+  if (hm.beat!==curBeat){ curBeat=hm.beat; if (curBeat){ aimYaw=THREE.MathUtils.degToRad(curBeat.aim[0]); aimPitch=THREE.MathUtils.degToRad(curBeat.aim[1]); if (entered) say(curBeat.line); } }
+  aimW += ((curBeat?1:0) - aimW) * (1-Math.exp(-dt*1.6));
   // reel: gentle automatic look-around
-  if (REEL){ tYaw=Math.sin(t*0.00022)*0.3; tPitch=Math.sin(t*0.00017)*0.06-0.02; }
+  if (REEL || guiding){ tYaw=Math.sin(t*0.00022)*0.22; tPitch=Math.sin(t*0.00017)*0.05-0.02; }
   // idle drift when the mouse hasn't moved on a stop (keeps the world breathing)
-  const ky=1-Math.exp(-dt*3.2); yaw+=(tYaw+Math.sin(t*0.0003)*0.025-yaw)*ky; pitch+=(tPitch+Math.sin(t*0.00023)*0.012-pitch)*ky;
+  const ky=1-Math.exp(-dt*3.2); const uy=tYaw+Math.sin(t*0.0003)*0.025, up=tPitch+Math.sin(t*0.00023)*0.012; yaw+=((aimYaw*aimW + uy*(1-0.6*aimW))-yaw)*ky; pitch+=((aimPitch*aimW + up*(1-0.6*aimW))-pitch)*ky;
   headX+=(mouseX-headX)*ky; headY+=(mouseY-headY)*ky;
   // camera: look + small head offset + forward walk within the sphere
   const WALK=(s.walk!=null? s.walk: 9.0); const walk = f<0.6 ? THREE.MathUtils.smoothstep(f,0,0.6)*WALK : WALK;         // forward over the stop
@@ -501,21 +508,44 @@ function frame(now){
 window.addEventListener('resize', ()=>{ renderer.setSize(innerWidth, innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio()); postMat.uniforms.resolution.value.set(innerWidth,innerHeight); const nbw=Math.max(64,Math.round(innerWidth/4)), nbh=Math.max(64,Math.round(innerHeight/4)); bloomA.setSize(nbw,nbh); bloomB.setSize(nbw,nbh); maskRT.setSize(Math.round(innerWidth/2), Math.round(innerHeight/2)); blurMat.uniforms.texel.value.set(1/nbw,1/nbh); onScroll(); });
 sceneRT.setSize(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio());
 
-/* ================= audio (ambient loops crossfaded by stop) ================= */
-let actx=null, gains=[]; const AUDIO=['audio/dusk.mp3','audio/deck.mp3','audio/under.mp3','audio/night.mp3','audio/fire.mp3'];
+/* ================= audio: music bed + quiet ambience per stop + a calm voice that points things out ================= */
+let actx=null, gains=[], musicG=null, voiceG=null, master=null, voiceEl=null, said={}, voiceBusy=false, guiding=false; const AUDIO=['audio/dusk.mp3','audio/deck.mp3','audio/under.mp3','audio/night.mp3','audio/fire.mp3'];
+const AMB=0.22, MUSIC=0.55, VOICE=0.95, DUCK=0.3;
+function mkEl(url, loop){ const el=new Audio(url); el.loop=loop; el.crossOrigin='anonymous'; el.preload='auto'; return el; }
 function startAudio(){ if (actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
-  AUDIO.forEach((url,i)=>{ const el=new Audio(url); el.loop=true; el.crossOrigin='anonymous'; el.volume=1; const src=actx.createMediaElementSource(el); const g=actx.createGain(); g.gain.value=0; src.connect(g).connect(actx.destination); el.play().catch(()=>{}); gains.push(g); });
-  setInterval(()=>{ if (!sound) return; const i=Math.min(N-1,Math.floor(p)), f=p-i; const xf=THREE.MathUtils.smoothstep(f,0.6,1); gains.forEach((g,k)=>{ let v=0; if (k===i) v=1-xf; if (k===i+1) v=xf; g.gain.setTargetAtTime(v*0.8, actx.currentTime, 0.4); }); }, 120); }
-function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textContent=on?'Sound on':'Sound off'; b.setAttribute('aria-pressed', on); if (on) startAudio(); if (!on && gains.length) gains.forEach((g)=>g.gain.setTargetAtTime(0, actx.currentTime, 0.3)); if (on && actx) actx.resume(); }
+  master=actx.createGain(); master.gain.value=1; master.connect(actx.destination);
+  AUDIO.forEach((url,i)=>{ const el=mkEl(url,true); const src=actx.createMediaElementSource(el); const g=actx.createGain(); g.gain.value=0; src.connect(g).connect(master); el.play().catch(()=>{}); gains.push(g); });
+  const m=mkEl('audio/music.mp3',true); const ms=actx.createMediaElementSource(m); musicG=actx.createGain(); musicG.gain.value=0; ms.connect(musicG).connect(master); m.play().catch(()=>{}); musicG.gain.setTargetAtTime(MUSIC, actx.currentTime+0.2, 1.2);
+  voiceG=actx.createGain(); voiceG.gain.value=VOICE; voiceG.connect(master);
+  setInterval(()=>{ if (!sound) return; const i=Math.min(N-1,Math.floor(p)), f=p-i; const xf=THREE.MathUtils.smoothstep(f,0.6,1); gains.forEach((g,k)=>{ let v=0; if (k===i) v=1-xf; if (k===i+1) v=xf; g.gain.setTargetAtTime(v*AMB*(k===2?1.6:1), actx.currentTime, 0.4); }); }, 120); }
+// the voice: one line per stop, said once, music and ambience duck underneath it
+function say(k){ if (!sound || !actx || said[k]) return; said[k]=true; if (voiceEl){ try{ voiceEl.pause(); }catch(e){} }
+  const el=mkEl(k===0?'audio/v0.mp3':'audio/g_'+k+'.mp3', false); voiceEl=el; voiceBusy=true; el.addEventListener('ended', ()=>{ voiceBusy=false; }); el.addEventListener('error', ()=>{ voiceBusy=false; }, {once:true}); const src=actx.createMediaElementSource(el); src.connect(voiceG);
+  const duck=()=>{ musicG.gain.setTargetAtTime(MUSIC*DUCK, actx.currentTime, 0.25); master.gain.setTargetAtTime(1, actx.currentTime, 0.1); };
+  const undock=()=>{ musicG.gain.setTargetAtTime(MUSIC, actx.currentTime, 0.9); };
+  el.addEventListener('play', duck); el.addEventListener('ended', undock); el.addEventListener('error', undock, {once:true});
+  setTimeout(()=>{ if (sound) el.play().catch(undock); }, 650); }
+function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textContent=on?'Sound on':'Sound off'; b.setAttribute('aria-pressed', on); if (on) startAudio(); if (actx){ master.gain.setTargetAtTime(on?1:0, actx.currentTime, 0.3); if (on) actx.resume(); } if (on && entered && curBeat) setTimeout(()=>say(curBeat.line), 400); }
 document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
 
 /* ================= enter ================= */
-function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); stopTex.forEach((st,k)=>{ if (st.players && k<2){ st.players[0].v.play().catch(()=>{}); st.players[1].v.load(); } }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
+function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); if (withSound) setTimeout(()=>{ say(0); }, 900); stopTex.forEach((st,k)=>{ if (st.players && k<2){ st.players[0].v.play().catch(()=>{}); st.players[1].v.load(); } }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL){ if (!sound) setSound(true); autoWalk(); } }
 document.getElementById('enter').addEventListener('click', ()=>enter(false));
 document.getElementById('enter-sound').addEventListener('click', ()=>enter(true));
+document.getElementById('guide').addEventListener('click', ()=>{ if (guiding){ stopAuto(); return; } if (!sound) setSound(true); guideWalk(); });
 document.getElementById('skip').addEventListener('click', ()=>{ window.scrollTo({top:track.offsetHeight-innerHeight, behavior:'smooth'}); });
 document.querySelector('.brand').addEventListener('click', (ev)=>{ ev.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); });
-function autoWalk(){ const start=performance.now(), to=track.offsetHeight-innerHeight, dur=REEL*1000; (function step(now){ const x=Math.min(1,(now-start)/dur); const e2=x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0,to*e2); if (x<1) requestAnimationFrame(step); })(start); }
+// guided walk: glide to each beat, park there while the guide talks (or ~5 s without sound), then move on
+let guideToken=0;
+function scrollFor(pp){ const max=track.offsetHeight-innerHeight; return max*pp/(N-1); }
+function glide(from, to, ms){ return new Promise((res)=>{ const t0=performance.now(); (function st(now){ const x=Math.min(1,(now-t0)/ms); const e2=x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2; window.scrollTo(0, from+(to-from)*e2); if (x<1 && auto) auto=requestAnimationFrame(st); else res(); })(t0); }); }
+async function guideWalk(){ stopAuto(); const tok=++guideToken; guiding=true; document.getElementById('guide').textContent='Guiding…'; auto=1;
+  const plan=[]; STOPS.forEach((st,si)=>{ (st.beats||[]).forEach((b)=>plan.push({pp: si + b.at + b.hold*0.5, line:b.line})); }); plan.push({pp:N-1, line:null});
+  let y=window.scrollY; for (const stp of plan){ if (tok!==guideToken) return; const target=scrollFor(stp.pp); const dist=Math.abs(target-y); await glide(y, target, Math.max(1800, Math.min(6000, dist*1.4))); y=target; if (tok!==guideToken) return;
+    const t0=performance.now(); await new Promise((res)=>{ (function w(){ if (tok!==guideToken) return res(); const el=performance.now()-t0; const minHold = sound ? 1800 : 4200; if (el>minHold && !(sound && voiceBusy && el<16000)) return res(); setTimeout(w,120); })(); });
+    await new Promise(r=>setTimeout(r, 700)); }
+  guiding=false; auto=null; document.getElementById('guide').textContent='Guide me'; }
+function autoWalk(){ guideWalk(); }
 
 /* ================= lead form ================= */
 document.getElementById('lead').addEventListener('submit', (ev)=>{ ev.preventDefault(); const err=document.getElementById('form-err'); err.textContent=''; const name=document.getElementById('f-name').value.trim(), phone=document.getElementById('f-phone').value.trim(); if (!name){ err.textContent='Your name, so we know who to text.'; return; } if (!/^[\d\s().+-]{7,}$/.test(phone)){ err.textContent='That number doesn\'t look right.'; return; } document.getElementById('lead').classList.add('sent'); });
