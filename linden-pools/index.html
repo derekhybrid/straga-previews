@@ -161,7 +161,7 @@ import * as THREE from './vendor/three.module.min.js';
 
 /* ================= world config ================= */
 const STOPS=[
-  {id:'arrival', vx:[0.985,0.985,0.0,0.0256], k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
+  {id:'arrival', vx:[0.985,0.985,0.0,0.0256], walk:4, k:'Arrival', h:'The gate <em>opens.</em>', p:'Twenty minutes after sunset. The path is lit, the water is warm, and nobody\'s home but you.', night:0.55,
     fx:{fireflies:.5, fire:{op:0}, pit:{op:0}, steam:{op:0}, bubbles:0},
     labels:[{yaw:-46,pitch:-20,b:'Path lighting',s:'warm 2700K, dusk to dawn'},{yaw:0,pitch:-3,b:'The pool',s:'sixty feet ahead'}]},
   {id:'deck', vx:[0.98,0.98,0.0027,0.0285], k:'The deck', h:'Stand at <em>the edge.</em>', parallax:0.6, walk:7, p:'Forty feet of dark pebble, a spa spilling over glass tile, and the first lights of the evening coming on under the water.', night:0.6,
@@ -242,12 +242,21 @@ function loadTex(url, srgb){ if (tex[url]) return Promise.resolve(tex[url]); if 
   pending[url]=new Promise((res)=>{ loader.load(url, (t)=>{ t.colorSpace=srgb?THREE.SRGBColorSpace:THREE.NoColorSpace; t.minFilter=THREE.LinearMipmapLinearFilter; t.magFilter=THREE.LinearFilter; t.generateMipmaps=true; t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; tex[url]=t; res(t); }, undefined, ()=>{ tex[url]=null; res(null); }); });
   return pending[url]; }
 const stopTex=STOPS.map(()=>({pano:null,depth:null,mask:null,fire:null,video:null,vtex:null,vfov:null,ready:false}));
-const LOOP=(s)=>'pano/'+s.id+'-loop.mp4';
-function attachVideo(i){ const st=stopTex[i]; if (st.video) return; const v=document.createElement('video'); v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.crossOrigin='anonymous'; v.src=LOOP(STOPS[i]);
-  v.addEventListener('loadedmetadata', ()=>{ st.vfov=new THREE.Vector2(THREE.MathUtils.degToRad(140), THREE.MathUtils.degToRad(140)*(v.videoHeight/v.videoWidth)); });
-  v.addEventListener('error', ()=>{ st.video=null; }, {once:true});
-  const vt=new THREE.VideoTexture(v); vt.colorSpace=THREE.SRGBColorSpace; vt.minFilter=THREE.LinearFilter; vt.magFilter=THREE.LinearFilter; vt.generateMipmaps=false; vt.wrapS=vt.wrapT=THREE.ClampToEdgeWrapping; st.video=v; st.vtex=vt; }
-function videoReady(st){ return st.video && st.video.readyState>=3 && st.vfov; }
+const LOOP=(s)=>'pano/'+s.id+'-loop'+(SMALL?'-m':'')+'.mp4';
+function mkPlayer(url, st){ const v=document.createElement('video'); v.muted=true; v.loop=false; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.crossOrigin='anonymous'; v.src=url;
+  v.addEventListener('loadedmetadata', ()=>{ st.vfov=new THREE.Vector2(THREE.MathUtils.degToRad(140), THREE.MathUtils.degToRad(140)*(v.videoHeight/v.videoWidth)); st.dur=v.duration; });
+  v.addEventListener('error', ()=>{ st.video=null; st.players=null; }, {once:true});
+  const t=new THREE.VideoTexture(v); t.colorSpace=THREE.SRGBColorSpace; t.minFilter=THREE.LinearFilter; t.magFilter=THREE.LinearFilter; t.generateMipmaps=false; t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; return {v,t}; }
+function attachVideo(i){ const st=stopTex[i]; if (st.players) return; const url=LOOP(STOPS[i]); st.players=[mkPlayer(url,st), mkPlayer(url,st)]; st.cur=0; st.video=st.players[0].v; st.vtex=st.players[0].t; }
+// called every frame for the stops that should be playing: keeps one player on screen, starts the other 150 ms before the seam
+function tickLoop(st, shouldPlay){ if (!st.players) return; const a=st.players[st.cur], b=st.players[1-st.cur];
+  if (!shouldPlay){ [a,b].forEach(pl=>{ if (!pl.v.paused) pl.v.pause(); }); return; }
+  if (a.v.paused && a.v.readyState>=2) a.v.play().catch(()=>{});
+  const d=st.dur||a.v.duration||0; if (!d) return;
+  if (a.v.currentTime > d-0.15 && b.v.paused){ b.v.currentTime=0; b.v.play().catch(()=>{}); }
+  if (a.v.ended || a.v.currentTime >= d-0.03){ if (b.v.readyState>=2 && !b.v.paused && b.v.currentTime>0){ st.cur=1-st.cur; st.video=b.v; st.vtex=b.t; a.v.pause(); a.v.currentTime=0; } }
+}
+function videoReady(st){ if (st.locked) return true; if (st.video && st.video.readyState>=3 && st.vfov && st.video.currentTime>0){ st.locked=true; return true; } return false; }
 async function loadStop(i){ const s=STOPS[i]; if (stopTex[i].ready) return; const [p,d,m,f]=await Promise.all([loadTex(PANO(s),true), loadTex(DEPTH(s),false), loadTex(MASK(s),false), loadTex(FIRE(s),false)]); Object.assign(stopTex[i],{pano:p,depth:d,mask:m,fire:f,ready:!!p}); attachVideo(i); }
 
 /* ================= particles (fireflies / steam / fire / bubbles) ================= */
@@ -320,9 +329,9 @@ const simMat=new THREE.ShaderMaterial({uniforms:{prev:{value:null}, prev2:{value
       vec2 d2=vUv-drop2.xy; d2.x*=2.0; n+=exp(-dot(d2,d2)*9000.0)*drop2.z;
       gl_FragColor=vec4(n,0.,0.,1.); }`});
 const simMesh=new THREE.Mesh(quadGeo, simMat); quadScene.add(simMesh);
-const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, tex:{value:sceneRT.texture}, bloom:{value:null}, height:{value:null}, mask:{value:null}, hasMask:{value:0}, fireA:{value:null}, fireB:{value:null}, fireMix:{value:0}, masks:{value:maskRT.texture}, invPV:{value:new THREE.Matrix4()}, time:{value:0}, under:{value:0}, aspect:{value:1}, vig:{value:1}, dusk:{value:0}, ripple:{value:1}, splash:{value:0}, resolution:{value:new THREE.Vector2(innerWidth,innerHeight)}},
+const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(THREE.MathUtils.degToRad(140),THREE.MathUtils.degToRad(70))}, tex:{value:sceneRT.texture}, bloom:{value:null}, height:{value:null}, mask:{value:null}, hasMask:{value:0}, fireA:{value:null}, fireB:{value:null}, fireMix:{value:0}, masks:{value:maskRT.texture}, invPV:{value:new THREE.Matrix4()}, time:{value:0}, under:{value:0}, aspect:{value:1}, vig:{value:1}, dusk:{value:0}, ripple:{value:1}, splash:{value:0}, sharp:{value:0}, resolution:{value:new THREE.Vector2(innerWidth,innerHeight)}},
   vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
-  fragmentShader:`uniform sampler2D tex, bloom, height, mask, fireA, fireB, masks; uniform float hasMask, time, under, aspect, vig, dusk, ripple, splash, fireMix; uniform mat4 invPV; uniform vec2 resolution; varying vec2 vUv;
+  fragmentShader:`uniform sampler2D tex, bloom, height, mask, fireA, fireB, masks; uniform float hasMask, time, under, aspect, vig, dusk, ripple, splash, fireMix, sharp; uniform mat4 invPV; uniform vec2 resolution; varying vec2 vUv;
     const float PI=3.14159265;
     uniform vec2 fov;
     vec2 dirToUv(vec3 d){ return vec2(atan(d.x,-d.z)/fov.x+0.5, asin(clamp(d.y,-1.0,1.0))/fov.y+0.5); }
@@ -358,6 +367,7 @@ const postMat=new THREE.ShaderMaterial({uniforms:{fov:{value:new THREE.Vector2(T
         off += vec2(0.0, n2)*0.0022*fm.r*fm.r;
       }
       vec3 c=texture2D(tex, vUv+off).rgb;
+      if (sharp>0.0){ vec2 px=1.0/resolution; vec3 bl = (texture2D(tex, vUv+off+vec2(px.x,0.)).rgb + texture2D(tex, vUv+off-vec2(px.x,0.)).rgb + texture2D(tex, vUv+off+vec2(0.,px.y)).rgb + texture2D(tex, vUv+off-vec2(0.,px.y)).rgb)*0.25; c += (c-bl)*sharp; }
       c += vec3(1.0,0.93,0.8)*glint*0.35;
       if (fm.b>0.003){ float fl2 = 0.9 + 0.2*noise(vec2(t*3.1, eq.x*14.0)); c *= 1.0 + fm.r*(fl2-1.0)*1.4 + fm.b*(flick-1.0)*0.45; c += vec3(1.0,0.5,0.15)*fm.b*0.2*flick; }
       // ---------- bloom ----------
@@ -452,7 +462,7 @@ function frame(now){
   // spheres
   const A=stopTex[i], B=stopTex[Math.min(N-1,i+1)];
   sphA.material.uniforms.parallax.value=(s.parallax!=null? s.parallax: 0.72); sphB.material.uniforms.parallax.value=(s2.parallax!=null? s2.parallax: 0.72);
-  stopTex.forEach((st,k)=>{ if (!st.video) return; const near = k===i || k===i+1; if (near && entered){ if (st.video.paused) st.video.play().catch(()=>{}); } else if (!st.video.paused) st.video.pause(); });
+  stopTex.forEach((st,k)=>{ tickLoop(st, entered && (k===i || k===i+1)); });
   const useA=videoReady(A), useB=videoReady(B);
   sphA.material.uniforms.fov.value.copy(useA? A.vfov : FOV21); sphB.material.uniforms.fov.value.copy(useB? B.vfov : FOV21);
   const ia=useA&&s.vx? s.vx:[1,1,0,0], ib=useB&&s2.vx? s2.vx:[1,1,0,0]; sphA.material.uniforms.vidXf.value.set(ia[0],ia[1],ia[2],ia[3]); sphB.material.uniforms.vidXf.value.set(ib[0],ib[1],ib[2],ib[3]);
@@ -470,6 +480,7 @@ function frame(now){
   const under=THREE.MathUtils.lerp(s.under?1:0, s2.under?1:0, xf);
   postMat.uniforms.under.value=under; postMat.uniforms.splash.value = ((s.under?1:0)!==(s2.under?1:0)) ? Math.pow(4*xf*(1-xf),6.0) : 0.0; postMat.uniforms.time.value=t; postMat.uniforms.aspect.value=innerWidth/innerHeight; postMat.uniforms.dusk.value=1-THREE.MathUtils.lerp(s.night,s2.night,xf);
   postMat.uniforms.mask.value = xf<0.5 ? A.mask : B.mask; postMat.uniforms.hasMask.value = postMat.uniforms.mask.value?1:0; postMat.uniforms.ripple.value=(1-under)*((xf<0.5? useA: useB)? 0.3 : 1.0);
+  postMat.uniforms.sharp.value = ((xf<0.5? useA: useB) ? 0.55 : 0.15) * (innerWidth/1600) ;
   postMat.uniforms.fireA.value=A.fire||blackTex; postMat.uniforms.fireB.value=B.fire||blackTex; postMat.uniforms.fireMix.value = (i<N-1)? xf : 0;
   camera.updateMatrixWorld(); postMat.uniforms.invPV.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).invert();
   // sim + render
@@ -499,7 +510,7 @@ function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textC
 document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
 
 /* ================= enter ================= */
-function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); stopTex.forEach((st,k)=>{ if (st.video && k<2) st.video.play().catch(()=>{}); }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
+function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); stopTex.forEach((st,k)=>{ if (st.players && k<2){ st.players[0].v.play().catch(()=>{}); st.players[1].v.load(); } }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL) autoWalk(); }
 document.getElementById('enter').addEventListener('click', ()=>enter(false));
 document.getElementById('enter-sound').addEventListener('click', ()=>enter(true));
 document.getElementById('skip').addEventListener('click', ()=>{ window.scrollTo({top:track.offsetHeight-innerHeight, behavior:'smooth'}); });
