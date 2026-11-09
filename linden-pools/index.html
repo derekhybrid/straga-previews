@@ -246,7 +246,8 @@ function loadTex(url, srgb){ if (tex[url]) return Promise.resolve(tex[url]); if 
   pending[url]=new Promise((res)=>{ loader.load(url, (t)=>{ t.colorSpace=srgb?THREE.SRGBColorSpace:THREE.NoColorSpace; t.minFilter=THREE.LinearMipmapLinearFilter; t.magFilter=THREE.LinearFilter; t.generateMipmaps=true; t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; tex[url]=t; res(t); }, undefined, ()=>{ tex[url]=null; res(null); }); });
   return pending[url]; }
 const stopTex=STOPS.map(()=>({pano:null,depth:null,mask:null,fire:null,video:null,vtex:null,vfov:null,ready:false}));
-const LOOP=(s)=>'pano/'+s.id+'-loop'+(SMALL?'-m':'')+'.mp4';
+const BIG=!SMALL && (Math.max(screen.width,screen.height)*(window.devicePixelRatio||1))>=2500 && MAXTEX>=8192;
+const LOOP=(s)=>'pano/'+s.id+'-loop'+(SMALL?'-m':(BIG?'-4k':''))+'.mp4';
 function mkPlayer(url, st){ const v=document.createElement('video'); v.muted=true; v.loop=false; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.crossOrigin='anonymous'; v.src=url;
   v.addEventListener('loadedmetadata', ()=>{ st.vfov=new THREE.Vector2(THREE.MathUtils.degToRad(140), THREE.MathUtils.degToRad(140)*(v.videoHeight/v.videoWidth)); st.dur=v.duration; });
   v.addEventListener('error', ()=>{ st.video=null; st.players=null; }, {once:true});
