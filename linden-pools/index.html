@@ -183,6 +183,10 @@ const PANO=(s)=>'pano/'+s.id+(SMALL?'-m':'')+'.jpg', DEPTH=(s)=>'pano/'+s.id+'-d
 const REEL=(()=>{ const m=location.search.match(/[?&]reel=([\d.]+)/); return m?+m[1]:0; })();
 if (REEL) document.body.classList.add('reel');
 
+/* always begin at the gate: no scroll restoration, and Enter resets the walk */
+if ('scrollRestoration' in history) history.scrollRestoration='manual';
+window.scrollTo(0,0); window.addEventListener('pageshow', ()=>{ if (!entered) window.scrollTo(0,0); });
+
 /* ================= renderer ================= */
 const holder=document.getElementById('gl');
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
@@ -533,7 +537,7 @@ function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textC
 document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
 
 /* ================= enter ================= */
-function enter(withSound){ if (entered) return; entered=true; enterAt=performance.now(); if (withSound) setTimeout(()=>{ say(0); }, 900); stopTex.forEach((st,k)=>{ if (st.players && k<2){ st.players[0].v.play().catch(()=>{}); st.players[1].v.load(); } }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL){ if (!sound) setSound(true); autoWalk(); } }
+function enter(withSound){ if (entered) return; window.scrollTo(0,0); p=0; tp=0; onScroll(); entered=true; enterAt=performance.now(); if (withSound) setTimeout(()=>{ say(0); }, 900); stopTex.forEach((st,k)=>{ if (st.players && k<2){ st.players[0].v.play().catch(()=>{}); st.players[1].v.load(); } }); document.getElementById('intro').classList.add('gone'); if (withSound) setSound(true); enableGyro(); if (REEL){ if (!sound) setSound(true); autoWalk(); } }
 document.getElementById('enter').addEventListener('click', ()=>enter(false));
 document.getElementById('enter-sound').addEventListener('click', ()=>enter(true));
 document.getElementById('guide').addEventListener('click', ()=>{ if (guiding){ stopAuto(); return; } if (!sound) setSound(true); guideWalk(); });
