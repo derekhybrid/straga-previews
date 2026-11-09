@@ -409,7 +409,7 @@ const labelHost=document.getElementById('labels'); const labelEls=[];
 STOPS.forEach((s,si)=>{ s.labels.forEach((l)=>{ const el=document.createElement('div'); el.className='lab'; el.innerHTML='<i></i><div class="ln"></div><b>'+l.b+'</b><span>'+l.s+'</span>'; labelHost.appendChild(el); labelEls.push({el, stop:si, dir:dirFrom(l.yaw,l.pitch)}); }); });
 
 /* ================= state ================= */
-let yaw=0, pitch=0, tYaw=0, tPitch=0, mouseX=0, mouseY=0, headX=0, headY=0, aimW=0, aimYaw=0, aimPitch=0, curBeat=null;
+let yaw=0, pitch=0, tYaw=0, tPitch=0, mouseX=0, mouseY=0, headX=0, headY=0, aimW=0, aimYaw=0, aimPitch=0, curBeat=null, pendingAt=0;
 // scroll fraction f (0..1 inside a stop) -> walk fraction with holds removed, plus which beat we're sitting in
 function holdMap(st, f){ const bs=st.beats||[]; let total=bs.reduce((a,b)=>a+b.hold,0); let g=f, beat=null; let removed=0;
   for (const b of bs){ if (f<b.at){ break; } if (f<b.at+b.hold){ g=b.at-removed; beat=b; break; } removed+=b.hold; g=f-removed; }
@@ -451,7 +451,9 @@ function frame(now){
   const kp=1-Math.exp(-dt*(REEL?6:4.5)); p+=(tp-p)*kp; if (Math.abs(tp-p)<0.0005) p=tp;
   const i=Math.min(N-1, Math.floor(p)), fRaw=p-i; const s=STOPS[i], s2=STOPS[Math.min(N-1,i+1)];
   const hm=holdMap(s, fRaw); const f=Math.min(1, hm.g);
-  if (hm.beat!==curBeat){ curBeat=hm.beat; if (curBeat){ aimYaw=THREE.MathUtils.degToRad(curBeat.aim[0]); aimPitch=THREE.MathUtils.degToRad(curBeat.aim[1]); if (entered) say(curBeat.line); } }
+  if (hm.beat!==curBeat){ curBeat=hm.beat; pendingAt=t; if (curBeat){ aimYaw=THREE.MathUtils.degToRad(curBeat.aim[0]); aimPitch=THREE.MathUtils.degToRad(curBeat.aim[1]); } else { hushVoice(); } }
+  // speak only once the visitor has settled on the beat (not while flying past it)
+  if (curBeat && entered && !said[curBeat.line] && t-pendingAt>650 && Math.abs(tp-p)<0.03 && !(voiceBusy && voiceK===0)) say(curBeat.line);
   aimW += ((curBeat?1:0) - aimW) * (1-Math.exp(-dt*1.6));
   // reel: gentle automatic look-around
   if (REEL || guiding){ tYaw=Math.sin(t*0.00022)*0.22; tPitch=Math.sin(t*0.00017)*0.05-0.02; }
@@ -519,12 +521,14 @@ function startAudio(){ if (actx) return; try{ actx=new (window.AudioContext||win
   voiceG=actx.createGain(); voiceG.gain.value=VOICE; voiceG.connect(master);
   setInterval(()=>{ if (!sound) return; const i=Math.min(N-1,Math.floor(p)), f=p-i; const xf=THREE.MathUtils.smoothstep(f,0.6,1); gains.forEach((g,k)=>{ let v=0; if (k===i) v=1-xf; if (k===i+1) v=xf; g.gain.setTargetAtTime(v*AMB*(k===2?1.6:1), actx.currentTime, 0.4); }); }, 120); }
 // the voice: one line per stop, said once, music and ambience duck underneath it
-function say(k){ if (!sound || !actx || said[k]) return; said[k]=true; if (voiceEl){ try{ voiceEl.pause(); }catch(e){} }
-  const el=mkEl(k===0?'audio/v0.mp3':'audio/g_'+k+'.mp3', false); voiceEl=el; voiceBusy=true; el.addEventListener('ended', ()=>{ voiceBusy=false; }); el.addEventListener('error', ()=>{ voiceBusy=false; }, {once:true}); const src=actx.createMediaElementSource(el); src.connect(voiceG);
+let lineG=null, voiceK=null;
+function hushVoice(){ if (!voiceEl || !actx) return; const el=voiceEl, g=lineG; voiceEl=null; voiceBusy=false; if (g){ g.gain.setTargetAtTime(0, actx.currentTime, 0.12); } setTimeout(()=>{ try{ el.pause(); }catch(e){} }, 500); if (musicG) musicG.gain.setTargetAtTime(MUSIC, actx.currentTime, 0.9); }
+function say(k){ if (!sound || !actx || said[k]) return; said[k]=true; hushVoice(); voiceK=k;
+  const el=mkEl(k===0?'audio/v0.mp3':'audio/g_'+k+'.mp3', false); voiceEl=el; voiceBusy=true; el.addEventListener('ended', ()=>{ if (voiceEl===el) voiceBusy=false; }); el.addEventListener('error', ()=>{ if (voiceEl===el) voiceBusy=false; }, {once:true}); const src=actx.createMediaElementSource(el); const g=actx.createGain(); g.gain.value=1; lineG=g; src.connect(g).connect(voiceG);
   const duck=()=>{ musicG.gain.setTargetAtTime(MUSIC*DUCK, actx.currentTime, 0.25); master.gain.setTargetAtTime(1, actx.currentTime, 0.1); };
   const undock=()=>{ musicG.gain.setTargetAtTime(MUSIC, actx.currentTime, 0.9); };
   el.addEventListener('play', duck); el.addEventListener('ended', undock); el.addEventListener('error', undock, {once:true});
-  setTimeout(()=>{ if (sound) el.play().catch(undock); }, 650); }
+  setTimeout(()=>{ if (sound && voiceEl===el) el.play().catch(undock); else { said[k]=false; voiceBusy=false; } }, 250); }
 function setSound(on){ sound=on; const b=document.getElementById('snd'); b.textContent=on?'Sound on':'Sound off'; b.setAttribute('aria-pressed', on); if (on) startAudio(); if (actx){ master.gain.setTargetAtTime(on?1:0, actx.currentTime, 0.3); if (on) actx.resume(); } if (on && entered && curBeat) setTimeout(()=>say(curBeat.line), 400); }
 document.getElementById('snd').addEventListener('click', ()=>setSound(!sound));
 
@@ -544,7 +548,7 @@ function glide(from, to, ms){ return new Promise((res)=>{ const t0=performance.n
 async function guideWalk(){ stopAuto(); const tok=++guideToken; guiding=true; document.getElementById('guide').textContent='Guiding…'; auto=1;
   const plan=[]; STOPS.forEach((st,si)=>{ (st.beats||[]).forEach((b)=>plan.push({pp: si + b.at + b.hold*0.5, line:b.line})); }); plan.push({pp:N-1, line:null});
   let y=window.scrollY; for (const stp of plan){ if (tok!==guideToken) return; const target=scrollFor(stp.pp); const dist=Math.abs(target-y); await glide(y, target, Math.max(1800, Math.min(6000, dist*1.4))); y=target; if (tok!==guideToken) return;
-    const t0=performance.now(); await new Promise((res)=>{ (function w(){ if (tok!==guideToken) return res(); const el=performance.now()-t0; const minHold = sound ? 1800 : 4200; if (el>minHold && !(sound && voiceBusy && el<16000)) return res(); setTimeout(w,120); })(); });
+    const t0=performance.now(); await new Promise((res)=>{ (function w(){ if (tok!==guideToken) return res(); const el=performance.now()-t0; const minHold = sound ? 2600 : 4200; if (el>minHold && !(sound && voiceBusy && el<16000)) return res(); setTimeout(w,120); })(); });
     await new Promise(r=>setTimeout(r, 700)); }
   guiding=false; auto=null; document.getElementById('guide').textContent='Guide me'; }
 function autoWalk(){ guideWalk(); }
